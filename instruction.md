@@ -42,6 +42,7 @@ Add a block under `posts:` in `materials.yaml`. Posts are sorted by date automat
 | `pdf`   | `file` | "Vaata" (in-browser viewer, works on phones) + "Laadi alla" |
 | `file`  | `file` | "Laadi alla" button with file type and size               |
 | `form`  | `url`  | "Täida vorm" button (Google Forms, Microsoft Forms, …)     |
+| `game`  | `game` | Interactive game in the page. Available: `binary` (base 2 ↔ base 10) |
 
 `label` is optional for every type.
 

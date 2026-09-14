@@ -2,6 +2,7 @@
 import type { Item } from '../lib/materials';
 import { fileSize, youtubeId } from '../lib/materials';
 import { t } from '../lib/labels';
+import BinaryGame from './BinaryGame.astro';
 
 interface Props {
   item: Item;
@@ -11,7 +12,9 @@ const { item } = Astro.props;
 const base = import.meta.env.BASE_URL;
 
 const fileUrl = 'file' in item ? `${base}files/${item.file}` : '';
-const label = item.label || ('file' in item ? item.file : new URL(item.url).hostname.replace(/^www\./, ''));
+const label =
+  item.label ||
+  ('file' in item ? item.file : 'url' in item ? new URL(item.url).hostname.replace(/^www\./, '') : '');
 const ext = 'file' in item ? item.file.split('.').pop()?.toUpperCase() : '';
 const size = 'file' in item ? fileSize(item.file) : '';
 const videoId = item.type === 'video' ? youtubeId(item.url) : null;
@@ -26,11 +29,16 @@ const icons: Record<Item['type'], string> = {
   pdf: 'M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6',
   file: 'M12 4v11M7 10l5 5 5-5M5 20h14',
   form: 'M9 11l2 2 4-4M5 4h14v16H5z',
+  game: 'M6 8h12a4 4 0 0 1 0 8H6a4 4 0 0 1 0-8zM8 11v2M7 12h2M15 12h.01M17 12h.01',
 };
 ---
 
 {
-  item.type === 'video' && videoId ? (
+  item.type === 'game' ? (
+    <div class="item">
+      <BinaryGame label={item.label} />
+    </div>
+  ) : item.type === 'video' && videoId ? (
     <div class="item video">
       {item.label && <div class="video-label">{item.label}</div>}
       <div class="frame">

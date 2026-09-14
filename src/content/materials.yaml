@@ -29,26 +29,28 @@ courses:
     description: "Veebirakendused"
 
 posts:
-  - title: "Tere tulemast!"
+  - title: "1. nädal: kahendsüsteem"
     course: 10it
     date: 2026-09-14
-    text: "Siit leiad kõik tunnimaterjalid. Vaata video, loe konspekti ja täida test reedeks."
+    text: "Arvuti kasutab ainult kahte numbrit: 0 ja 1. Vaata videot, loe vajadusel lisa ja harjuta mänguga, kuni teisendamine hakkab lihtsalt välja tulema."
     items:
       - type: video
-        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-        label: "Sissejuhatav video"
-      - type: pdf
-        file: "naidis.pdf"
-        label: "Konspekt"
-      - type: file
-        file: "naidis.pdf"
-        label: "Harjutused (allalaadimiseks)"
-      - type: form
-        url: "https://forms.gle/"
-        label: "Test"
+        url: "https://www.youtube.com/watch?v=k-dOsKrPu5k"
+        label: "Kuidas töötab kahendsüsteem? (Rakett69)"
+      - type: game
+        game: binary
+      - type: video
+        url: "https://www.youtube.com/watch?v=iccBNOZEE_I"
+        label: "Arvu teisendamine kümnendsüsteemist kahendsüsteemi"
       - type: link
-        url: "https://www.err.ee/"
-        label: "Lisalugemine"
+        url: "https://et.wikipedia.org/wiki/Kahendsüsteem"
+        label: "Kahendsüsteem (Vikipeedia)"
+      - type: link
+        url: "https://study.risk.ee/prog/ylesanded/kahendsysteem/"
+        label: "Kahend- ja kümnendsüsteem: näited"
+      - type: link
+        url: "https://www.kalkulaator.ee/et/kahendsusteem"
+        label: "Teisendaja: kontrolli oma vastust"
 
   - title: "Esimene tund"
     course: 11it

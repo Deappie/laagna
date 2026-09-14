@@ -1,0 +1,192 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-binary-game>
+  <div class="game-label">{label || t.game.title}</div>
+  <div class="box">
+    <p class="task" data-task></p>
+    <div class="bits" data-bits></div>
+    <input class="answer" data-answer type="number" inputmode="numeric" min="0" aria-label={t.game.answer} />
+    <div class="controls">
+      <button type="button" class="btn primary" data-check>{t.game.check}</button>
+      <button type="button" class="btn" data-size>{t.game.bits8}</button>
+      <span class="score" data-score></span>
+    </div>
+    <p class="feedback" data-feedback aria-live="polite"></p>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  // Two kinds of rounds:
+  //  "toBinary"  – show a decimal number, the student switches bits on/off
+  //  "toDecimal" – show bits, the student types the decimal number
+  type Mode = 'toBinary' | 'toDecimal';
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+    const taskEl = $('task');
+    const bitsEl = $('bits');
+    const answerEl = $<HTMLInputElement>('answer');
+    const checkBtn = $<HTMLButtonElement>('check');
+    const sizeBtn = $<HTMLButtonElement>('size');
+    const scoreEl = $('score');
+    const feedbackEl = $('feedback');
+
+    let size = 4;
+    let mode: Mode = 'toBinary';
+    let target = 0;
+    let bits: number[] = [];
+    let score = 0;
+    let solved = false;
+
+    const valueOf = (b: number[]) => b.reduce((sum, bit, i) => sum + bit * 2 ** (b.length - 1 - i), 0);
+
+    function drawBits() {
+      bitsEl.innerHTML = '';
+      bits.forEach((bit, i) => {
+        const place = 2 ** (size - 1 - i);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'bit' + (bit ? ' on' : '');
+        btn.disabled = mode === 'toDecimal' || solved;
+        btn.innerHTML = `<span class="digit">${bit}</span><span class="place">${place}</span>`;
+        btn.addEventListener('click', () => {
+          bits[i] = bit ? 0 : 1;
+          feedbackEl.textContent = '';
+          drawBits();
+        });
+        bitsEl.append(btn);
+      });
+    }
+
+    function newRound() {
+      solved = false;
+      mode = Math.random() < 0.5 ? 'toBinary' : 'toDecimal';
+      target = 1 + Math.floor(Math.random() * (2 ** size - 1));
+      if (mode === 'toBinary') {
+        bits = Array(size).fill(0);
+        taskEl.textContent = t.game.toBinary(target);
+      } else {
+        bits = target.toString(2).padStart(size, '0').split('').map(Number);
+        taskEl.textContent = t.game.toDecimal(bits.join(''));
+      }
+      answerEl.hidden = mode === 'toBinary';
+      answerEl.value = '';
+      feedbackEl.textContent = '';
+      feedbackEl.className = 'feedback';
+      checkBtn.textContent = t.game.check;
+      scoreEl.textContent = t.game.score(score);
+      drawBits();
+    }
+
+    function check() {
+      if (solved) return newRound();
+      const guess = mode === 'toBinary' ? valueOf(bits) : Number(answerEl.value);
+      if (mode === 'toDecimal' && answerEl.value === '') return answerEl.focus();
+
+      if (guess === target) {
+        solved = true;
+        score++;
+        feedbackEl.textContent = t.game.correct;
+        feedbackEl.className = 'feedback ok';
+        checkBtn.textContent = t.game.next;
+        scoreEl.textContent = t.game.score(score);
+        drawBits();
+      } else {
+        feedbackEl.textContent =
+          mode === 'toBinary' ? t.game.wrongBinary(guess) : t.game.wrongDecimal;
+        feedbackEl.className = 'feedback bad';
+      }
+    }
+
+    checkBtn.addEventListener('click', check);
+    answerEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') check();
+    });
+    sizeBtn.addEventListener('click', () => {
+      size = size === 4 ? 8 : 4;
+      sizeBtn.textContent = size === 4 ? t.game.bits8 : t.game.bits4;
+      newRound();
+    });
+
+    newRound();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-binary-game]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .task { margin: 0 0 12px; font-size: 1.1rem; font-weight: 550; }
+  .bits { display: flex; gap: 6px; margin-bottom: 12px; }
+  .bits :global(.bit) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 1 48px;
+    min-width: 0;
+    padding: 6px 0 4px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+  }
+  .bits :global(.bit:disabled) { cursor: default; }
+  .bits :global(.bit.on) { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .bits :global(.digit) { font-size: 1.4rem; font-weight: 650; line-height: 1.2; }
+  .bits :global(.place) { font-size: 0.75rem; opacity: 0.75; }
+  .answer {
+    display: block;
+    width: 120px;
+    min-height: 40px;
+    margin-bottom: 12px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+  }
+  .answer[hidden] { display: none; }
+  .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .score { color: var(--muted); font-size: 0.9rem; margin-left: auto; }
+  .feedback { margin: 10px 0 0; min-height: 1.55em; font-weight: 550; }
+  .feedback.ok { color: #2e8b57; }
+  .feedback.bad { color: #c0392b; }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+    .feedback.bad { color: #ff8a80; }
+  }
+</style>
