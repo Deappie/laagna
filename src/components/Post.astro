@@ -1,0 +1,51 @@
+---
+import type { Post } from '../lib/materials';
+import { getCourse } from '../lib/materials';
+import { formatDate } from '../lib/labels';
+import Item from './Item.astro';
+
+interface Props {
+  post: Post;
+  showCourse?: boolean;
+}
+
+const { post, showCourse = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const course = getCourse(post.course)!;
+---
+
+<article class="post">
+  <div class="meta">
+    <time datetime={post.date.toISOString().slice(0, 10)}>{formatDate(post.date)}</time>
+    {showCourse && (
+      <>
+        {' · '}
+        <a href={`${base}${course.id}/`}>{course.title}</a>
+      </>
+    )}
+  </div>
+  <h2>{post.title}</h2>
+  {post.text && <p class="text">{post.text}</p>}
+  {post.items.length > 0 && (
+    <div class="items">
+      {post.items.map((item) => <Item item={item} />)}
+    </div>
+  )}
+</article>
+
+<style>
+  .post {
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px 8px;
+    margin-bottom: 16px;
+  }
+  .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 2px; }
+  .meta a { color: inherit; }
+  h2 { font-size: 1.25rem; margin-bottom: 6px; }
+  .text { margin: 0 0 10px; white-space: pre-line; }
+  .items { margin-top: 6px; }
+  .post > :last-child:not(.items) { margin-bottom: 10px; }
+</style>

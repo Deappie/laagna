@@ -1,0 +1,18 @@
+{
+  "name": "tpg",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "predev": "node scripts/copy-pdfjs.mjs",
+    "prebuild": "node scripts/copy-pdfjs.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.3.2",
+    "pdfjs-dist": "^6.3.289",
+    "yaml": "^2.9.1"
+  }
+}

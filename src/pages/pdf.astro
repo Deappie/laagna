@@ -1,0 +1,168 @@
+---
+import Base from '../layouts/Base.astro';
+import { t } from '../lib/labels';
+---
+
+<Base title="PDF" wide>
+  <div class="toolbar" data-base={import.meta.env.BASE_URL}>
+    <button type="button" class="back" id="back">←</button>
+    <div class="name" id="name"></div>
+    <a class="btn" id="open" target="_blank" rel="noopener">{t.openNewTab}</a>
+    <a class="btn primary" id="download" download>{t.download}</a>
+  </div>
+  <p class="status muted" id="status">{t.pdfLoading}</p>
+  <div class="pages" id="pages"></div>
+</Base>
+
+<script>
+  import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
+  import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+  import { t } from '../lib/labels';
+
+  pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const base = (document.querySelector('.toolbar') as HTMLElement).dataset.base!;
+  const params = new URLSearchParams(location.search);
+  const file = params.get('f') ?? '';
+  const status = $('status');
+  const pagesEl = $('pages');
+
+  $('back').addEventListener('click', () => {
+    if (history.length > 1) history.back();
+    else location.href = base;
+  });
+
+  async function main() {
+    if (!file || file.includes('..') || file.includes('://') || file.startsWith('/')) {
+      status.textContent = t.pdfNotFound;
+      return;
+    }
+    const url = `${base}files/${file.split('/').map(encodeURIComponent).join('/')}`;
+    const title = params.get('t') || file;
+    $('name').textContent = title;
+    document.title = `${title} · ${document.title.split(' · ').pop()}`;
+    $('open').setAttribute('href', url);
+    $('download').setAttribute('href', url);
+
+    let doc: pdfjs.PDFDocumentProxy;
+    try {
+      doc = await pdfjs.getDocument({
+        url,
+        standardFontDataUrl: `${base}pdfjs/standard_fonts/`,
+        cMapUrl: `${base}pdfjs/cmaps/`,
+        cMapPacked: true,
+        wasmUrl: `${base}pdfjs/wasm/`,
+      }).promise;
+    } catch (e) {
+      console.error(e);
+      const err = e as { name?: string; missing?: boolean; status?: number };
+      const notFound = err?.name === 'ResponseException' && (err.missing || err.status === 404);
+      status.textContent = notFound ? t.pdfNotFound : t.pdfError;
+      return;
+    }
+    status.hidden = true;
+
+    // One placeholder per page, sized from page 1 so scrolling is stable; render when near viewport.
+    const first = await doc.getPage(1);
+    const ratio = first.getViewport({ scale: 1 }).height / first.getViewport({ scale: 1 }).width;
+    const rendered = new Map<HTMLCanvasElement, number>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) render(entry.target as HTMLCanvasElement);
+        }
+      },
+      { rootMargin: '800px 0px' },
+    );
+
+    for (let i = 1; i <= doc.numPages; i++) {
+      const canvas = document.createElement('canvas');
+      canvas.dataset.page = String(i);
+      canvas.style.aspectRatio = String(1 / ratio);
+      pagesEl.append(canvas);
+      observer.observe(canvas);
+    }
+
+    async function render(canvas: HTMLCanvasElement) {
+      const width = canvas.clientWidth;
+      if (!width || rendered.get(canvas) === width) return;
+      rendered.set(canvas, width);
+      const page = await doc.getPage(Number(canvas.dataset.page));
+      const unscaled = page.getViewport({ scale: 1 });
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      const viewport = page.getViewport({ scale: (width / unscaled.width) * dpr });
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      canvas.style.aspectRatio = `${unscaled.width} / ${unscaled.height}`;
+      await page.render({ canvas, canvasContext: canvas.getContext('2d')!, viewport }).promise;
+    }
+
+    let resizeTimer: number | undefined;
+    addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        for (const canvas of pagesEl.querySelectorAll('canvas')) {
+          const r = canvas.getBoundingClientRect();
+          if (r.bottom > -800 && r.top < innerHeight + 800) render(canvas);
+          else rendered.delete(canvas);
+        }
+      }, 200);
+    });
+  }
+
+  main();
+</script>
+
+<style>
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    margin-top: -22px;
+    background: var(--bg);
+  }
+  .back {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+  .name { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 550;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .pages { display: flex; flex-direction: column; gap: 12px; }
+  .pages :global(canvas) {
+    display: block;
+    width: 100%;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgb(17 45 78 / 0.18);
+  }
+  @media (max-width: 520px) {
+    #open { display: none; }
+  }
+</style>

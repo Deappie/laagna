@@ -1,0 +1,97 @@
+---
+import { site } from '../lib/materials';
+
+interface Props {
+  title?: string;
+  wide?: boolean;
+}
+
+const { title, wide = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const pageTitle = title ? `${title} · ${site.title}` : site.title;
+---
+
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class:list={['wrap', { wide }]}>
+        <a class="brand" href={base}>{site.title}</a>
+      </div>
+    </header>
+    <main class:list={['wrap', { wide }]}>
+      <slot />
+    </main>
+    <footer class="wrap">
+      {site.teacher && <span>{site.teacher}</span>}
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    /* Palette: #F9F7F7 · #DBE2EF · #3F72AF · #112D4E */
+    --bg: #f9f7f7;
+    --surface: #ffffff;
+    --text: #112d4e;
+    --muted: #4d6584;
+    --line: #dbe2ef;
+    --accent: #3f72af;
+    --accent-hover: #335f94;
+    --accent-soft: #dbe2ef;
+    --on-accent: #ffffff;
+    --header-bg: #112d4e;
+    --header-text: #f9f7f7;
+    --shadow: 0 1px 2px rgb(17 45 78 / 0.06);
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b1e35;
+      --surface: #112d4e;
+      --text: #f9f7f7;
+      --muted: #a9b8cf;
+      --line: #22446b;
+      --accent: #7fa6d6;
+      --accent-hover: #9dbce2;
+      --accent-soft: #1d3d63;
+      --on-accent: #0b1e35;
+      --header-bg: #081628;
+      --header-text: #f9f7f7;
+      --shadow: none;
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  a { color: var(--accent); }
+  h1, h2, h3 { line-height: 1.25; margin: 0; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+  .wrap.wide { max-width: 1000px; }
+  .site-header { background: var(--header-bg); }
+  .site-header .wrap { padding-block: 16px; }
+  .brand { color: var(--header-text); font-weight: 650; text-decoration: none; font-size: 1.05rem; }
+  main.wrap { padding-block: 32px 48px; }
+  footer.wrap { color: var(--muted); font-size: 0.85rem; padding-block: 0 32px; }
+  .section-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  .muted { color: var(--muted); }
+</style>

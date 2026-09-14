@@ -1,0 +1,128 @@
+---
+import type { Item } from '../lib/materials';
+import { fileSize, youtubeId } from '../lib/materials';
+import { t } from '../lib/labels';
+
+interface Props {
+  item: Item;
+}
+
+const { item } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+const fileUrl = 'file' in item ? `${base}files/${item.file}` : '';
+const label = item.label || ('file' in item ? item.file : new URL(item.url).hostname.replace(/^www\./, ''));
+const ext = 'file' in item ? item.file.split('.').pop()?.toUpperCase() : '';
+const size = 'file' in item ? fileSize(item.file) : '';
+const videoId = item.type === 'video' ? youtubeId(item.url) : null;
+const pdfViewer =
+  item.type === 'pdf'
+    ? `${base}pdf/?f=${encodeURIComponent(item.file)}${item.label ? `&t=${encodeURIComponent(item.label)}` : ''}`
+    : '';
+
+const icons: Record<Item['type'], string> = {
+  link: 'M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1',
+  video: 'M4 5h16v14H4zM10 9l5 3-5 3z',
+  pdf: 'M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6',
+  file: 'M12 4v11M7 10l5 5 5-5M5 20h14',
+  form: 'M9 11l2 2 4-4M5 4h14v16H5z',
+};
+---
+
+{
+  item.type === 'video' && videoId ? (
+    <div class="item video">
+      {item.label && <div class="video-label">{item.label}</div>}
+      <div class="frame">
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+          title={item.label || t.video}
+          loading="lazy"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        />
+      </div>
+    </div>
+  ) : (
+    <div class="item row">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d={icons[item.type]} />
+      </svg>
+      <div class="body">
+        <div class="label">{label}</div>
+        <div class="meta">
+          {t.types[item.type]}
+          {item.type === 'file' && ` · ${ext}`}
+          {'file' in item && ` · ${size}`}
+        </div>
+      </div>
+      <div class="actions">
+        {item.type === 'pdf' && (
+          <>
+            <a class="btn primary" href={pdfViewer}>{t.viewPdf}</a>
+            <a class="btn" href={fileUrl} download>{t.download}</a>
+          </>
+        )}
+        {item.type === 'file' && <a class="btn primary" href={fileUrl} download>{t.download}</a>}
+        {item.type === 'form' && (
+          <a class="btn primary" href={item.url} target="_blank" rel="noopener">{t.openForm}</a>
+        )}
+        {(item.type === 'link' || item.type === 'video') && (
+          <a class="btn" href={item.url} target="_blank" rel="noopener">{t.openLink}</a>
+        )}
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .item + :global(.item) { border-top: 1px solid var(--line); }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+  }
+  .icon {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .body { flex: 1; min-width: 0; }
+  .label { font-weight: 550; overflow-wrap: anywhere; }
+  .meta { color: var(--muted); font-size: 0.82rem; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 550;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .video { padding: 14px 0; }
+  .video-label { font-weight: 550; margin-bottom: 8px; }
+  .frame { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: #000; }
+  .frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  @media (max-width: 520px) {
+    .row { flex-wrap: wrap; }
+    .actions { width: 100%; padding-left: 50px; justify-content: flex-start; }
+  }
+</style>

@@ -1,0 +1,59 @@
+# ─────────────────────────────────────────────────────────────────────────
+#  Kõik veebilehe sisu on selles failis.
+#  Juhend: vaata README.md
+#
+#  Kursused (courses): id läheb aadressi sisse, nt  /10it/
+#  Postitused (posts): uusim postitus kuvatakse automaatselt esimesena.
+#
+#  Materjali tüübid (items → type):
+#    link   – tavaline link           (url, label)
+#    video  – YouTube'i video         (url, label on valikuline)
+#    pdf    – PDF brauseris vaatamiseks (file, label)
+#    file   – allalaaditav fail        (file, label)
+#    form   – Google Forms vms          (url, label)
+#
+#  Failid (pdf, file) pane kausta  public/files/  ja kirjuta siia ainult faili nimi.
+# ─────────────────────────────────────────────────────────────────────────
+
+site:
+  title: "Õppematerjalid"
+  teacher: ""          # nt "Õpetaja Nimi" – kuvatakse jaluses
+
+courses:
+  - id: 10it
+    title: "10IT"
+    description: "Sissejuhatus infotehnoloogiasse"
+
+  - id: 11it
+    title: "11IT"
+    description: "Veebirakendused"
+
+posts:
+  - title: "Tere tulemast!"
+    course: 10it
+    date: 2026-09-14
+    text: "Siit leiad kõik tunnimaterjalid. Vaata video, loe konspekti ja täida test reedeks."
+    items:
+      - type: video
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        label: "Sissejuhatav video"
+      - type: pdf
+        file: "naidis.pdf"
+        label: "Konspekt"
+      - type: file
+        file: "naidis.pdf"
+        label: "Harjutused (allalaadimiseks)"
+      - type: form
+        url: "https://forms.gle/"
+        label: "Test"
+      - type: link
+        url: "https://www.err.ee/"
+        label: "Lisalugemine"
+
+  - title: "Esimene tund"
+    course: 11it
+    date: 2026-09-10
+    items:
+      - type: link
+        url: "https://developer.mozilla.org/et/"
+        label: "MDN veebidokumentatsioon"
