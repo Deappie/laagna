@@ -1,7 +1,6 @@
 // All interface text in one place.
 export const t = {
   courses: 'Klassid',
-  latest: 'Viimati lisatud',
   noPosts: 'Materjale veel pole.',
   back: '← Kõik klassid',
   openLink: 'Ava link',

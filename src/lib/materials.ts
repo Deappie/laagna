@@ -117,10 +117,6 @@ export function getPostsForCourse(id: string): Post[] {
   return data.posts.filter((p) => p.course === id).sort(byNewest);
 }
 
-export function getLatestPosts(n: number): Post[] {
-  return [...data.posts].sort(byNewest).slice(0, n);
-}
-
 export function fileSize(file: string): string {
   const bytes = fs.statSync(path.join(FILES_DIR, file)).size;
   if (bytes < 1024) return `${bytes} B`;

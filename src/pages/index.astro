@@ -1,12 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
-import Post from '../components/Post.astro';
-import { getCourses, getLatestPosts, getPostsForCourse, site } from '../lib/materials';
+import { getCourses, getPostsForCourse, site } from '../lib/materials';
 import { t } from '../lib/labels';
 
 const base = import.meta.env.BASE_URL;
 const courses = getCourses();
-const latest = getLatestPosts(5);
 ---
 
 <Base>
@@ -26,9 +24,6 @@ const latest = getLatestPosts(5);
       ))
     }
   </ul>
-
-  <h2 class="section-title">{t.latest}</h2>
-  {latest.length ? latest.map((p) => <Post post={p} showCourse />) : <p class="muted">{t.noPosts}</p>}
 </Base>
 
 <style>
@@ -36,7 +31,7 @@ const latest = getLatestPosts(5);
   .courses {
     list-style: none;
     padding: 0;
-    margin: 0 0 36px;
+    margin: 0 0 16px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 12px;
