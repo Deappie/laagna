@@ -2,7 +2,7 @@
 
 A simple site where students can find links, videos, PDFs, downloadable files and Google Forms, grouped by class.
 
-Site: https://deappie.github.io/tpg/
+Site: https://deappie.github.io/laagna/
 
 All content lives in **one file**: [`src/content/materials.yaml`](src/content/materials.yaml).
 Uploaded files go in **`public/files/`**.
@@ -70,7 +70,7 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:4321/tpg/. If you make a mistake in `materials.yaml` (a class that doesn't exist, a missing file, a wrong type), the error message tells you exactly which post has the problem.
+Then open http://localhost:4321/laagna/. If you make a mistake in `materials.yaml` (a class that doesn't exist, a missing file, a wrong type), the error message tells you exactly which post has the problem.
 
 ## Publish
 

@@ -17,7 +17,7 @@
 
 site:
   title: "Õppematerjalid"
-  teacher: ""          # nt "Õpetaja Nimi" – kuvatakse jaluses
+  teacher: "Maksim Tsõpov"          # nt "Õpetaja Nimi" – kuvatakse jaluses
 
 courses:
   - id: 10it
