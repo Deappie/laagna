@@ -1,6 +1,7 @@
 // All interface text in one place.
 export const t = {
   courses: 'Klassid',
+  usefulLinks: 'Kasulikud lingid',
   noPosts: 'Materjale veel pole.',
   back: '← Kõik klassid',
   openLink: 'Ava link',
@@ -20,7 +21,38 @@ export const t = {
     form: 'Vorm',
     game: 'Mäng',
   },
-  game: {
+  codeGame: {
+    title: {
+      html: 'Harjutus: pane HTML kokku',
+      css: 'Harjutus: pane CSS kokku',
+    },
+    hint: 'Klõpsa sõnal või lohista see lünka. Täidetud lüngal klõpsates saad sõna tagasi.',
+    preview: 'Nii peaks tulemus välja nägema:',
+    progress: (i: number, n: number) => `Ülesanne ${i}/${n}`,
+    gap: 'Lünk',
+    check: 'Kontrolli',
+    next: 'Järgmine ülesanne',
+    restart: 'Alusta otsast',
+    correct: 'Õige! 🎉',
+    allDone: 'Kõik ülesanded on tehtud! 🎉',
+    fillAll: 'Täida enne kontrollimist kõik lüngad.',
+    wrong: (n: number) =>
+      `${n === 1 ? '1 lünk on' : `${n} lünka on`} valesti. Klõpsa punasel lüngal, et sõna tagasi võtta.`,
+  },
+  hexGame: {
+    title: 'Värvimäng: kuueteistkümnendsüsteem',
+    explore: 'Liiguta liugureid ja vaata, kuidas värvikood muutub.',
+    red: 'Punane (R)',
+    green: 'Roheline (G)',
+    blue: 'Sinine (B)',
+    question: (code: string) => `Millist värvi on ${code}?`,
+    option: (n: number) => `Valik ${n}`,
+    correct: 'Õige! 🎉',
+    wrong: (code: string) => `See on ${code}. Mõtle, kui palju on koodis punast, rohelist ja sinist.`,
+    next: 'Järgmine',
+    score: (n: number) => `Õigeid: ${n}`,
+  },
+  binaryGame: {
     title: 'Mäng: kahend- ja kümnendsüsteem',
     toBinary: (n: number) => `Kirjuta arv ${n} kahendsüsteemis. Klõpsa bittidel.`,
     toDecimal: (b: string) => `Mis arv on ${b} kümnendsüsteemis?`,

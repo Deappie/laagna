@@ -23,17 +23,30 @@ courses:
   - id: 10it
     title: "10IT"
     description: "Sissejuhatus infotehnoloogiasse"
+    links:
+      - url: "https://excalidraw.com/"
+        label: "Excalidraw – joonistustahvel"
+      - url: "https://moodle.taltech.ee/"
+        label: "TalTech Moodle"
 
   - id: 11it
     title: "11IT"
     description: "Veebirakendused"
+    links:
+      - url: "https://vscode.dev/"
+        label: "VS Code veebis"
+      - url: "https://www.w3schools.com/"
+        label: "W3Schools"
 
 posts:
-  - title: "1. nädal: kahendsüsteem"
+  - title: "1. tund: miks just kahendsüsteem?"
     course: 10it
-    date: 2026-09-14
-    text: "Arvuti kasutab ainult kahte numbrit: 0 ja 1. Vaata videot, loe vajadusel lisa ja harjuta mänguga, kuni teisendamine hakkab lihtsalt välja tulema."
+    date: 2026-09-08
+    text: "Miks arvuti kasutab ainult nulli ja ühte ning mida tähendab, et väärtuse annab koht? Loe konspekt läbi, vaata videot ja harjuta mänguga, kuni teisendamine hakkab lihtsalt välja tulema.\nKodus: kirjuta kahendsüsteemis oma vanus, tänane kuupäev ja lemmiknumber."
     items:
+      - type: pdf
+        file: "kahendsusteem-konspekt.pdf"
+        label: "Konspekt: kahendsüsteem"
       - type: video
         url: "https://www.youtube.com/watch?v=k-dOsKrPu5k"
         label: "Kuidas töötab kahendsüsteem? (Rakett69)"
@@ -52,10 +65,104 @@ posts:
         url: "https://www.kalkulaator.ee/et/kahendsusteem"
         label: "Teisendaja: kontrolli oma vastust"
 
-  - title: "Esimene tund"
+  - title: "2. tund: kuueteistkümnendsüsteem"
+    course: 10it
+    date: 2026-09-15
+    text: "Kahendarvud on pikad ja neid on raske lugeda. Kuueteistkümnendsüsteemis vastab üks number täpselt neljale bitile, seepärast kasutavad seda programmeerijad ja veebivärvid. Loe konspekt, mängi värvimängu ja tee kodutöö.\nKodutöö: laadi PDF alla, täida see, salvesta ja saada oma vastused aadressile mtsopo@taltech.ee."
+    items:
+      - type: pdf
+        file: "kuueteistkumnendsusteem-konspekt.pdf"
+        label: "Konspekt: kuueteistkümnendsüsteem"
+      - type: game
+        game: hex
+      - type: link
+        url: "https://et.wikipedia.org/wiki/Kuueteistkümnendsüsteem"
+        label: "Kuueteistkümnendsüsteem (Vikipeedia)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_colors/Color_picker_tool"
+        label: "Värvivalija: leia oma lemmikvärvi kood (inglise keeles)"
+      - type: pdf
+        file: "kodutoo-arvususteemid.pdf"
+        label: "Kodutöö: arvusüsteemid (täida ja saada: mtsopo@taltech.ee)"
+
+  - title: "Esimene tund: HTML-i alused"
     course: 11it
-    date: 2026-09-10
+    date: 2026-09-08
+    text: "HTML on keel, millega veebilehed kirja pannakse. Leht koosneb elementidest: pealkirjad, tekstilõigud, lingid, pildid ja loetelud. Loe materjal läbi, proovi näiteid VS Code'is ja tee lõpus harjutus ning test."
     items:
       - type: link
-        url: "https://developer.mozilla.org/et/"
-        label: "MDN veebidokumentatsioon"
+        url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART1A"
+        label: "Mis on HTML? (Tartu Ülikool, Noored Koodi)"
+      - type: link
+        url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART1D"
+        label: "HTML-dokumendi struktuur: DOCTYPE, head ja body"
+      - type: link
+        url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART1B"
+        label: "Märgendid (tag'id) ja atribuudid"
+      - type: link
+        url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART2"
+        label: "Tekst ja lingid: pealkirjad, lõigud, viited"
+      - type: link
+        url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART4"
+        label: "Loendid ja tabelid"
+      - type: link
+        url: "https://www.w3schools.com/html/html_basic.asp"
+        label: "W3Schools: HTML-i põhinäited (inglise keeles)"
+      - type: link
+        url: "https://www.w3schools.com/html/html_elements.asp"
+        label: "W3Schools: HTML-i elemendid (inglise keeles)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax"
+        label: "MDN: HTML-i süntaks (inglise keeles)"
+      - type: game
+        game: html
+      - type: link
+        url: "https://www.w3schools.com/html/html_quiz.asp"
+        label: "W3Schools HTML-i test (inglise keeles)"
+
+  - title: "Teine tund: CSS-i alused"
+    course: 11it
+    date: 2026-09-15
+    text: "HTML ütleb, mis lehel on, CSS aga seda, kuidas see välja näeb: värvid, fondid, suurused ja paigutus. Loe materjal läbi ja tee lõpus harjutus ning test.\nKodutöö: laadi alla lähtefailid, tee juhendi järgi oma koduleht ja saada ZIP-fail aadressile mtsopo@taltech.ee."
+    items:
+      - type: link
+        url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART5A"
+        label: "Ülevaade CSS-ist (Tartu Ülikool, Noored Koodi)"
+      - type: link
+        url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART5B"
+        label: "CSS-i süntaks: selektor, omadus ja väärtus"
+      - type: link
+        url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART5BB"
+        label: "Erinevad selektorid"
+      - type: link
+        url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART5C"
+        label: "Teksti kujundamine"
+      - type: link
+        url: "https://www.w3schools.com/css/css_intro.asp"
+        label: "W3Schools: mis on CSS? (inglise keeles)"
+      - type: link
+        url: "https://www.w3schools.com/css/css_syntax.asp"
+        label: "W3Schools: CSS-i süntaks (inglise keeles)"
+      - type: link
+        url: "https://www.w3schools.com/css/css_howto.asp"
+        label: "W3Schools: kuidas CSS HTML-iga ühendada (inglise keeles)"
+      - type: link
+        url: "https://www.w3schools.com/css/css_selectors.asp"
+        label: "W3Schools: selektorid (inglise keeles)"
+      - type: link
+        url: "https://www.w3schools.com/css/css_colors.asp"
+        label: "W3Schools: värvid (inglise keeles)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/What_is_CSS"
+        label: "MDN: mis on CSS? (inglise keeles)"
+      - type: game
+        game: css
+      - type: link
+        url: "https://www.w3schools.com/css/css_quiz.asp"
+        label: "W3Schools CSS-i test (inglise keeles)"
+      - type: pdf
+        file: "kodutoo-css-juhend.pdf"
+        label: "Kodutöö juhend: minu koduleht"
+      - type: file
+        file: "kodutoo-minu-koduleht.zip"
+        label: "Kodutöö lähtefailid (index.html ja stiil.css)"

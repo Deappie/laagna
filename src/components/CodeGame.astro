@@ -1,0 +1,367 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  game: 'html' | 'css';
+  label?: string;
+}
+
+const { game, label } = Astro.props;
+---
+
+<div class="game" data-code-game={game}>
+  <div class="game-label">{label || t.codeGame.title[game]}</div>
+  <div class="box">
+    <div class="top">
+      <p class="task" data-task></p>
+      <span class="progress" data-progress></span>
+    </div>
+    <p class="hint">{t.codeGame.hint}</p>
+    <div class="preview" data-preview hidden>
+      <div class="preview-label">{t.codeGame.preview}</div>
+      <iframe data-frame sandbox="" title={t.codeGame.preview}></iframe>
+    </div>
+    <pre class="code" data-code></pre>
+    <div class="bank" data-bank></div>
+    <div class="controls">
+      <button type="button" class="btn" data-check>{t.codeGame.check}</button>
+    </div>
+    <p class="feedback" data-feedback aria-live="polite"></p>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  // Words in [[double brackets]] become gaps. `extra` adds wrong answers to the word bank.
+  // `preview` is optional HTML showing what the finished code should look like.
+  interface Task {
+    title: string;
+    code: string;
+    extra: string[];
+    preview?: string;
+  }
+
+  const games: Record<string, Task[]> = {
+    html: [
+      {
+        title: 'Iga HTML-leht algab sama põhjaga. Täida lüngad.',
+        code: `<!DOCTYPE html>
+<[[html]] lang="et">
+  <[[head]]>
+    <[[title]]>Minu leht</title>
+  </head>
+  <[[body]]>
+    <h1>Tere!</h1>
+  </body>
+</html>`,
+        extra: ['p'],
+      },
+      {
+        title: 'Pealkirjad ja tekstilõigud',
+        code: `<[[h1]]>Minu hobid</h1>
+<[[p]]>Mängin jalgpalli.</p>
+
+<[[h2]]>Muusika</h2>
+<p>Kuulan muusikat.</[[p]]>`,
+        extra: ['a', 'img'],
+      },
+      {
+        title: 'Link ja pilt',
+        code: `<a [[href]]="https://err.ee">
+  Uudised
+</[[a]]>
+
+<img [[src]]="kass.jpg"
+     [[alt]]="Must kass">`,
+        extra: ['link', 'title'],
+      },
+      {
+        title: 'Loetelu',
+        code: `<h2>Poenimekiri</h2>
+<[[ul]]>
+  <[[li]]>Leib</li>
+  <[[li]]>Piim</li>
+</[[ul]]>`,
+        extra: ['p', 'a'],
+      },
+    ],
+    css: [
+      {
+        title: 'CSS-i reegel: tee pealkiri punaseks.',
+        code: `[[h1]] {
+  [[color]]: red;
+}`,
+        extra: ['p', 'font-size'],
+        preview: '<style>h1 { color: red; }</style><h1>Pealkiri</h1><p>Tavaline tekst</p>',
+      },
+      {
+        title: 'Taustavärv ja teksti värv',
+        code: `body {
+  [[background-color]]: lightyellow;
+}
+
+p {
+  color: [[blue]];
+}`,
+        extra: ['red', 'border'],
+        preview:
+          '<style>body { background-color: lightyellow; } p { color: blue; }</style><p>Sinine tekst kollasel taustal.</p>',
+      },
+      {
+        title: 'Suur pealkiri keset lehte',
+        code: `h1 {
+  [[font-size]]: 40px;
+  [[text-align]]: center;
+}`,
+        extra: ['color', 'width'],
+        preview: '<style>h1 { font-size: 40px; text-align: center; }</style><h1>Keskel</h1>',
+      },
+      {
+        title: 'Klass: muuda ainult ühte lõiku',
+        code: `<style>
+  [[.hoiatus]] {
+    color: red;
+  }
+</style>
+
+<p>Tavaline</p>
+<p [[class]]="hoiatus">Oht!</p>`,
+        extra: ['#hoiatus', 'id'],
+        preview: '<style>.hoiatus { color: red; }</style><p>Tavaline</p><p class="hoiatus">Oht!</p>',
+      },
+      {
+        title: 'Ühenda CSS-fail HTML-lehega',
+        code: `<head>
+  <[[link]] rel="stylesheet"
+        [[href]]="stiil.css">
+</head>`,
+        extra: ['style', 'src'],
+      },
+    ],
+  };
+
+  function shuffle<T>(list: T[]): T[] {
+    return list
+      .map((value) => ({ value, key: Math.random() }))
+      .sort((a, b) => a.key - b.key)
+      .map((x) => x.value);
+  }
+
+  function setup(root: HTMLElement) {
+    const tasks = games[root.dataset.codeGame!];
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+    const taskEl = $('task');
+    const progressEl = $('progress');
+    const previewEl = $('preview');
+    const frameEl = $<HTMLIFrameElement>('frame');
+    const codeEl = $('code');
+    const bankEl = $('bank');
+    const checkBtn = $<HTMLButtonElement>('check');
+    const feedbackEl = $('feedback');
+
+    let index = 0;
+    let solved = false;
+    // Which word chip sits in which gap.
+    const filled = new Map<HTMLButtonElement, HTMLButtonElement>();
+    let dragged: HTMLButtonElement | null = null;
+
+    const gaps = () => [...codeEl.querySelectorAll<HTMLButtonElement>('.gap')];
+
+    function clearMarks() {
+      gaps().forEach((gap) => gap.classList.remove('ok', 'bad'));
+      feedbackEl.textContent = '';
+      feedbackEl.className = 'feedback';
+    }
+
+    function putIn(gap: HTMLButtonElement, chip: HTMLButtonElement) {
+      if (solved) return;
+      takeOut(gap);
+      filled.set(gap, chip);
+      gap.textContent = chip.textContent;
+      gap.classList.add('filled');
+      chip.hidden = true;
+      clearMarks();
+    }
+
+    function takeOut(gap: HTMLButtonElement) {
+      const chip = filled.get(gap);
+      if (!chip) return;
+      filled.delete(gap);
+      gap.textContent = '';
+      gap.classList.remove('filled');
+      chip.hidden = false;
+      clearMarks();
+    }
+
+    function load() {
+      const task = tasks[index];
+      solved = false;
+      filled.clear();
+      taskEl.textContent = task.title;
+      progressEl.textContent = t.codeGame.progress(index + 1, tasks.length);
+      checkBtn.textContent = t.codeGame.check;
+      previewEl.hidden = !task.preview;
+      frameEl.srcdoc = task.preview
+        ? `<!doctype html><meta charset="utf-8"><body style="margin:10px;font-family:system-ui,sans-serif">${task.preview}`
+        : '';
+      codeEl.innerHTML = '';
+      bankEl.innerHTML = '';
+
+      const answers: string[] = [];
+      task.code.split(/\[\[(.+?)\]\]/).forEach((part, i) => {
+        // Odd parts are the words inside [[brackets]].
+        if (i % 2 === 0) return codeEl.append(part);
+        answers.push(part);
+        const gap = document.createElement('button');
+        gap.type = 'button';
+        gap.className = 'gap';
+        gap.dataset.answer = part;
+        gap.setAttribute('aria-label', t.codeGame.gap);
+        gap.addEventListener('click', () => !solved && takeOut(gap));
+        gap.addEventListener('dragover', (e) => e.preventDefault());
+        gap.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (dragged) putIn(gap, dragged);
+        });
+        codeEl.append(gap);
+      });
+
+      for (const word of shuffle([...answers, ...task.extra])) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'chip';
+        chip.textContent = word;
+        chip.draggable = true;
+        chip.addEventListener('dragstart', () => (dragged = chip));
+        chip.addEventListener('dragend', () => (dragged = null));
+        // Clicking a word puts it into the first empty gap.
+        chip.addEventListener('click', () => {
+          const empty = gaps().find((g) => !filled.has(g));
+          if (empty) putIn(empty, chip);
+        });
+        bankEl.append(chip);
+      }
+      clearMarks();
+    }
+
+    function check() {
+      if (solved) {
+        index = (index + 1) % tasks.length;
+        return load();
+      }
+      if (gaps().some((g) => !filled.has(g))) {
+        feedbackEl.textContent = t.codeGame.fillAll;
+        feedbackEl.className = 'feedback bad';
+        return;
+      }
+      let wrong = 0;
+      for (const gap of gaps()) {
+        const ok = gap.textContent === gap.dataset.answer;
+        gap.classList.add(ok ? 'ok' : 'bad');
+        if (!ok) wrong++;
+      }
+      if (wrong) {
+        feedbackEl.textContent = t.codeGame.wrong(wrong);
+        feedbackEl.className = 'feedback bad';
+        return;
+      }
+      solved = true;
+      const last = index === tasks.length - 1;
+      feedbackEl.textContent = last ? t.codeGame.allDone : t.codeGame.correct;
+      feedbackEl.className = 'feedback ok';
+      checkBtn.textContent = last ? t.codeGame.restart : t.codeGame.next;
+    }
+
+    checkBtn.addEventListener('click', check);
+    load();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-code-game]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .top { display: flex; align-items: baseline; gap: 12px; }
+  .task { flex: 1; margin: 0; font-size: 1.1rem; font-weight: 550; }
+  .progress { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+  .hint { margin: 4px 0 12px; color: var(--muted); font-size: 0.9rem; }
+  .preview { margin-bottom: 12px; }
+  .preview-label { color: var(--muted); font-size: 0.85rem; margin-bottom: 4px; }
+  .preview iframe {
+    display: block;
+    width: 100%;
+    height: 120px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .code {
+    margin: 0 0 12px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    border-radius: 8px;
+    background: var(--bg);
+    font: 0.95rem/1.9 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+    .code { padding: 10px; font-size: 0.8rem; }
+  }
+  .code :global(.gap) {
+    display: inline-block;
+    min-width: 4ch;
+    min-height: 1.6em;
+    padding: 0 6px;
+    vertical-align: middle;
+    border: 1.5px dashed var(--accent);
+    border-radius: 6px;
+    background: var(--accent-soft);
+    color: var(--text);
+    font: inherit;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+  .code :global(.gap.filled) { border-style: solid; font-weight: 650; }
+  .code :global(.gap.ok) { border-color: #2e8b57; background: rgb(46 139 87 / 0.15); }
+  .code :global(.gap.bad) { border-color: #c0392b; background: rgb(192 57 43 / 0.15); }
+  .bank { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .bank :global(.chip) {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 600 0.95rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    cursor: grab;
+  }
+  .bank :global(.chip:hover) { background: var(--accent-soft); }
+  .controls { display: flex; gap: 8px; }
+  .btn {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .feedback { margin: 10px 0 0; min-height: 1.55em; font-weight: 550; }
+  .feedback.ok { color: #2e8b57; }
+  .feedback.bad { color: #c0392b; }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+    .feedback.bad { color: #ff8a80; }
+  }
+</style>

@@ -1,0 +1,218 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-hex-game>
+  <div class="game-label">{label || t.hexGame.title}</div>
+  <div class="box">
+    <p class="task">{t.hexGame.explore}</p>
+    <div class="swatch" data-swatch><span data-code></span></div>
+    <div class="channels" data-channels></div>
+
+    <hr />
+
+    <div class="top">
+      <p class="task" data-question></p>
+      <span class="score" data-score></span>
+    </div>
+    <div class="choices" data-choices></div>
+    <p class="feedback" data-feedback aria-live="polite"></p>
+    <button type="button" class="btn" data-next hidden>{t.hexGame.next}</button>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  const hex2 = (n: number) => n.toString(16).toUpperCase().padStart(2, '0');
+  const bin8 = (n: number) => n.toString(2).padStart(8, '0').replace(/^(\d{4})/, '$1 ');
+  const toCode = (rgb: number[]) => '#' + rgb.map(hex2).join('');
+  // Dark text on light colours, light text on dark ones.
+  const textOn = (rgb: number[]) => (rgb[0] * 0.3 + rgb[1] * 0.59 + rgb[2] * 0.11 > 150 ? '#000' : '#fff');
+
+  function shuffle<T>(list: T[]): T[] {
+    return list
+      .map((value) => ({ value, key: Math.random() }))
+      .sort((a, b) => a.key - b.key)
+      .map((x) => x.value);
+  }
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+    const swatchEl = $('swatch');
+    const codeEl = $('code');
+    const channelsEl = $('channels');
+    const questionEl = $('question');
+    const scoreEl = $('score');
+    const choicesEl = $('choices');
+    const feedbackEl = $('feedback');
+    const nextBtn = $<HTMLButtonElement>('next');
+
+    // Mixer: three sliders, one per colour byte.
+    const rgb = [255, 128, 0];
+    const names = [t.hexGame.red, t.hexGame.green, t.hexGame.blue];
+    const numbers = names.map((name, i) => {
+      const label = document.createElement('label');
+      label.className = `channel c${i}`;
+      const title = document.createElement('span');
+      title.textContent = name;
+      const input = document.createElement('input');
+      input.type = 'range';
+      input.min = '0';
+      input.max = '255';
+      input.value = String(rgb[i]);
+      input.addEventListener('input', () => {
+        rgb[i] = Number(input.value);
+        draw();
+      });
+      const nums = document.createElement('span');
+      nums.className = 'nums';
+      label.append(title, input, nums);
+      channelsEl.append(label);
+      return nums;
+    });
+
+    function draw() {
+      swatchEl.style.background = toCode(rgb);
+      codeEl.style.color = textOn(rgb);
+      codeEl.textContent = toCode(rgb);
+      rgb.forEach((v, i) => {
+        numbers[i].innerHTML = `${v}<sub>10</sub> = ${hex2(v)}<sub>16</sub> = ${bin8(v)}<sub>2</sub>`;
+      });
+    }
+
+    // Quiz: which swatch matches the code? Components are 00, 80 or FF so it can be reasoned out.
+    const levels = [0, 128, 255];
+    const randomColor = () => [0, 1, 2].map(() => levels[Math.floor(Math.random() * levels.length)]);
+    let score = 0;
+    let solved = false;
+
+    function newQuestion() {
+      solved = false;
+      const answer = randomColor();
+      const options = new Map([[toCode(answer), answer]]);
+      while (options.size < 4) {
+        const c = randomColor();
+        options.set(toCode(c), c);
+      }
+      questionEl.textContent = t.hexGame.question(toCode(answer));
+      scoreEl.textContent = t.hexGame.score(score);
+      feedbackEl.textContent = '';
+      feedbackEl.className = 'feedback';
+      nextBtn.hidden = true;
+      choicesEl.innerHTML = '';
+
+      shuffle([...options.entries()]).forEach(([code, color], i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice';
+        btn.style.background = code;
+        btn.style.color = textOn(color);
+        btn.setAttribute('aria-label', t.hexGame.option(i + 1));
+        btn.addEventListener('click', () => {
+          if (solved) return;
+          if (code === toCode(answer)) {
+            solved = true;
+            score++;
+            btn.classList.add('ok');
+            feedbackEl.textContent = t.hexGame.correct;
+            feedbackEl.className = 'feedback ok';
+            scoreEl.textContent = t.hexGame.score(score);
+            nextBtn.hidden = false;
+            // Reveal every option's code so the student can compare.
+            choicesEl.querySelectorAll<HTMLButtonElement>('.choice').forEach((b) => (b.textContent = b.dataset.code!));
+          } else {
+            btn.classList.add('bad');
+            btn.disabled = true;
+            btn.textContent = code;
+            feedbackEl.textContent = t.hexGame.wrong(code);
+            feedbackEl.className = 'feedback bad';
+          }
+        });
+        btn.dataset.code = code;
+        choicesEl.append(btn);
+      });
+    }
+
+    nextBtn.addEventListener('click', newQuestion);
+    draw();
+    newQuestion();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-hex-game]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .top { display: flex; align-items: baseline; gap: 12px; }
+  .task { flex: 1; margin: 0 0 12px; font-size: 1.1rem; font-weight: 550; }
+  .swatch {
+    display: grid;
+    place-items: center;
+    height: 90px;
+    margin-bottom: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font: 700 1.5rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .channels { display: grid; gap: 10px; }
+  .channel { display: grid; gap: 2px; font-weight: 550; }
+  .channel input { width: 100%; }
+  .c0 input { accent-color: #e03131; }
+  .c1 input { accent-color: #2f9e44; }
+  .c2 input { accent-color: #1c7ed6; }
+  .nums {
+    color: var(--muted);
+    font: 0.9rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  hr { margin: 18px 0 14px; border: 0; border-top: 1px solid var(--line); }
+  .score { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+  .choices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .choices :global(.choice) {
+    height: 64px;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    font: 700 0.85rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    cursor: pointer;
+  }
+  .choices :global(.choice.ok) { outline: 3px solid #2e8b57; outline-offset: 2px; }
+  .choices :global(.choice.bad) { opacity: 0.45; cursor: default; }
+  .feedback { margin: 10px 0 0; min-height: 1.55em; font-weight: 550; }
+  .feedback.ok { color: #2e8b57; }
+  .feedback.bad { color: #c0392b; }
+  .btn {
+    margin-top: 8px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+    .choices { grid-template-columns: repeat(2, 1fr); }
+    .nums { font-size: 0.8rem; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+    .feedback.bad { color: #ff8a80; }
+  }
+</style>

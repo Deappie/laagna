@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Post from '../components/Post.astro';
+import Item from '../components/Item.astro';
 import { getCourses, getPostsForCourse, type Course } from '../lib/materials';
 import { t } from '../lib/labels';
 
@@ -13,10 +14,22 @@ const base = import.meta.env.BASE_URL;
 const posts = getPostsForCourse(course.id);
 ---
 
-<Base title={course.title}>
+<Base title={course.title} linksHref={course.links.length ? '#lingid' : undefined}>
   <a class="back" href={base}>{t.back}</a>
   <h1 class="title">{course.title}</h1>
   {course.description && <p class="muted desc">{course.description}</p>}
+
+  {course.links.length > 0 && (
+    <section class="links" id="lingid">
+      <h2>
+        <svg class="pin" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7" />
+        </svg>
+        {t.usefulLinks}
+      </h2>
+      {course.links.map((link) => <Item item={link} />)}
+    </section>
+  )}
 
   <div class="posts">
     {posts.length ? posts.map((p) => <Post post={p} />) : <p class="muted">{t.noPosts}</p>}
@@ -28,4 +41,25 @@ const posts = getPostsForCourse(course.id);
   .title { font-size: 1.9rem; }
   .desc { margin: 6px 0 0; }
   .posts { margin-top: 28px; }
+  .links {
+    margin-top: 28px;
+    padding: 16px 20px 4px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    scroll-margin-top: 76px; /* sticky header is 60px */
+  }
+  .links h2 { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; margin-bottom: 2px; }
+  .pin {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .links + .posts { margin-top: 16px; }
 </style>

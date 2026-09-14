@@ -42,7 +42,7 @@ Add a block under `posts:` in `materials.yaml`. Posts are sorted by date automat
 | `pdf`   | `file` | "Vaata" (in-browser viewer, works on phones) + "Laadi alla" |
 | `file`  | `file` | "Laadi alla" button with file type and size               |
 | `form`  | `url`  | "Täida vorm" button (Google Forms, Microsoft Forms, …)     |
-| `game`  | `game` | Interactive game in the page. Available: `binary` (base 2 ↔ base 10) |
+| `game`  | `game` | Interactive game in the page. Available: `binary` (base 2 ↔ base 10), `hex` (colour codes in base 16), `html` (fill in missing HTML tags), `css` (fill in missing CSS) |
 
 `label` is optional for every type.
 
@@ -55,7 +55,12 @@ courses:
   - id: 12it           # lowercase letters, numbers and "-"; becomes the address /12it/
     title: "12IT"
     description: "Optional short description"
+    links:             # optional "Kasulikud lingid", pinned on top of the class page
+      - url: "https://vscode.dev/"
+        label: "VS Code veebis"
 ```
+
+When a class has `links`, its page also gets a **Kasulikud lingid** button in the header that jumps to them.
 
 ## Upload a file
 

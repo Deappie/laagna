@@ -9,14 +9,14 @@ const { label } = Astro.props;
 ---
 
 <div class="game" data-binary-game>
-  <div class="game-label">{label || t.game.title}</div>
+  <div class="game-label">{label || t.binaryGame.title}</div>
   <div class="box">
     <p class="task" data-task></p>
     <div class="bits" data-bits></div>
-    <input class="answer" data-answer type="number" inputmode="numeric" min="0" aria-label={t.game.answer} />
+    <input class="answer" data-answer type="number" inputmode="numeric" min="0" aria-label={t.binaryGame.answer} />
     <div class="controls">
-      <button type="button" class="btn primary" data-check>{t.game.check}</button>
-      <button type="button" class="btn" data-size>{t.game.bits8}</button>
+      <button type="button" class="btn primary" data-check>{t.binaryGame.check}</button>
+      <button type="button" class="btn" data-size>{t.binaryGame.bits8}</button>
       <span class="score" data-score></span>
     </div>
     <p class="feedback" data-feedback aria-live="polite"></p>
@@ -74,17 +74,17 @@ const { label } = Astro.props;
       target = 1 + Math.floor(Math.random() * (2 ** size - 1));
       if (mode === 'toBinary') {
         bits = Array(size).fill(0);
-        taskEl.textContent = t.game.toBinary(target);
+        taskEl.textContent = t.binaryGame.toBinary(target);
       } else {
         bits = target.toString(2).padStart(size, '0').split('').map(Number);
-        taskEl.textContent = t.game.toDecimal(bits.join(''));
+        taskEl.textContent = t.binaryGame.toDecimal(bits.join(''));
       }
       answerEl.hidden = mode === 'toBinary';
       answerEl.value = '';
       feedbackEl.textContent = '';
       feedbackEl.className = 'feedback';
-      checkBtn.textContent = t.game.check;
-      scoreEl.textContent = t.game.score(score);
+      checkBtn.textContent = t.binaryGame.check;
+      scoreEl.textContent = t.binaryGame.score(score);
       drawBits();
     }
 
@@ -96,14 +96,14 @@ const { label } = Astro.props;
       if (guess === target) {
         solved = true;
         score++;
-        feedbackEl.textContent = t.game.correct;
+        feedbackEl.textContent = t.binaryGame.correct;
         feedbackEl.className = 'feedback ok';
-        checkBtn.textContent = t.game.next;
-        scoreEl.textContent = t.game.score(score);
+        checkBtn.textContent = t.binaryGame.next;
+        scoreEl.textContent = t.binaryGame.score(score);
         drawBits();
       } else {
         feedbackEl.textContent =
-          mode === 'toBinary' ? t.game.wrongBinary(guess) : t.game.wrongDecimal;
+          mode === 'toBinary' ? t.binaryGame.wrongBinary(guess) : t.binaryGame.wrongDecimal;
         feedbackEl.className = 'feedback bad';
       }
     }
@@ -114,7 +114,7 @@ const { label } = Astro.props;
     });
     sizeBtn.addEventListener('click', () => {
       size = size === 4 ? 8 : 4;
-      sizeBtn.textContent = size === 4 ? t.game.bits8 : t.game.bits4;
+      sizeBtn.textContent = size === 4 ? t.binaryGame.bits8 : t.binaryGame.bits4;
       newRound();
     });
 

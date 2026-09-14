@@ -3,6 +3,8 @@ import type { Item } from '../lib/materials';
 import { fileSize, youtubeId } from '../lib/materials';
 import { t } from '../lib/labels';
 import BinaryGame from './BinaryGame.astro';
+import CodeGame from './CodeGame.astro';
+import HexGame from './HexGame.astro';
 
 interface Props {
   item: Item;
@@ -36,7 +38,13 @@ const icons: Record<Item['type'], string> = {
 {
   item.type === 'game' ? (
     <div class="item">
-      <BinaryGame label={item.label} />
+      {item.game === 'binary' ? (
+        <BinaryGame label={item.label} />
+      ) : item.game === 'hex' ? (
+        <HexGame label={item.label} />
+      ) : (
+        <CodeGame game={item.game} label={item.label} />
+      )}
     </div>
   ) : item.type === 'video' && videoId ? (
     <div class="item video">

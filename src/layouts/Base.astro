@@ -1,12 +1,15 @@
 ---
 import { site } from '../lib/materials';
+import { t } from '../lib/labels';
 
 interface Props {
   title?: string;
   wide?: boolean;
+  /** Shows a "useful links" button in the header pointing here. */
+  linksHref?: string;
 }
 
-const { title, wide = false } = Astro.props;
+const { title, wide = false, linksHref } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const pageTitle = title ? `${title} · ${site.title}` : site.title;
 ---
@@ -24,6 +27,7 @@ const pageTitle = title ? `${title} · ${site.title}` : site.title;
     <header class="site-header">
       <div class:list={['wrap', { wide }]}>
         <a class="brand" href={base}>{site.title}</a>
+        {linksHref && <a class="header-btn" href={linksHref}>{t.usefulLinks}</a>}
       </div>
     </header>
     <main class:list={['wrap', { wide }]}>
@@ -80,9 +84,30 @@ const pageTitle = title ? `${title} · ${site.title}` : site.title;
   h1, h2, h3 { line-height: 1.25; margin: 0; }
   .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px; }
   .wrap.wide { max-width: 1000px; }
-  .site-header { background: var(--header-bg); }
-  .site-header .wrap { padding-block: 16px; }
+  .site-header { position: sticky; top: 0; z-index: 10; background: var(--header-bg); }
+  .site-header .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-block: 12px;
+    min-height: 60px;
+  }
   .brand { color: var(--header-text); font-weight: 650; text-decoration: none; font-size: 1.05rem; }
+  .header-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid rgb(249 247 247 / 0.35);
+    border-radius: 8px;
+    color: var(--header-text);
+    font-size: 0.9rem;
+    font-weight: 550;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .header-btn:hover { border-color: var(--header-text); background: rgb(249 247 247 / 0.08); }
   main.wrap { padding-block: 32px 48px; }
   footer.wrap { color: var(--muted); font-size: 0.85rem; padding-block: 0 32px; }
   .section-title {
