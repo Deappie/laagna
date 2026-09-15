@@ -5,6 +5,7 @@ import { t } from '../lib/labels';
 import BinaryGame from './BinaryGame.astro';
 import CodeGame from './CodeGame.astro';
 import HexGame from './HexGame.astro';
+import EscapeGame from './EscapeGame.astro';
 
 interface Props {
   item: Item;
@@ -42,6 +43,8 @@ const icons: Record<Item['type'], string> = {
         <BinaryGame label={item.label} />
       ) : item.game === 'hex' ? (
         <HexGame label={item.label} />
+      ) : item.game === 'escape' ? (
+        <EscapeGame label={item.label} />
       ) : (
         <CodeGame game={item.game} label={item.label} />
       )}

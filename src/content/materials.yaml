@@ -68,13 +68,15 @@ posts:
   - title: "2. tund: kuueteistkümnendsüsteem"
     course: 10it
     date: 2026-09-15
-    text: "Kahendarvud on pikad ja neid on raske lugeda. Kuueteistkümnendsüsteemis vastab üks number täpselt neljale bitile, seepärast kasutavad seda programmeerijad ja veebivärvid. Loe konspekt, mängi värvimängu ja tee kodutöö.\nKodutöö: laadi PDF alla, täida see, salvesta ja saada oma vastused aadressile mtsopo@taltech.ee."
+    text: "Kahendarvud on pikad ja neid on raske lugeda. Kuueteistkümnendsüsteemis vastab üks number täpselt neljale bitile, seepärast kasutavad seda programmeerijad ja veebivärvid. Loe konspekt, mängi värvimängu ja tee kodutöö. Kui oled valmis, proovi põgenemistuba ja vaata lisamaterjale lehe lõpus.\nKodutöö: laadi PDF alla, täida see, salvesta ja saada oma vastused aadressile mtsopo@taltech.ee."
     items:
       - type: pdf
         file: "kuueteistkumnendsusteem-konspekt.pdf"
         label: "Konspekt: kuueteistkümnendsüsteem"
       - type: game
         game: hex
+      - type: game
+        game: escape
       - type: link
         url: "https://et.wikipedia.org/wiki/Kuueteistkümnendsüsteem"
         label: "Kuueteistkümnendsüsteem (Vikipeedia)"
@@ -84,6 +86,18 @@ posts:
       - type: pdf
         file: "kodutoo-arvususteemid.pdf"
         label: "Kodutöö: arvusüsteemid (täida ja saada: mtsopo@taltech.ee)"
+      - type: video
+        url: "https://www.youtube.com/watch?v=onGJrgJYG2E"
+        label: "Lisavideo: kuidas 16-süsteem töötab ja miks seda kasutatakse (inglise keeles)"
+      - type: video
+        url: "https://www.youtube.com/watch?v=w5E30OTBZeY"
+        label: "Lisavideo: miks 16-süsteem, mitte kümnendsüsteem? (inglise keeles)"
+      - type: link
+        url: "https://flippybitandtheattackofthehexadecimalsfrombase16.com/"
+        label: "Lisamäng: Flippy Bit, tõrju 16-süsteemi rünnak bittidega (inglise keeles)"
+      - type: link
+        url: "https://en.wikipedia.org/wiki/Hexspeak"
+        label: "Hexspeak: sõnad, mis on peidetud 16-süsteemi arvudesse (inglise keeles)"
 
   - title: "Esimene tund: HTML-i alused"
     course: 11it

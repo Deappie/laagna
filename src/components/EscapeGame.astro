@@ -1,0 +1,371 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-escape-game>
+  <div class="game-label">{label || t.escapeGame.title}</div>
+  <div class="box">
+    <div data-start>
+      <p class="story">{t.escapeGame.story}</p>
+      <button type="button" class="btn" data-begin>{t.escapeGame.begin}</button>
+    </div>
+
+    <div data-play hidden>
+      <div class="top">
+        <span class="locks" data-locks></span>
+        <span class="timer" data-timer>00:00</span>
+      </div>
+      <p class="level-title" data-title></p>
+      <p class="question" data-question></p>
+      <div data-visual></div>
+      <form class="answer-row" data-form>
+        <input data-answer autocomplete="off" spellcheck="false" aria-label={t.escapeGame.answer} placeholder={t.escapeGame.answer} />
+        <button type="submit" class="btn">{t.escapeGame.open}</button>
+      </form>
+      <button type="button" class="hint-btn" data-hint-btn>{t.escapeGame.hint}</button>
+      <p class="hint" data-hint hidden></p>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+      <div class="fact" data-fact hidden>
+        <strong>{t.escapeGame.fact}</strong>
+        <span data-fact-text></span>
+      </div>
+      <button type="button" class="btn" data-next hidden>{t.escapeGame.next}</button>
+    </div>
+
+    <div data-finish hidden>
+      <p class="level-title">{t.escapeGame.finishTitle}</p>
+      <p data-finish-text></p>
+      <p class="muted">{t.escapeGame.finishFact}</p>
+      <button type="button" class="btn" data-restart>{t.escapeGame.restart}</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  interface Level {
+    title: string;
+    question: string;
+    visual: string; // trusted static HTML
+    answers: string[]; // compared after normalize()
+    hint: string;
+    fact: string;
+  }
+
+  const screen = (text: string) => `<div class="screen">${text}</div>`;
+  const asciiTable = () =>
+    `<div class="ascii">${Array.from({ length: 26 }, (_, i) => {
+      const code = 65 + i;
+      return `<span><b>${String.fromCharCode(code)}</b>${code.toString(16).toUpperCase()}</span>`;
+    }).join('')}</div>`;
+
+  const levels: Level[] = [
+    {
+      title: 'Uksekaardi lugeja',
+      question: 'Kaardilugejal põleb viis lampi. Põlev lamp on 1, kustunud lamp on 0. Mis arvu lambid näitavad? Vasta kümnendsüsteemis.',
+      visual: `<div class="lamps">${[1, 0, 1, 1, 0].map((b) => `<span class="lamp${b ? ' on' : ''}"></span>`).join('')}</div>`,
+      answers: ['22'],
+      hint: 'Kohtade väärtused paremalt vasakule on 1, 2, 4, 8, 16. Liida kokku põlevate lampide väärtused.',
+      fact: 'Sõna „bit“ tuleb ingliskeelsest väljendist binary digit ehk kahendnumber. Selle mõtles välja matemaatik John Tukey 1947. aastal.',
+    },
+    {
+      title: 'Numbrilukk',
+      question: 'Luku ekraanil vilgub arv. Lukk tahab sama arvu kümnendsüsteemis.',
+      visual: screen('0x2F'),
+      answers: ['47'],
+      hint: '0x ütleb ainult, et järgneb 16-süsteemi arv. 2F = 2·16 + F, kusjuures F on 15.',
+      fact: 'Eesliide 0x tuli kasutusele programmeerimiskeelega C. Nii saab arvuti aru, et 2F on arv, mitte muutuja nimi.',
+    },
+    {
+      title: 'Värvilukk',
+      question: 'Lukk helendab selle värviga. Kirjuta värvi kood kujul #RRGGBB.',
+      visual: '<div class="swatch" style="background:#FF00FF"></div>',
+      answers: ['FF00FF'],
+      hint: 'See värv on segatud täis punasest ja täis sinisest. Rohelist pole üldse.',
+      fact: 'Iga ekraanipiksel koosneb kolmest pisikesest tulest: punasest, rohelisest ja sinisest. Kui igaüks saab olla 256 heledusega, tuleb kokku 16 777 216 värvi.',
+    },
+    {
+      title: 'Salasõnum',
+      question: 'Arvutis on igal tähel oma number. Seinale on kirjutatud neli baiti. Mis sõna see on?',
+      visual: screen('54 45 52 45') + asciiTable(),
+      answers: ['TERE'],
+      hint: 'Otsi iga bait tabelist üles: 54 on T.',
+      fact: 'Selle tähetabeli nimi on ASCII ja see valmis 1963. aastal. Suur A on 41, väike a on 61. Vahe on 0x20 ehk täpselt üks bitt.',
+    },
+    {
+      title: 'Failidetektiiv',
+      question: 'Laual on mälupulk, millel olevat faili nimi on kadunud. Faili esimesed baidid on ekraanil. Esimene bait 25 on märk %. Mis kolm tähte tulevad järgmisena? Need ütlevad faili tüübi.',
+      visual: screen('25 50 44 46 2D 31 2E 37') + asciiTable(),
+      answers: ['PDF'],
+      hint: 'Jällegi tabel appi: 50 on P.',
+      fact: 'Faili alguses olevaid baite nimetatakse maagiliseks numbriks. Nende järgi tunneb arvuti failitüübi ära ka siis, kui laiend on vale. ZIP-fail algab tähtedega PK, ZIP-i looja Phil Katzi initsiaalidega.',
+    },
+    {
+      title: 'Kohvilukk',
+      question: 'Serveri ekraanil on sõna, mis on tegelikult arv. Teisenda see kümnendsüsteemi.',
+      visual: screen('0xCAFE'),
+      answers: ['51966'],
+      hint: 'Kohtade väärtused on 4096, 256, 16 ja 1. C = 12, A = 10, F = 15, E = 14. Arvuta 12·4096 + 10·256 + 15·16 + 14.',
+      fact: 'Iga Java programmi klassifail algab baitidega CA FE BA BE. Sõnu, mis koosnevad ainult tähtedest A–F, kutsutakse hexspeak\'iks.',
+    },
+    {
+      title: 'Viimane uks',
+      question: 'Viimane uks avaneb ainult 16-süsteemis. Teisenda arv 48879.',
+      visual: screen('48879'),
+      answers: ['BEEF'],
+      hint: 'Jaga 16-ga: 48879 = 3054·16 + 15, jääk 15 on F. Jätka arvuga 3054 ja loe jäägid lõpuks alt üles.',
+      fact: '0xDEADBEEF on programmeerijate seas kuulus: seda kirjutatakse mällu, et oleks silmaga kohe näha, kui programm loeb mälu, mida ta ei tohiks.',
+    },
+  ];
+
+  const normalize = (s: string) => s.toUpperCase().replace(/\s+/g, '').replace(/^(0X|#)/, '');
+  const clock = (sec: number) =>
+    `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+    const startEl = $('start');
+    const playEl = $('play');
+    const finishEl = $('finish');
+    const locksEl = $('locks');
+    const timerEl = $('timer');
+    const titleEl = $('title');
+    const questionEl = $('question');
+    const visualEl = $('visual');
+    const form = $<HTMLFormElement>('form');
+    const input = $<HTMLInputElement>('answer');
+    const hintBtn = $<HTMLButtonElement>('hint-btn');
+    const hintEl = $('hint');
+    const feedbackEl = $('feedback');
+    const factEl = $('fact');
+    const factText = $('fact-text');
+    const nextBtn = $<HTMLButtonElement>('next');
+
+    let index = 0;
+    let startedAt = 0;
+    let penalty = 0;
+    let hintsUsed = 0;
+    let solved = false;
+    let ticker = 0;
+
+    const elapsed = () => Math.floor((Date.now() - startedAt) / 1000) + penalty;
+
+    function drawLocks() {
+      locksEl.innerHTML = levels
+        .map((_, i) => `<span class="${i === index ? 'current' : ''}">${i < index || (i === index && solved) ? '🔓' : '🔒'}</span>`)
+        .join('');
+    }
+
+    function load() {
+      const level = levels[index];
+      solved = false;
+      titleEl.textContent = `${t.escapeGame.lock(index + 1, levels.length)}: ${level.title}`;
+      questionEl.textContent = level.question;
+      visualEl.innerHTML = level.visual;
+      input.value = '';
+      input.disabled = false;
+      hintBtn.hidden = false;
+      hintEl.hidden = true;
+      hintEl.textContent = level.hint;
+      feedbackEl.textContent = '';
+      feedbackEl.className = 'feedback';
+      factEl.hidden = true;
+      nextBtn.hidden = true;
+      drawLocks();
+      input.focus({ preventScroll: true });
+    }
+
+    function begin() {
+      index = 0;
+      penalty = 0;
+      hintsUsed = 0;
+      startedAt = Date.now();
+      startEl.hidden = true;
+      finishEl.hidden = true;
+      playEl.hidden = false;
+      clearInterval(ticker);
+      ticker = window.setInterval(() => (timerEl.textContent = clock(elapsed())), 1000);
+      timerEl.textContent = clock(0);
+      load();
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (solved) return;
+      const guess = normalize(input.value);
+      if (!guess) {
+        feedbackEl.textContent = t.escapeGame.empty;
+        feedbackEl.className = 'feedback bad';
+        return;
+      }
+      if (!levels[index].answers.includes(guess)) {
+        feedbackEl.textContent = t.escapeGame.wrong;
+        feedbackEl.className = 'feedback bad';
+        return;
+      }
+      solved = true;
+      input.disabled = true;
+      hintBtn.hidden = true;
+      feedbackEl.textContent = t.escapeGame.correct;
+      feedbackEl.className = 'feedback ok';
+      factText.textContent = levels[index].fact;
+      factEl.hidden = false;
+      nextBtn.textContent = index === levels.length - 1 ? t.escapeGame.escape : t.escapeGame.next;
+      nextBtn.hidden = false;
+      drawLocks();
+    });
+
+    hintBtn.addEventListener('click', () => {
+      if (!hintEl.hidden) return;
+      hintEl.hidden = false;
+      hintsUsed++;
+      penalty += 30;
+      timerEl.textContent = clock(elapsed());
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (!solved) return;
+      if (index < levels.length - 1) {
+        index++;
+        return load();
+      }
+      clearInterval(ticker);
+      playEl.hidden = true;
+      finishEl.hidden = false;
+      $('finish-text').textContent = t.escapeGame.finish(clock(elapsed()), hintsUsed);
+    });
+
+    $('begin').addEventListener('click', begin);
+    $('restart').addEventListener('click', begin);
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-escape-game]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .story { margin: 0 0 14px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .locks { display: flex; flex-wrap: wrap; gap: 4px; font-size: 1.25rem; }
+  .locks :global(span) { padding: 0 2px; border-radius: 6px; opacity: 0.55; }
+  .locks :global(.current) { opacity: 1; background: var(--accent-soft); }
+  .timer { font: 700 1.1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .level-title { margin: 0 0 4px; font-size: 1.1rem; font-weight: 650; }
+  .question { margin: 0 0 12px; }
+  .muted { color: var(--muted); }
+
+  [data-visual] :global(.screen) {
+    margin-bottom: 12px;
+    padding: 14px;
+    border-radius: 8px;
+    background: #0d1117;
+    color: #3fb950;
+    font: 700 1.6rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  [data-visual] :global(.lamps) {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    padding: 16px;
+    border-radius: 8px;
+    background: #0d1117;
+  }
+  [data-visual] :global(.lamp) {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #30363d;
+  }
+  [data-visual] :global(.lamp.on) { background: #ffd43b; box-shadow: 0 0 16px #ffd43b; }
+  [data-visual] :global(.swatch) {
+    height: 80px;
+    margin-bottom: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  [data-visual] :global(.ascii) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    gap: 4px;
+    margin-bottom: 12px;
+    font: 0.85rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  [data-visual] :global(.ascii span) {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+
+  .answer-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .answer-row input {
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 600 1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-transform: uppercase;
+  }
+  .btn {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .hint-btn {
+    margin-top: 8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .hint { margin: 6px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--accent-soft); }
+  .feedback { margin: 10px 0 0; min-height: 1.55em; font-weight: 550; }
+  .feedback.ok { color: #2e8b57; }
+  .feedback.bad { color: #c0392b; }
+  .fact {
+    margin: 4px 0 12px;
+    padding: 10px 12px;
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    background: var(--accent-soft);
+  }
+  .fact strong { display: block; margin-bottom: 2px; }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+    .feedback.bad { color: #ff8a80; }
+  }
+</style>

@@ -39,6 +39,28 @@ export const t = {
     wrong: (n: number) =>
       `${n === 1 ? '1 lünk on' : `${n} lünka on`} valesti. Klõpsa punasel lüngal, et sõna tagasi võtta.`,
   },
+  escapeGame: {
+    title: 'Põgenemistuba: serveriruum',
+    story:
+      'Jäid hilja õhtul kooli serveriruumi ja uks vajus lukku. Väljapääsuni on seitse lukku ning iga lukk tahab koodi, mis on peidetud kahend- või kuueteistkümnendsüsteemi. Kell hakkab tiksuma kohe, kui alustad. Kui kiiresti sa välja saad?',
+    begin: 'Alusta',
+    lock: (i: number, n: number) => `Lukk ${i}/${n}`,
+    answer: 'Kood',
+    open: 'Ava lukk',
+    hint: 'Vihje (+30 s)',
+    empty: 'Kirjuta kõigepealt kood.',
+    wrong: 'Lukk ei avanenud. Kontrolli arvutust ja proovi uuesti.',
+    correct: 'Klõps! Lukk avanes. 🔓',
+    fact: 'Kas teadsid?',
+    next: 'Järgmine lukk',
+    escape: 'Ava uks',
+    finishTitle: 'Oled vaba! 🎉',
+    finish: (time: string, hints: number) =>
+      `Said välja ajaga ${time}${hints === 0 ? ' ja ühegi vihjeta' : hints === 1 ? ', kasutasid ühe vihje' : `, kasutasid ${hints} vihjet`}. Kas pinginaaber saab kiiremini?`,
+    finishFact:
+      'Ja veel üks fakt: ka selle veebilehe iga muudatus saab 16-süsteemis tunnuse, näiteks 3de79da. Programmeerijad kasutavad neid tunnuseid iga päev.',
+    restart: 'Proovi uuesti',
+  },
   hexGame: {
     title: 'Värvimäng: kuueteistkümnendsüsteem',
     explore: 'Liiguta liugureid ja vaata, kuidas värvikood muutub.',
