@@ -68,7 +68,7 @@ posts:
   - title: "2. tund: kuueteistkümnendsüsteem"
     course: 10it
     date: 2026-09-15
-    text: "Kahendarvud on pikad ja neid on raske lugeda. Kuueteistkümnendsüsteemis vastab üks number täpselt neljale bitile, seepärast kasutavad seda programmeerijad ja veebivärvid. Loe konspekt, mängi värvimängu ja tee kodutöö. Kui oled valmis, proovi põgenemistuba ja vaata lisamaterjale lehe lõpus.\nKodutöö: laadi PDF alla, täida see, salvesta ja saada oma vastused aadressile mtsopo@taltech.ee."
+    text: "Kahendarvud on pikad ja neid on raske lugeda. Kuueteistkümnendsüsteemis vastab üks number täpselt neljale bitile, seepärast kasutavad seda programmeerijad ja veebivärvid. Loe konspekt, mängi värvimängu ja tee kodutöö. Kui oled valmis, proovi põgenemistuba ja vaata lisamaterjale lehe lõpus.\nKodutöö: ava PDF nupuga „Vaata“, täida lahtrid otse veebis, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee."
     items:
       - type: pdf
         file: "kuueteistkumnendsusteem-konspekt.pdf"
@@ -85,7 +85,7 @@ posts:
         label: "Värvivalija: leia oma lemmikvärvi kood (inglise keeles)"
       - type: pdf
         file: "kodutoo-arvususteemid.pdf"
-        label: "Kodutöö: arvusüsteemid (täida ja saada: mtsopo@taltech.ee)"
+        label: "Kodutöö: arvusüsteemid (täida veebis ja saada: mtsopo@taltech.ee)"
       - type: video
         url: "https://www.youtube.com/watch?v=onGJrgJYG2E"
         label: "Lisavideo: kuidas 16-süsteem töötab ja miks seda kasutatakse (inglise keeles)"
@@ -137,7 +137,7 @@ posts:
   - title: "Teine tund: CSS-i alused"
     course: 11it
     date: 2026-09-15
-    text: "HTML ütleb, mis lehel on, CSS aga seda, kuidas see välja näeb: värvid, fondid, suurused ja paigutus. Loe materjal läbi ja tee lõpus harjutus ning test.\nKodutöö: laadi alla lähtefailid, tee juhendi järgi oma koduleht ja saada ZIP-fail aadressile mtsopo@taltech.ee."
+    text: "HTML ütleb, mis lehel on, CSS aga seda, kuidas see välja näeb: värvid, fondid, suurused ja paigutus. Loe materjal läbi ja tee lõpus harjutus ning test. Kui jõuad, proovi põgenemistuba: kas päästad kooli kodulehe?\nKodutöö: laadi alla lähtefailid, tee juhendi järgi oma koduleht ja saada ZIP-fail aadressile mtsopo@taltech.ee."
     items:
       - type: link
         url: "https://courses.cs.ut.ee/t/nooredkoodi/Veebilehed/PART5A"
@@ -171,6 +171,8 @@ posts:
         label: "MDN: mis on CSS? (inglise keeles)"
       - type: game
         game: css
+      - type: game
+        game: escape-web
       - type: link
         url: "https://www.w3schools.com/css/css_quiz.asp"
         label: "W3Schools CSS-i test (inglise keeles)"

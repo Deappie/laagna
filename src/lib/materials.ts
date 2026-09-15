@@ -22,7 +22,7 @@ const itemSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('form'), url, label: z.string().optional() }),
   z.object({ type: z.literal('pdf'), file: fileName, label: z.string().optional() }),
   z.object({ type: z.literal('file'), file: fileName, label: z.string().optional() }),
-  z.object({ type: z.literal('game'), game: z.enum(['binary', 'hex', 'escape', 'html', 'css']), label: z.string().optional() }),
+  z.object({ type: z.literal('game'), game: z.enum(['binary', 'hex', 'escape', 'escape-web', 'html', 'css']), label: z.string().optional() }),
 ]);
 
 const schema = z.object({

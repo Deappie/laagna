@@ -2,17 +2,19 @@
 import { t } from '../lib/labels';
 
 interface Props {
+  room: 'hex' | 'web';
   label?: string;
 }
 
-const { label } = Astro.props;
+const { room, label } = Astro.props;
+const text = t.escapeGame.rooms[room];
 ---
 
-<div class="game" data-escape-game>
-  <div class="game-label">{label || t.escapeGame.title}</div>
+<div class="game" data-escape-game={room}>
+  <div class="game-label">{label || text.title}</div>
   <div class="box">
     <div data-start>
-      <p class="story">{t.escapeGame.story}</p>
+      <p class="story">{text.story}</p>
       <button type="button" class="btn" data-begin>{t.escapeGame.begin}</button>
     </div>
 
@@ -25,7 +27,7 @@ const { label } = Astro.props;
       <p class="question" data-question></p>
       <div data-visual></div>
       <form class="answer-row" data-form>
-        <input data-answer autocomplete="off" spellcheck="false" aria-label={t.escapeGame.answer} placeholder={t.escapeGame.answer} />
+        <input data-answer autocomplete="off" autocapitalize="off" spellcheck="false" aria-label={t.escapeGame.answer} placeholder={t.escapeGame.answer} />
         <button type="submit" class="btn">{t.escapeGame.open}</button>
       </form>
       <button type="button" class="hint-btn" data-hint-btn>{t.escapeGame.hint}</button>
@@ -39,9 +41,9 @@ const { label } = Astro.props;
     </div>
 
     <div data-finish hidden>
-      <p class="level-title">{t.escapeGame.finishTitle}</p>
+      <p class="level-title">{text.finishTitle}</p>
       <p data-finish-text></p>
-      <p class="muted">{t.escapeGame.finishFact}</p>
+      <p class="muted">{text.finishFact}</p>
       <button type="button" class="btn" data-restart>{t.escapeGame.restart}</button>
     </div>
   </div>
@@ -54,9 +56,14 @@ const { label } = Astro.props;
     title: string;
     question: string;
     visual: string; // trusted static HTML
-    answers: string[]; // compared after normalize()
+    answers: string[]; // compared after the room's normalize()
     hint: string;
     fact: string;
+  }
+
+  interface Room {
+    levels: Level[];
+    normalize: (s: string) => string;
   }
 
   const screen = (text: string) => `<div class="screen">${text}</div>`;
@@ -65,71 +72,151 @@ const { label } = Astro.props;
       const code = 65 + i;
       return `<span><b>${String.fromCharCode(code)}</b>${code.toString(16).toUpperCase()}</span>`;
     }).join('')}</div>`;
+  // Source code shown as text; ___ marks the missing piece.
+  const code = (source: string, caption = '') =>
+    `${caption ? `<div class="caption">${caption}</div>` : ''}<pre class="codebox">${source
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/___/g, '<span class="blank">___</span>')}</pre>`;
 
-  const levels: Level[] = [
-    {
-      title: 'Uksekaardi lugeja',
-      question: 'Kaardilugejal põleb viis lampi. Põlev lamp on 1, kustunud lamp on 0. Mis arvu lambid näitavad? Vasta kümnendsüsteemis.',
-      visual: `<div class="lamps">${[1, 0, 1, 1, 0].map((b) => `<span class="lamp${b ? ' on' : ''}"></span>`).join('')}</div>`,
-      answers: ['22'],
-      hint: 'Kohtade väärtused paremalt vasakule on 1, 2, 4, 8, 16. Liida kokku põlevate lampide väärtused.',
-      fact: 'Sõna „bit“ tuleb ingliskeelsest väljendist binary digit ehk kahendnumber. Selle mõtles välja matemaatik John Tukey 1947. aastal.',
-    },
-    {
-      title: 'Numbrilukk',
-      question: 'Luku ekraanil vilgub arv. Lukk tahab sama arvu kümnendsüsteemis.',
-      visual: screen('0x2F'),
-      answers: ['47'],
-      hint: '0x ütleb ainult, et järgneb 16-süsteemi arv. 2F = 2·16 + F, kusjuures F on 15.',
-      fact: 'Eesliide 0x tuli kasutusele programmeerimiskeelega C. Nii saab arvuti aru, et 2F on arv, mitte muutuja nimi.',
-    },
-    {
-      title: 'Värvilukk',
-      question: 'Lukk helendab selle värviga. Kirjuta värvi kood kujul #RRGGBB.',
-      visual: '<div class="swatch" style="background:#FF00FF"></div>',
-      answers: ['FF00FF'],
-      hint: 'See värv on segatud täis punasest ja täis sinisest. Rohelist pole üldse.',
-      fact: 'Iga ekraanipiksel koosneb kolmest pisikesest tulest: punasest, rohelisest ja sinisest. Kui igaüks saab olla 256 heledusega, tuleb kokku 16 777 216 värvi.',
-    },
-    {
-      title: 'Salasõnum',
-      question: 'Arvutis on igal tähel oma number. Seinale on kirjutatud neli baiti. Mis sõna see on?',
-      visual: screen('54 45 52 45') + asciiTable(),
-      answers: ['TERE'],
-      hint: 'Otsi iga bait tabelist üles: 54 on T.',
-      fact: 'Selle tähetabeli nimi on ASCII ja see valmis 1963. aastal. Suur A on 41, väike a on 61. Vahe on 0x20 ehk täpselt üks bitt.',
-    },
-    {
-      title: 'Failidetektiiv',
-      question: 'Laual on mälupulk, millel olevat faili nimi on kadunud. Faili esimesed baidid on ekraanil. Esimene bait 25 on märk %. Mis kolm tähte tulevad järgmisena? Need ütlevad faili tüübi.',
-      visual: screen('25 50 44 46 2D 31 2E 37') + asciiTable(),
-      answers: ['PDF'],
-      hint: 'Jällegi tabel appi: 50 on P.',
-      fact: 'Faili alguses olevaid baite nimetatakse maagiliseks numbriks. Nende järgi tunneb arvuti failitüübi ära ka siis, kui laiend on vale. ZIP-fail algab tähtedega PK, ZIP-i looja Phil Katzi initsiaalidega.',
-    },
-    {
-      title: 'Kohvilukk',
-      question: 'Serveri ekraanil on sõna, mis on tegelikult arv. Teisenda see kümnendsüsteemi.',
-      visual: screen('0xCAFE'),
-      answers: ['51966'],
-      hint: 'Kohtade väärtused on 4096, 256, 16 ja 1. C = 12, A = 10, F = 15, E = 14. Arvuta 12·4096 + 10·256 + 15·16 + 14.',
-      fact: 'Iga Java programmi klassifail algab baitidega CA FE BA BE. Sõnu, mis koosnevad ainult tähtedest A–F, kutsutakse hexspeak\'iks.',
-    },
-    {
-      title: 'Viimane uks',
-      question: 'Viimane uks avaneb ainult 16-süsteemis. Teisenda arv 48879.',
-      visual: screen('48879'),
-      answers: ['BEEF'],
-      hint: 'Jaga 16-ga: 48879 = 3054·16 + 15, jääk 15 on F. Jätka arvuga 3054 ja loe jäägid lõpuks alt üles.',
-      fact: '0xDEADBEEF on programmeerijate seas kuulus: seda kirjutatakse mällu, et oleks silmaga kohe näha, kui programm loeb mälu, mida ta ei tohiks.',
-    },
-  ];
+  const hex: Room = {
+    normalize: (s) => s.toUpperCase().replace(/\s+/g, '').replace(/^(0X|#)/, ''),
+    levels: [
+      {
+        title: 'Uksekaardi lugeja',
+        question: 'Kaardilugejal põleb viis lampi. Põlev lamp on 1, kustunud lamp on 0. Mis arvu lambid näitavad? Vasta kümnendsüsteemis.',
+        visual: `<div class="lamps">${[1, 0, 1, 1, 0].map((b) => `<span class="lamp${b ? ' on' : ''}"></span>`).join('')}</div>`,
+        answers: ['22'],
+        hint: 'Kohtade väärtused paremalt vasakule on 1, 2, 4, 8, 16. Liida kokku põlevate lampide väärtused.',
+        fact: 'Sõna „bit“ tuleb ingliskeelsest väljendist binary digit ehk kahendnumber. Selle mõtles välja matemaatik John Tukey 1947. aastal.',
+      },
+      {
+        title: 'Numbrilukk',
+        question: 'Luku ekraanil vilgub arv. Lukk tahab sama arvu kümnendsüsteemis.',
+        visual: screen('0x2F'),
+        answers: ['47'],
+        hint: '0x ütleb ainult, et järgneb 16-süsteemi arv. 2F = 2·16 + F, kusjuures F on 15.',
+        fact: 'Eesliide 0x tuli kasutusele programmeerimiskeelega C. Nii saab arvuti aru, et 2F on arv, mitte muutuja nimi.',
+      },
+      {
+        title: 'Värvilukk',
+        question: 'Lukk helendab selle värviga. Kirjuta värvi kood kujul #RRGGBB.',
+        visual: '<div class="swatch" style="background:#FF00FF"></div>',
+        answers: ['FF00FF'],
+        hint: 'See värv on segatud täis punasest ja täis sinisest. Rohelist pole üldse.',
+        fact: 'Iga ekraanipiksel koosneb kolmest pisikesest tulest: punasest, rohelisest ja sinisest. Kui igaüks saab olla 256 heledusega, tuleb kokku 16 777 216 värvi.',
+      },
+      {
+        title: 'Salasõnum',
+        question: 'Arvutis on igal tähel oma number. Seinale on kirjutatud neli baiti. Mis sõna see on?',
+        visual: screen('54 45 52 45') + asciiTable(),
+        answers: ['TERE'],
+        hint: 'Otsi iga bait tabelist üles: 54 on T.',
+        fact: 'Selle tähetabeli nimi on ASCII ja see valmis 1963. aastal. Suur A on 41, väike a on 61. Vahe on 0x20 ehk täpselt üks bitt.',
+      },
+      {
+        title: 'Failidetektiiv',
+        question: 'Laual on mälupulk, millel olevat faili nimi on kadunud. Faili esimesed baidid on ekraanil. Esimene bait 25 on märk %. Mis kolm tähte tulevad järgmisena? Need ütlevad faili tüübi.',
+        visual: screen('25 50 44 46 2D 31 2E 37') + asciiTable(),
+        answers: ['PDF'],
+        hint: 'Jällegi tabel appi: 50 on P.',
+        fact: 'Faili alguses olevaid baite nimetatakse maagiliseks numbriks. Nende järgi tunneb arvuti failitüübi ära ka siis, kui laiend on vale. ZIP-fail algab tähtedega PK, ZIP-i looja Phil Katzi initsiaalidega.',
+      },
+      {
+        title: 'Kohvilukk',
+        question: 'Serveri ekraanil on sõna, mis on tegelikult arv. Teisenda see kümnendsüsteemi.',
+        visual: screen('0xCAFE'),
+        answers: ['51966'],
+        hint: 'Kohtade väärtused on 4096, 256, 16 ja 1. C = 12, A = 10, F = 15, E = 14. Arvuta 12·4096 + 10·256 + 15·16 + 14.',
+        fact: 'Iga Java programmi klassifail algab baitidega CA FE BA BE. Sõnu, mis koosnevad ainult tähtedest A–F, kutsutakse hexspeak\'iks.',
+      },
+      {
+        title: 'Viimane uks',
+        question: 'Viimane uks avaneb ainult 16-süsteemis. Teisenda arv 48879.',
+        visual: screen('48879'),
+        answers: ['BEEF'],
+        hint: 'Jaga 16-ga: 48879 = 3054·16 + 15, jääk 15 on F. Jätka arvuga 3054 ja loe jäägid lõpuks alt üles.',
+        fact: '0xDEADBEEF on programmeerijate seas kuulus: seda kirjutatakse mällu, et oleks silmaga kohe näha, kui programm loeb mälu, mida ta ei tohiks.',
+      },
+    ],
+  };
 
-  const normalize = (s: string) => s.toUpperCase().replace(/\s+/g, '').replace(/^(0X|#)/, '');
+  const web: Room = {
+    // Code answers: ignore case, spaces, quote style and a trailing semicolon.
+    normalize: (s) => s.toLowerCase().replace(/\s+/g, '').replace(/'/g, '"').replace(/;$/, ''),
+    levels: [
+      {
+        title: 'Katkine pealkiri',
+        question: 'Avalehe pealkiri venib üle terve lehe, sest selles on viga. Mis peab olema lõputag?',
+        visual: code('<h1>Tere tulemast!</h2>\n<p>Homme on lahtiste uste päev.</p>'),
+        answers: ['</h1>', '/h1', 'h1'],
+        hint: 'Lõputag on sama nimega nagu algustag, ainult kaldkriipsuga ees.',
+        fact: 'Maailma esimese veebilehe tegi Tim Berners-Lee 1991. aastal CERN-is. See on tänaseni üleval aadressil info.cern.ch.',
+      },
+      {
+        title: 'Nähtamatu logo',
+        question: 'Kooli logo ei ilmu lehele. Mis atribuut tuleb lünka kirjutada?',
+        visual: code('<img ___="logo.png" alt="Kooli logo">'),
+        answers: ['src'],
+        hint: 'Pildifaili asukoht käib atribuuti, mille nimi on lühend ingliskeelsest sõnast source.',
+        fact: 'Atribuut alt on vaegnägijate jaoks: ekraanilugeja loeb pildi asemel ette alt-teksti. Ka otsingumootorid saavad selle järgi aru, mis pildil on.',
+      },
+      {
+        title: 'Link eikuhugi',
+        question: 'Lingile vajutades ei juhtu midagi. Mis tuleb lünka kirjutada, et link viiks lehele tunniplaan.html?',
+        visual: code('<a ___>Tunniplaan</a>'),
+        answers: ['href="tunniplaan.html"', 'href=tunniplaan.html'],
+        hint: 'Lingi aadress käib atribuuti href. Kirjuta nii atribuut, võrdusmärk kui ka aadress jutumärkides.',
+        fact: 'H täht HTML-is tähendab hüperteksti ehk teksti, mis viitab linkide kaudu teistele tekstidele. Just lingid teevad veebist võrgu.',
+      },
+      {
+        title: 'Keskele!',
+        question: 'Bänneri tekst peab olema täpselt keskel. Mis väärtus tuleb lünka kirjutada?',
+        visual:
+          code('.banner {\n  text-align: ___;\n}') +
+          '<div class="caption">Nii peab välja nägema:</div><div class="preview"><p style="text-align:center;margin:0">Lahtiste uste päev</p></div>',
+        answers: ['center'],
+        hint: 'Omadus text-align võib olla left, right või center.',
+        fact: 'CSS tuli kasutusele 1996. aastal. Enne seda kujundati lehti HTML-i tagidega nagu font ja center, mida tänapäeval enam ei kasutata.',
+      },
+      {
+        title: 'Hoiatussilt',
+        question: 'Ainult hoiatuse tekst peab olema punane. Kirjuta lünka selektor, mis valib just selle lõigu.',
+        visual: code('<p>Tavaline tekst</p>\n<p class="hoiatus">Ära puuduta!</p>', 'HTML') + code('___ {\n  color: red;\n}', 'CSS'),
+        answers: ['.hoiatus', 'p.hoiatus'],
+        hint: 'Klassi valimiseks pane klassi nime ette punkt.',
+        fact: 'Ühel elemendil võib olla mitu klassi korraga, näiteks class="hoiatus suur". Siis kehtivad talle mõlema klassi stiilid.',
+      },
+      {
+        title: 'Kuldne uks',
+        question: 'Uksele on vaja kuldset raami, aga ainult sellele ühele elemendile. Kirjuta lünka selektor.',
+        visual: code('<div id="uks">🚪</div>', 'HTML') + code('___ {\n  border: 5px solid gold;\n}', 'CSS'),
+        answers: ['#uks', 'div#uks'],
+        hint: 'id valimiseks pane nime ette trellid (#).',
+        fact: 'Sama id-d saab kasutada ka lingis: href="#uks" hüppab lehel otse selle elemendini. Nii töötavad paljud „tagasi üles“ nupud.',
+      },
+      {
+        title: 'Peidetud parool',
+        question: 'Viimane lukk tahab parooli. Brauseris seda lehel näha pole, aga kood on sul olemas. Mis on parool?',
+        visual:
+          code('<p>Tere tulemast!</p>\n<p class="salajane">karikakar</p>', 'HTML') +
+          code('.salajane {\n  display: none;\n}', 'CSS'),
+        answers: ['karikakar'],
+        hint: 'Ära vaata, mida brauser näitab, vaid mis on HTML-is kirjas. display: none peidab elemendi lehelt.',
+        fact: 'Iga veebilehe HTML-i ja CSS-i näeb arendaja tööriistadega (F12). Seepärast ei tohi paroole ega saladusi kunagi lehe koodi peita.',
+      },
+    ],
+  };
+
+  const rooms: Record<string, Room> = { hex, web };
+
   const clock = (sec: number) =>
     `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
 
   function setup(root: HTMLElement) {
+    const roomName = root.dataset.escapeGame!;
+    const { levels, normalize } = rooms[roomName];
     const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
     const startEl = $('start');
     const playEl = $('play');
@@ -147,6 +234,8 @@ const { label } = Astro.props;
     const factEl = $('fact');
     const factText = $('fact-text');
     const nextBtn = $<HTMLButtonElement>('next');
+
+    input.classList.toggle('upper', roomName === 'hex');
 
     let index = 0;
     let startedAt = 0;
@@ -205,7 +294,7 @@ const { label } = Astro.props;
         feedbackEl.className = 'feedback bad';
         return;
       }
-      if (!levels[index].answers.includes(guess)) {
+      if (!levels[index].answers.map(normalize).includes(guess)) {
         feedbackEl.textContent = t.escapeGame.wrong;
         feedbackEl.className = 'feedback bad';
         return;
@@ -217,7 +306,7 @@ const { label } = Astro.props;
       feedbackEl.className = 'feedback ok';
       factText.textContent = levels[index].fact;
       factEl.hidden = false;
-      nextBtn.textContent = index === levels.length - 1 ? t.escapeGame.escape : t.escapeGame.next;
+      nextBtn.textContent = index === levels.length - 1 ? t.escapeGame.rooms[roomName as 'hex' | 'web'].last : t.escapeGame.next;
       nextBtn.hidden = false;
       drawLocks();
     });
@@ -314,6 +403,39 @@ const { label } = Astro.props;
     border: 1px solid var(--line);
     border-radius: 6px;
   }
+  [data-visual] :global(.caption) { color: var(--muted); font-size: 0.85rem; margin-bottom: 4px; }
+  [data-visual] :global(.codebox) {
+    margin: 0 0 12px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    border-radius: 8px;
+    background: #0d1117;
+    color: #e6edf3;
+    font: 0.95rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    /* Wrap long lines so the missing piece is never hidden off-screen on phones. */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+    [data-visual] :global(.codebox) { padding: 10px; font-size: 0.85rem; }
+  }
+  [data-visual] :global(.blank) {
+    padding: 0 4px;
+    border-radius: 4px;
+    background: #ffd43b;
+    color: #0d1117;
+    font-weight: 700;
+  }
+  [data-visual] :global(.preview) {
+    margin-bottom: 12px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: #111;
+    font-family: system-ui, sans-serif;
+  }
 
   .answer-row { display: flex; gap: 8px; flex-wrap: wrap; }
   .answer-row input {
@@ -326,8 +448,8 @@ const { label } = Astro.props;
     background: var(--surface);
     color: var(--text);
     font: 600 1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    text-transform: uppercase;
   }
+  .answer-row input.upper { text-transform: uppercase; }
   .btn {
     min-height: 40px;
     padding: 0 14px;

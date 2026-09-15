@@ -13,6 +13,9 @@ export const t = {
   pdfLoading: 'Laadin PDF-i…',
   pdfError: 'PDF-i avamine ebaõnnestus.',
   pdfNotFound: 'Faili ei leitud.',
+  pdfFillHint: 'Selle PDF-i saad täita otse siin: klõpsa lahtril ja kirjuta. Kui oled valmis, vajuta „Laadi täidetud PDF alla“ ja saada fail õpetajale.',
+  pdfDownloadFilled: 'Laadi täidetud PDF alla',
+  pdfSaving: 'Salvestan…',
   types: {
     link: 'Link',
     video: 'Video',
@@ -40,9 +43,26 @@ export const t = {
       `${n === 1 ? '1 lünk on' : `${n} lünka on`} valesti. Klõpsa punasel lüngal, et sõna tagasi võtta.`,
   },
   escapeGame: {
-    title: 'Põgenemistuba: serveriruum',
-    story:
-      'Jäid hilja õhtul kooli serveriruumi ja uks vajus lukku. Väljapääsuni on seitse lukku ning iga lukk tahab koodi, mis on peidetud kahend- või kuueteistkümnendsüsteemi. Kell hakkab tiksuma kohe, kui alustad. Kui kiiresti sa välja saad?',
+    rooms: {
+      hex: {
+        title: 'Põgenemistuba: serveriruum',
+        story:
+          'Jäid hilja õhtul kooli serveriruumi ja uks vajus lukku. Väljapääsuni on seitse lukku ning iga lukk tahab koodi, mis on peidetud kahend- või kuueteistkümnendsüsteemi. Kell hakkab tiksuma kohe, kui alustad. Kui kiiresti sa välja saad?',
+        last: 'Ava uks',
+        finishTitle: 'Oled vaba! 🎉',
+        finishFact:
+          'Ja veel üks fakt: ka selle veebilehe iga muudatus saab 16-süsteemis tunnuse, näiteks 3de79da. Programmeerijad kasutavad neid tunnuseid iga päev.',
+      },
+      web: {
+        title: 'Põgenemistuba: lukus koduleht',
+        story:
+          'Homme on koolis lahtiste uste päev, aga keegi on kooli kodulehe seitsme lukuga kinni pannud. Iga lukk avaneb, kui leiad HTML-ist või CSS-ist vea või puuduva tüki. Kell hakkab tiksuma kohe, kui alustad. Kui kiiresti sa lehe päästad?',
+        last: 'Päästa leht',
+        finishTitle: 'Leht on päästetud! 🎉',
+        finishFact:
+          'Ja veel üks fakt: vajuta mistahes veebilehel F12 (Macis Cmd+Option+I) ja näed selle lehe HTML-i ja CSS-i. Nii on paljud veebiarendajad teiste lehtede pealt õppinud.',
+      },
+    },
     begin: 'Alusta',
     lock: (i: number, n: number) => `Lukk ${i}/${n}`,
     answer: 'Kood',
@@ -53,12 +73,8 @@ export const t = {
     correct: 'Klõps! Lukk avanes. 🔓',
     fact: 'Kas teadsid?',
     next: 'Järgmine lukk',
-    escape: 'Ava uks',
-    finishTitle: 'Oled vaba! 🎉',
     finish: (time: string, hints: number) =>
-      `Said välja ajaga ${time}${hints === 0 ? ' ja ühegi vihjeta' : hints === 1 ? ', kasutasid ühe vihje' : `, kasutasid ${hints} vihjet`}. Kas pinginaaber saab kiiremini?`,
-    finishFact:
-      'Ja veel üks fakt: ka selle veebilehe iga muudatus saab 16-süsteemis tunnuse, näiteks 3de79da. Programmeerijad kasutavad neid tunnuseid iga päev.',
+      `Said hakkama ajaga ${time}${hints === 0 ? ' ja ühegi vihjeta' : hints === 1 ? ', kasutasid ühe vihje' : `, kasutasid ${hints} vihjet`}. Kas pinginaaber saab kiiremini?`,
     restart: 'Proovi uuesti',
   },
   hexGame: {

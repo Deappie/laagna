@@ -43,8 +43,8 @@ const icons: Record<Item['type'], string> = {
         <BinaryGame label={item.label} />
       ) : item.game === 'hex' ? (
         <HexGame label={item.label} />
-      ) : item.game === 'escape' ? (
-        <EscapeGame label={item.label} />
+      ) : item.game === 'escape' || item.game === 'escape-web' ? (
+        <EscapeGame room={item.game === 'escape' ? 'hex' : 'web'} label={item.label} />
       ) : (
         <CodeGame game={item.game} label={item.label} />
       )}

@@ -11,6 +11,7 @@ import { t } from '../lib/labels';
     <a class="btn primary" id="download" download>{t.download}</a>
   </div>
   <p class="status muted" id="status">{t.pdfLoading}</p>
+  <p class="fill-hint" id="fill-hint" hidden>{t.pdfFillHint}</p>
   <div class="pages" id="pages"></div>
 </Base>
 
@@ -27,6 +28,18 @@ import { t } from '../lib/labels';
   const file = params.get('f') ?? '';
   const status = $('status');
   const pagesEl = $('pages');
+  const downloadBtn = $('download') as HTMLAnchorElement;
+
+  // Form fields don't use links, so pdf.js only needs these no-ops instead of a full PDFLinkService.
+  const linkService = {
+    externalLinkEnabled: false,
+    addLinkAttributes() {},
+    getDestinationHash: () => '#',
+    getAnchorUrl: () => '#',
+    goToDestination() {},
+    executeNamedAction() {},
+    executeSetOCGState() {},
+  };
 
   $('back').addEventListener('click', () => {
     if (history.length > 1) history.back();
@@ -43,7 +56,7 @@ import { t } from '../lib/labels';
     $('name').textContent = title;
     document.title = `${title} · ${document.title.split(' · ').pop()}`;
     $('open').setAttribute('href', url);
-    $('download').setAttribute('href', url);
+    downloadBtn.setAttribute('href', url);
 
     let doc: pdfjs.PDFDocumentProxy;
     try {
@@ -63,52 +76,136 @@ import { t } from '../lib/labels';
     }
     status.hidden = true;
 
+    const hasForm = Boolean(await doc.getFieldObjects());
+    if (hasForm) setUpFilling(doc);
+
     // One placeholder per page, sized from page 1 so scrolling is stable; render when near viewport.
     const first = await doc.getPage(1);
     const ratio = first.getViewport({ scale: 1 }).height / first.getViewport({ scale: 1 }).width;
-    const rendered = new Map<HTMLCanvasElement, number>();
+    const rendered = new Map<HTMLElement, number>();
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) render(entry.target as HTMLCanvasElement);
+          if (entry.isIntersecting) render(entry.target as HTMLElement);
         }
       },
       { rootMargin: '800px 0px' },
     );
 
     for (let i = 1; i <= doc.numPages; i++) {
-      const canvas = document.createElement('canvas');
-      canvas.dataset.page = String(i);
-      canvas.style.aspectRatio = String(1 / ratio);
-      pagesEl.append(canvas);
-      observer.observe(canvas);
+      const pageEl = document.createElement('div');
+      pageEl.className = 'page';
+      pageEl.dataset.page = String(i);
+      pageEl.style.aspectRatio = String(1 / ratio);
+      pageEl.append(document.createElement('canvas'));
+      pagesEl.append(pageEl);
+      observer.observe(pageEl);
     }
 
-    async function render(canvas: HTMLCanvasElement) {
-      const width = canvas.clientWidth;
-      if (!width || rendered.get(canvas) === width) return;
-      rendered.set(canvas, width);
-      const page = await doc.getPage(Number(canvas.dataset.page));
+    async function render(pageEl: HTMLElement) {
+      const width = pageEl.clientWidth;
+      if (!width || rendered.get(pageEl) === width) return;
+      rendered.set(pageEl, width);
+      const page = await doc.getPage(Number(pageEl.dataset.page));
       const unscaled = page.getViewport({ scale: 1 });
+      const cssScale = width / unscaled.width;
+      // The form layer sizes itself from this variable, so a resize only needs a new canvas.
+      pageEl.style.setProperty('--total-scale-factor', String(cssScale));
+      pageEl.style.aspectRatio = `${unscaled.width} / ${unscaled.height}`;
+
+      const canvas = pageEl.querySelector('canvas')!;
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
-      const viewport = page.getViewport({ scale: (width / unscaled.width) * dpr });
+      const viewport = page.getViewport({ scale: cssScale * dpr });
       canvas.width = Math.floor(viewport.width);
       canvas.height = Math.floor(viewport.height);
-      canvas.style.aspectRatio = `${unscaled.width} / ${unscaled.height}`;
-      await page.render({ canvas, canvasContext: canvas.getContext('2d')!, viewport }).promise;
+      await page.render({
+        canvas,
+        canvasContext: canvas.getContext('2d')!,
+        viewport,
+        // With forms, fields are drawn as real inputs on top instead of into the canvas.
+        annotationMode: hasForm ? pdfjs.AnnotationMode.ENABLE_FORMS : pdfjs.AnnotationMode.ENABLE,
+      }).promise;
+
+      if (hasForm && !pageEl.querySelector('.annotationLayer')) {
+        const annotations = await page.getAnnotations({ intent: 'display' });
+        if (!annotations.some((a) => a.subtype === 'Widget')) return;
+        const div = document.createElement('div');
+        div.className = 'annotationLayer';
+        pageEl.append(div);
+        const layerViewport = page.getViewport({ scale: 1 });
+        const layer = new pdfjs.AnnotationLayer({
+          div,
+          page,
+          viewport: layerViewport,
+          linkService,
+          annotationStorage: doc.annotationStorage,
+          accessibilityManager: null,
+          annotationCanvasMap: null,
+          annotationEditorUIManager: null,
+          structTreeLayer: null,
+          commentManager: null,
+        });
+        await layer.render({
+          div,
+          page,
+          viewport: layerViewport,
+          annotations,
+          linkService: linkService as never,
+          annotationStorage: doc.annotationStorage,
+          renderForms: true,
+        });
+      }
     }
 
     let resizeTimer: number | undefined;
     addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(() => {
-        for (const canvas of pagesEl.querySelectorAll('canvas')) {
-          const r = canvas.getBoundingClientRect();
-          if (r.bottom > -800 && r.top < innerHeight + 800) render(canvas);
-          else rendered.delete(canvas);
+        for (const pageEl of pagesEl.querySelectorAll<HTMLElement>('.page')) {
+          const r = pageEl.getBoundingClientRect();
+          if (r.bottom > -800 && r.top < innerHeight + 800) render(pageEl);
+          else rendered.delete(pageEl);
         }
       }, 200);
+    });
+  }
+
+  // Fillable PDF: typed answers stay in memory; the download button saves them into a new file.
+  function setUpFilling(doc: pdfjs.PDFDocumentProxy) {
+    let unsaved = false;
+    let saving = false;
+    $('fill-hint').hidden = false;
+    downloadBtn.textContent = t.pdfDownloadFilled;
+    doc.annotationStorage.onSetModified = () => (unsaved = true);
+
+    addEventListener('beforeunload', (e) => {
+      if (unsaved) e.preventDefault();
+    });
+
+    downloadBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (saving) return;
+      saving = true;
+      downloadBtn.textContent = t.pdfSaving;
+      try {
+        const bytes = await doc.saveDocument();
+        const blobUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `${file.split('/').pop()!.replace(/\.pdf$/i, '')}-taidetud.pdf`;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+        unsaved = false;
+      } catch (err) {
+        console.error(err);
+        alert(t.pdfError);
+      } finally {
+        saving = false;
+        downloadBtn.textContent = t.pdfDownloadFilled;
+      }
     });
   }
 
@@ -118,7 +215,7 @@ import { t } from '../lib/labels';
 <style>
   .toolbar {
     position: sticky;
-    top: 0;
+    top: 60px; /* just below the sticky site header */
     z-index: 1;
     display: flex;
     align-items: center;
@@ -154,13 +251,64 @@ import { t } from '../lib/labels';
     white-space: nowrap;
   }
   .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .fill-hint {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    background: var(--accent-soft);
+  }
   .pages { display: flex; flex-direction: column; gap: 12px; }
-  .pages :global(canvas) {
-    display: block;
-    width: 100%;
+  .pages :global(.page) {
+    position: relative;
+    /* pdf.js gives every form field its own z-index; keep them inside the page, under the sticky header. */
+    isolation: isolate;
+    --scale-round-x: 1px;
+    --scale-round-y: 1px;
     background: #fff;
     border-radius: 4px;
     box-shadow: 0 1px 3px rgb(17 45 78 / 0.18);
+  }
+  .pages :global(canvas) {
+    display: block;
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  /* Minimal pdf.js form layer styles (the parts of pdf_viewer.css that text fields need). */
+  .pages :global(.annotationLayer) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    transform-origin: 0 0;
+    color-scheme: only light;
+  }
+  .pages :global(.annotationLayer section) {
+    position: absolute;
+    box-sizing: border-box;
+    pointer-events: auto;
+    transform-origin: 0 0;
+  }
+  .pages :global(.textWidgetAnnotation :is(input, textarea)) {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 4px;
+    border: 2px solid transparent;
+    border-radius: 2px;
+    background: rgb(63 114 175 / 0.1);
+    color: #000;
+    font: calc(9px * var(--total-scale-factor)) sans-serif;
+    vertical-align: top;
+  }
+  .pages :global(.textWidgetAnnotation textarea) { resize: none; }
+  .pages :global(.textWidgetAnnotation :is(input, textarea):hover) { border-color: #3f72af; }
+  .pages :global(.textWidgetAnnotation :is(input, textarea):focus) {
+    border-color: #3f72af;
+    outline: none;
+    background: #fff;
   }
   @media (max-width: 520px) {
     #open { display: none; }
