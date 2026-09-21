@@ -1,0 +1,245 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-size-quiz>
+  <div class="game-label">{label || t.sizeQuiz.title}</div>
+  <div class="box">
+    <div class="top">
+      <p class="question" data-question></p>
+      <span class="progress" data-progress></span>
+    </div>
+    <div class="cards" data-cards></div>
+    <p class="feedback" data-feedback aria-live="polite"></p>
+    <p class="why" data-why hidden></p>
+    <button type="button" class="btn" data-next hidden>{t.sizeQuiz.next}</button>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  interface Option {
+    name: string;
+    size: string;
+  }
+  interface Round {
+    question: string;
+    options: [Option, Option];
+    bigger: 0 | 1;
+    why: string;
+  }
+
+  const rounds: Round[] = [
+    {
+      question: 'Kumb võtab rohkem baite?',
+      options: [
+        { name: 'sõna „oun“', size: '3 baiti' },
+        { name: 'sõna „õun“', size: '4 baiti' },
+      ],
+      bigger: 1,
+      why: 'Mõlemas on kolm märki, aga õ võtab UTF-8-s kaks baiti. Märk ja bait ei ole sama asi!',
+    },
+    {
+      question: 'Kumb mahutab rohkem erinevaid väärtusi?',
+      options: [
+        { name: '7 bitti, nagu ASCII-s', size: '128 väärtust' },
+        { name: '1 bait', size: '256 väärtust' },
+      ],
+      bigger: 1,
+      why: 'Iga lisabitt kahekordistab väärtuste arvu: 8 bitti annab 2 · 128 = 256.',
+    },
+    {
+      question: 'Kumb arv on suurem?',
+      options: [
+        { name: 'suurim arv, mis mahub ühte baiti', size: '255' },
+        { name: 'suurim kolmekohaline kümnendarv', size: '999' },
+      ],
+      bigger: 1,
+      why: 'Bait on 8 bitti ehk 256 väärtust, 0 kuni 255. Just see piir tegi Pac-Mani 256. taseme katki.',
+    },
+    {
+      question: 'Kumb fail on suurem?',
+      options: [
+        { name: 'raamat, 500 lehekülge teksti', size: 'umbes 1 MB' },
+        { name: 'üks telefonifoto', size: 'umbes 3 MB' },
+      ],
+      bigger: 1,
+      why: 'Raamatus on umbes miljon märki ehk umbes miljon baiti. Foto on isegi pakituna suurem.',
+    },
+    {
+      question: 'Kumb on suurem?',
+      options: [
+        { name: '12 MP foto pakkimata', size: '36 MB' },
+        { name: 'sama foto JPEG-ina', size: 'umbes 3 MB' },
+      ],
+      bigger: 0,
+      why: '12 miljonit pikslit, igaühes 3 baiti nagu värvikoodis: 36 MB. JPEG viskab ära detailid, mida silm ei märka.',
+    },
+    {
+      question: 'Kumb on suurem?',
+      options: [
+        { name: 'tund täis-HD videot pakkimata', size: 'umbes 670 GB' },
+        { name: '1 TB kõvaketas', size: '1000 GB' },
+      ],
+      bigger: 1,
+      why: 'Üks kaader on 1920 × 1080 × 3 baiti ehk umbes 6 MB ja sekundis on 30 kaadrit. Poolteist tundi pakkimata videot täidaks terve ketta.',
+    },
+    {
+      question: 'Kumb on suurem?',
+      options: [
+        { name: 'tund HD-videot voogedastuses', size: 'umbes 3 GB' },
+        { name: 'tund täis-HD videot pakkimata', size: 'umbes 670 GB' },
+      ],
+      bigger: 1,
+      why: 'Pakkimine teeb videost üle kahesaja korra väiksema. Ilma selleta ei töötaks ükski videoteenus.',
+    },
+  ];
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+    const questionEl = $('question');
+    const progressEl = $('progress');
+    const cardsEl = $('cards');
+    const feedbackEl = $('feedback');
+    const whyEl = $('why');
+    const nextBtn = $<HTMLButtonElement>('next');
+
+    let index = 0;
+    let score = 0;
+    let answered = false;
+
+    function load() {
+      const round = rounds[index];
+      answered = false;
+      questionEl.textContent = round.question;
+      progressEl.textContent = t.sizeQuiz.progress(index + 1, rounds.length);
+      feedbackEl.textContent = '';
+      feedbackEl.className = 'feedback';
+      whyEl.hidden = true;
+      nextBtn.hidden = true;
+      cardsEl.innerHTML = '';
+      round.options.forEach((option, i) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'card';
+        const name = document.createElement('span');
+        name.className = 'name';
+        name.textContent = option.name;
+        const size = document.createElement('span');
+        size.className = 'size';
+        size.textContent = option.size;
+        size.hidden = true;
+        card.append(name, size);
+        card.addEventListener('click', () => choose(i));
+        cardsEl.append(card);
+      });
+    }
+
+    function choose(i: number) {
+      if (answered) return;
+      answered = true;
+      const round = rounds[index];
+      const right = i === round.bigger;
+      if (right) score++;
+      [...cardsEl.children].forEach((card, j) => {
+        card.querySelector<HTMLElement>('.size')!.hidden = false;
+        card.classList.add(j === round.bigger ? 'bigger' : 'smaller');
+        if (j === i) card.classList.add('picked');
+      });
+      feedbackEl.textContent = right ? t.sizeQuiz.correct : t.sizeQuiz.wrong;
+      feedbackEl.className = `feedback ${right ? 'ok' : 'bad'}`;
+      whyEl.textContent = round.why;
+      whyEl.hidden = false;
+      const last = index === rounds.length - 1;
+      nextBtn.textContent = last ? t.sizeQuiz.results : t.sizeQuiz.next;
+      nextBtn.hidden = false;
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (index < rounds.length - 1) {
+        index++;
+        return load();
+      }
+      questionEl.textContent = t.sizeQuiz.final(score, rounds.length);
+      progressEl.textContent = '';
+      cardsEl.innerHTML = '';
+      feedbackEl.textContent = '';
+      whyEl.hidden = true;
+      nextBtn.textContent = t.sizeQuiz.restart;
+      index = rounds.length;
+      nextBtn.onclick = () => {
+        nextBtn.onclick = null;
+        index = 0;
+        score = 0;
+        load();
+      };
+    });
+
+    load();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-size-quiz]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .top { display: flex; align-items: baseline; gap: 12px; }
+  .question { flex: 1; margin: 0 0 12px; font-size: 1.1rem; font-weight: 600; }
+  .progress { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cards :global(.card) {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+    min-height: 96px;
+    padding: 14px;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+  }
+  .cards :global(.card:hover) { border-color: var(--accent); }
+  .cards :global(.name) { font-weight: 600; }
+  .cards :global(.size) { font: 700 1.1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--accent); }
+  .cards :global(.card.bigger) { border-color: #2e8b57; background: rgb(46 139 87 / 0.1); }
+  .cards :global(.card.smaller) { opacity: 0.75; }
+  .cards :global(.card.picked.smaller) { border-color: #c0392b; }
+  .feedback { margin: 10px 0 0; min-height: 1.4em; font-weight: 600; }
+  .feedback.ok { color: #2e8b57; }
+  .feedback.bad { color: #c0392b; }
+  .why { margin: 4px 0 10px; padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); }
+  .btn {
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+    .cards { grid-template-columns: 1fr; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+    .feedback.bad { color: #ff8a80; }
+  }
+</style>

@@ -99,6 +99,34 @@ posts:
         url: "https://en.wikipedia.org/wiki/Hexspeak"
         label: "Hexspeak: sõnad, mis on peidetud 16-süsteemi arvudesse (inglise keeles)"
 
+  - title: "3. tund: tekst ja failimahud"
+    course: 10it
+    date: 2026-09-22
+    text: "Arvutis ei ole tähti ega pilte, on ainult arvud ja kokkulepe selle kohta, mida need tähendavad. Esimeses pooles vaatame, kuidas tähest saab arv ja miks õ vanasti ära ei mahtunud, teises pooles, kui suur on raamat, foto või video. Ja harjutame kontrolltööks.\nKodutöö: kordamine KT1-ks. Ava PDF nupuga „Vaata“, täida lahtrid otse veebis, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 29.09."
+    items:
+      - type: pdf
+        file: "tekst-ja-failimahud-konspekt.pdf"
+        label: "Konspekt: tekst ja failimahud"
+      - type: game
+        game: text
+      - type: video
+        url: "https://www.youtube.com/watch?v=MijmeoH9LT4"
+        label: "Lisavideo: Unicode'i ime, kuidas kõik maailma tähed arvutisse said (inglise keeles)"
+      - type: game
+        game: sizes
+      - type: pdf
+        file: "tunnileht-kt1-harjutused.pdf"
+        label: "Tunnileht: KT1 tüüpi segaharjutused"
+      - type: link
+        url: "https://et.wikipedia.org/wiki/Unicode"
+        label: "Unicode (Vikipeedia)"
+      - type: link
+        url: "https://et.wikipedia.org/wiki/Bait"
+        label: "Bait (Vikipeedia)"
+      - type: pdf
+        file: "kodutoo-kt1-kordamine.pdf"
+        label: "Kodutöö: kordamine KT1-ks (täida veebis ja saada: mtsopo@taltech.ee)"
+
   - title: "Esimene tund: HTML-i alused"
     course: 11it
     date: 2026-09-08

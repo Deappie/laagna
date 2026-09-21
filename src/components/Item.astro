@@ -6,6 +6,8 @@ import BinaryGame from './BinaryGame.astro';
 import CodeGame from './CodeGame.astro';
 import HexGame from './HexGame.astro';
 import EscapeGame from './EscapeGame.astro';
+import TextLab from './TextLab.astro';
+import SizeQuiz from './SizeQuiz.astro';
 
 interface Props {
   item: Item;
@@ -43,6 +45,10 @@ const icons: Record<Item['type'], string> = {
         <BinaryGame label={item.label} />
       ) : item.game === 'hex' ? (
         <HexGame label={item.label} />
+      ) : item.game === 'text' ? (
+        <TextLab label={item.label} />
+      ) : item.game === 'sizes' ? (
+        <SizeQuiz label={item.label} />
       ) : item.game === 'escape' || item.game === 'escape-web' || item.game === 'escape-js' ? (
         <EscapeGame
           room={item.game === 'escape' ? 'hex' : item.game === 'escape-web' ? 'web' : 'js'}

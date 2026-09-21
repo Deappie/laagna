@@ -1,0 +1,215 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-text-lab>
+  <div class="game-label">{label || t.textLab.title}</div>
+  <div class="box">
+    <p class="task">{t.textLab.intro}</p>
+    <input class="text-input" data-input maxlength="40" value="õun" aria-label={t.textLab.inputLabel} />
+    <p class="summary" data-summary></p>
+    <div class="table-wrap">
+      <table class="chars">
+        <thead>
+          <tr>
+            <th>{t.textLab.colChar}</th>
+            <th>{t.textLab.colCode}</th>
+            <th>{t.textLab.colAscii}</th>
+            <th>{t.textLab.colBytes}</th>
+          </tr>
+        </thead>
+        <tbody data-rows></tbody>
+      </table>
+    </div>
+    <p class="garbled" data-garbled></p>
+
+    <hr />
+
+    <p class="task">{t.textLab.decodeTitle}</p>
+    <p class="hint">{t.textLab.decodeHint}</p>
+    <div class="screen" data-codes></div>
+    <form class="answer-row" data-form>
+      <input data-answer autocomplete="off" spellcheck="false" aria-label={t.textLab.answer} placeholder={t.textLab.answer} />
+      <button type="submit" class="btn">{t.textLab.check}</button>
+    </form>
+    <p class="feedback" data-feedback aria-live="polite"></p>
+    <button type="button" class="btn" data-next hidden>{t.textLab.next}</button>
+    <div class="ascii" data-ascii></div>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  const secrets = ['Hei', 'TERE', 'Kool', 'Mina olen'];
+  const encoder = new TextEncoder();
+  const oldComputer = new TextDecoder('windows-1252');
+  const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+    const input = $<HTMLInputElement>('input');
+    const rowsEl = $('rows');
+    const summaryEl = $('summary');
+    const garbledEl = $('garbled');
+    const codesEl = $('codes');
+    const form = $<HTMLFormElement>('form');
+    const answer = $<HTMLInputElement>('answer');
+    const feedback = $('feedback');
+    const nextBtn = $<HTMLButtonElement>('next');
+
+    // Part 1: every character with its number, ASCII bits and UTF-8 bytes.
+    function draw() {
+      const chars = Array.from(input.value);
+      let bytesTotal = 0;
+      rowsEl.innerHTML = chars
+        .map((ch) => {
+          const code = ch.codePointAt(0)!;
+          const bytes = [...encoder.encode(ch)];
+          bytesTotal += bytes.length;
+          const bits = code < 128 ? code.toString(2).padStart(8, '0') : t.textLab.notAscii;
+          const hex = bytes.map((b) => b.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+          return `<tr><td class="ch">${ch === ' ' ? '␣' : escape(ch)}</td><td>${code}</td><td class="mono${code < 128 ? '' : ' muted'}">${bits}</td><td class="mono">${hex} <span class="muted">(${bytes.length})</span></td></tr>`;
+        })
+        .join('');
+      summaryEl.textContent = t.textLab.summary(chars.length, bytesTotal);
+      const garbled = oldComputer.decode(encoder.encode(input.value));
+      garbledEl.textContent = garbled !== input.value ? t.textLab.garbled(garbled) : t.textLab.notGarbled;
+    }
+    input.addEventListener('input', draw);
+    draw();
+
+    // Part 2: decode secret messages written as ASCII codes.
+    $('ascii').innerHTML =
+      `<span><b>␣</b>32</span>` +
+      [65, 97]
+        .flatMap((start) => Array.from({ length: 26 }, (_, i) => start + i))
+        .map((c) => `<span><b>${String.fromCharCode(c)}</b>${c}</span>`)
+        .join('');
+
+    let round = 0;
+    let solved = false;
+    function load() {
+      solved = false;
+      const word = secrets[round];
+      codesEl.textContent = Array.from(word, (ch) => ch.charCodeAt(0)).join(' ');
+      answer.value = '';
+      answer.disabled = false;
+      feedback.textContent = '';
+      feedback.className = 'feedback';
+      nextBtn.hidden = true;
+    }
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (solved) return;
+      const guess = answer.value.trim();
+      const word = secrets[round];
+      if (guess === word) {
+        solved = true;
+        answer.disabled = true;
+        feedback.textContent = round === secrets.length - 1 ? t.textLab.allDone : t.textLab.correct;
+        feedback.className = 'feedback ok';
+        nextBtn.textContent = round === secrets.length - 1 ? t.textLab.restart : t.textLab.next;
+        nextBtn.hidden = false;
+      } else {
+        feedback.textContent = guess.toLowerCase() === word.toLowerCase() ? t.textLab.wrongCase : t.textLab.wrong;
+        feedback.className = 'feedback bad';
+      }
+    });
+    nextBtn.addEventListener('click', () => {
+      round = (round + 1) % secrets.length;
+      load();
+    });
+    load();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-text-lab]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .task { margin: 0 0 10px; font-size: 1.05rem; font-weight: 550; }
+  .hint { margin: 0 0 10px; color: var(--muted); font-size: 0.9rem; }
+  .text-input,
+  .answer-row input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 600 1.1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .summary { margin: 10px 0 8px; font-weight: 650; }
+  .table-wrap { overflow-x: auto; }
+  .chars { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  .chars th,
+  .chars :global(td) { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+  .chars th { color: var(--muted); font-size: 0.8rem; font-weight: 600; }
+  .chars :global(.ch) { font-size: 1.2rem; font-weight: 700; }
+  .chars :global(.mono) { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; }
+  .chars :global(.muted) { color: var(--muted); }
+  .garbled { margin: 10px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--accent-soft); }
+  hr { margin: 18px 0 14px; border: 0; border-top: 1px solid var(--line); }
+  .screen {
+    margin-bottom: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #0d1117;
+    color: #3fb950;
+    font: 700 1.4rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .answer-row { display: flex; gap: 8px; }
+  .answer-row input { flex: 1; min-width: 0; font-size: 1rem; }
+  .btn {
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  [data-next] { margin-top: 6px; }
+  .feedback { margin: 8px 0 0; min-height: 1.4em; font-weight: 550; }
+  .feedback.ok { color: #2e8b57; }
+  .feedback.bad { color: #c0392b; }
+  .ascii {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+    gap: 4px;
+    margin-top: 12px;
+    font: 0.85rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .ascii :global(span) {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+    .chars { font-size: 0.85rem; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+    .feedback.bad { color: #ff8a80; }
+  }
+</style>
