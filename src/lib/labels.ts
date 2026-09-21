@@ -28,7 +28,10 @@ export const t = {
     title: {
       html: 'Harjutus: pane HTML kokku',
       css: 'Harjutus: pane CSS kokku',
+      js: 'Harjutus: JavaScript',
     },
+    python: 'Sama Pythonis:',
+    javascript: 'JavaScriptis:',
     hint: 'Klõpsa sõnal või lohista see lünka. Täidetud lüngal klõpsates saad sõna tagasi.',
     preview: 'Nii peaks tulemus välja nägema:',
     progress: (i: number, n: number) => `Ülesanne ${i}/${n}`,
@@ -61,6 +64,15 @@ export const t = {
         finishTitle: 'Leht on päästetud! 🎉',
         finishFact:
           'Ja veel üks fakt: vajuta mistahes veebilehel F12 (Macis Cmd+Option+I) ja näed selle lehe HTML-i ja CSS-i. Nii on paljud veebiarendajad teiste lehtede pealt õppinud.',
+      },
+      js: {
+        title: 'Põgenemistuba: mida konsool vastab?',
+        story:
+          'Arvutiklassi uks on lukus ja võti on peidetud arvutisse, mille ekraanil on seitse koodijuppi. Iga lukk avaneb, kui ütled täpselt, mida konsool vastaks. Koodi käivitada ei tohi, pead selle ise peas läbi mängima. Kell hakkab tiksuma kohe, kui alustad.',
+        last: 'Ava klass',
+        finishTitle: 'Klass on lahti! 🎉',
+        finishFact:
+          'Nüüd kontrolli ennast: kopeeri mõni koodijupp päris konsooli ja vaata, kas arvasid õigesti. Nii õpivad programmeerijad iga päev: loevad koodi, ennustavad ja siis kontrollivad.',
       },
     },
     begin: 'Alusta',

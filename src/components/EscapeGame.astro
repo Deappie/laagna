@@ -2,7 +2,7 @@
 import { t } from '../lib/labels';
 
 interface Props {
-  room: 'hex' | 'web';
+  room: 'hex' | 'web' | 'js';
   label?: string;
 }
 
@@ -209,7 +209,70 @@ const text = t.escapeGame.rooms[room];
     ],
   };
 
-  const rooms: Record<string, Room> = { hex, web };
+  const js: Room = {
+    // Console output answers: ignore case, spaces and quote marks.
+    normalize: (s) => s.toLowerCase().replace(/\s+/g, '').replace(/["'`]/g, ''),
+    levels: [
+      {
+        title: 'Soojendus',
+        question: 'Arvuti ekraanil on kood. Mida kirjutab konsool?',
+        visual: code('let x = 5;\nx = x + 3;\nconsole.log(x);'),
+        answers: ['8'],
+        hint: 'Alguses on x väärtus 5. Teine rida võtab x-i väärtuse, liidab 3 ja paneb tulemuse tagasi x-i.',
+        fact: 'JavaScripti kirjutas Brendan Eich 1995. aastal firmas Netscape kõigest kümne päevaga. Mõned tollase kiirustamise jäljed on keeles tänaseni.',
+      },
+      {
+        title: 'Tekst või arv?',
+        question: 'Mida kirjutab konsool?',
+        visual: code('console.log("5" + 3);'),
+        answers: ['53'],
+        hint: 'Jutumärkides 5 on tekst. Kui üks pool on tekst, paneb pluss tekstid lihtsalt kokku.',
+        fact: 'Nimi JavaScript on pigem turundus: 1995. aastal oli Java väga populaarne. Tegelikult on Java ja JavaScript täiesti erinevad keeled, umbes nagu kass ja kassett.',
+      },
+      {
+        title: 'Uksehoidja',
+        question: 'Uksehoidja programm otsustab, keda sisse lasta. Mida kirjutab konsool?',
+        visual: code('const vanus = 15;\n\nif (vanus >= 18) {\n  console.log("sisse");\n} else {\n  console.log("stopp");\n}'),
+        answers: ['stopp'],
+        hint: '15 ei ole suurem ega võrdne 18-ga, nii et tingimus on väär ja käivitub else-osa.',
+        fact: 'Kuulus JavaScripti viga: typeof null annab vastuseks "object", kuigi null ei ole objekt. Viga on keeles olnud esimesest versioonist peale ja seda ei parandata, sest see lõhuks hulga vanu veebilehti.',
+      },
+      {
+        title: 'Ostunimekiri',
+        question: 'Mida kirjutab konsool?',
+        visual: code('const poed = ["leib", "piim", "juust"];\nconsole.log(poed[1]);'),
+        answers: ['piim'],
+        hint: 'Lugemist alustatakse nullist: poed[0] on leib.',
+        fact: 'Miks lugemist alustatakse nullist? Hollandi arvutiteadlane Edsger Dijkstra kirjutas 1982. aastal lausa eraldi kirjatüki, miks nullist lugemine on loogilisem. Nii teevad ka Python ja JavaScript.',
+      },
+      {
+        title: 'Retsept',
+        question: 'Mida kirjutab konsool?',
+        visual: code('function kolmekordne(n) {\n  return n * 3;\n}\n\nconsole.log(kolmekordne(4) + 1);'),
+        answers: ['13'],
+        hint: 'Kõigepealt arvuta kolmekordne(4), siis liida sellele 1.',
+        fact: 'Proovi konsoolis 0.1 + 0.2. Vastus on 0.30000000000000004! Arvuti hoiab murdarve kahendsüsteemis ja kõiki kümnendmurde ei saa seal täpselt kirja panna. Sama juhtub peaaegu kõigis programmeerimiskeeltes.',
+      },
+      {
+        title: 'Kokkuliitja',
+        question: 'Mida kirjutab konsool?',
+        visual: code('let summa = 0;\n\nfor (const x of [1, 2, 3, 4]) {\n  summa = summa + x;\n}\n\nconsole.log(summa);'),
+        answers: ['10'],
+        hint: 'Tsükkel liidab summale järjest 1, 2, 3 ja 4.',
+        fact: 'console.log-i tegi populaarseks brauserilaiendus Firebug 2006. aastal. Enne seda otsisid arendajad vigu hüpikakendega, mida tuli iga kord kinni klõpsata.',
+      },
+      {
+        title: 'Viimane uks',
+        question: 'Viimane lukk tahab terve lause täpselt sellisena, nagu konsool selle kirjutab.',
+        visual: code('const kass = { nimi: "Miisu", vanus: 3 };\n\nconsole.log(`${kass.nimi} on ${kass.vanus + 1}-aastane`);'),
+        answers: ['Miisu on 4-aastane', 'Miisu on 4 aastane'],
+        hint: 'Loe objektist nimi ja vanus. ${ } sees tehakse arvutus enne, kui tulemus teksti sisse pannakse.',
+        fact: 'JavaScript ei ela ammu enam ainult brauseris. Node.js viis selle 2009. aastal serveritesse ja JavaScripti ning TypeScriptiga tehakse ka arvutiprogramme. Näiteks VS Code, milles sa koodi kirjutad, ongi nendega tehtud.',
+      },
+    ],
+  };
+
+  const rooms: Record<string, Room> = { hex, web, js };
 
   const clock = (sec: number) =>
     `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
@@ -306,7 +369,7 @@ const text = t.escapeGame.rooms[room];
       feedbackEl.className = 'feedback ok';
       factText.textContent = levels[index].fact;
       factEl.hidden = false;
-      nextBtn.textContent = index === levels.length - 1 ? t.escapeGame.rooms[roomName as 'hex' | 'web'].last : t.escapeGame.next;
+      nextBtn.textContent = index === levels.length - 1 ? t.escapeGame.rooms[roomName as keyof typeof t.escapeGame.rooms].last : t.escapeGame.next;
       nextBtn.hidden = false;
       drawLocks();
     });

@@ -2,7 +2,7 @@
 import { t } from '../lib/labels';
 
 interface Props {
-  game: 'html' | 'css';
+  game: 'html' | 'css' | 'js';
   label?: string;
 }
 
@@ -21,6 +21,11 @@ const { game, label } = Astro.props;
       <div class="preview-label">{t.codeGame.preview}</div>
       <iframe data-frame sandbox="" title={t.codeGame.preview}></iframe>
     </div>
+    <div class="python" data-python hidden>
+      <div class="preview-label">{t.codeGame.python}</div>
+      <pre class="code" data-python-code></pre>
+      <div class="preview-label">{t.codeGame.javascript}</div>
+    </div>
     <pre class="code" data-code></pre>
     <div class="bank" data-bank></div>
     <div class="controls">
@@ -35,11 +40,13 @@ const { game, label } = Astro.props;
 
   // Words in [[double brackets]] become gaps. `extra` adds wrong answers to the word bank.
   // `preview` is optional HTML showing what the finished code should look like.
+  // `python` is optional: the same code in Python, shown above the JavaScript.
   interface Task {
     title: string;
     code: string;
     extra: string[];
     preview?: string;
+    python?: string;
   }
 
   const games: Record<string, Task[]> = {
@@ -139,6 +146,89 @@ p {
         extra: ['style', 'src'],
       },
     ],
+    js: [
+      {
+        title: 'Muutujad: nimi ei muutu, vanus muutub.',
+        python: 'nimi = "Mari"\nvanus = 17\nvanus = vanus + 1',
+        code: `[[const]] nimi = "Mari";
+[[let]] vanus = 17;
+vanus = vanus + 1;`,
+        extra: ['def', 'int'],
+      },
+      {
+        title: 'Tingimuslause',
+        python: 'if vanus >= 18:\n    print("Täisealine")\nelse:\n    print("Alaealine")',
+        code: `if (vanus >= 18) [[{]]
+  console.[[log]]("Täisealine");
+} [[else]] {
+  console.log("Alaealine");
+}`,
+        extra: ['elif', 'print', ':'],
+      },
+      {
+        title: 'Võrdlemine: JavaScriptis kasuta ranget võrdlust.',
+        python: 'if vastus == 42:\n    print("Õige!")',
+        code: `if (vastus [[===]] 42) {
+  console.log("Õige!");
+}`,
+        extra: ['=', '=='],
+      },
+      {
+        title: 'Tsükkel',
+        python: 'for i in range(3):\n    print(i)',
+        code: `for ([[let]] i = 0; i < [[3]]; [[i++]]) {
+  console.log(i);
+}`,
+        extra: ['range', 'const'],
+      },
+      {
+        title: 'Funktsioon',
+        python: 'def liida(a, b):\n    return a + b',
+        code: `[[function]] liida(a, b) {
+  [[return]] a + b;
+}`,
+        extra: ['def', 'print'],
+      },
+      {
+        title: 'Massiiv: lisa nimekirja ja käi see läbi.',
+        python: 'poed = ["leib", "piim"]\npoed.append("juust")\nprint(len(poed))\n\nfor asi in poed:\n    print(asi)',
+        code: `const poed = ["leib", "piim"];
+poed.[[push]]("juust");
+console.log(poed.[[length]]);   // 3
+
+for ([[const]] asi [[of]] poed) {
+  console.log(asi);
+}`,
+        extra: ['append', 'len', 'in'],
+      },
+      {
+        title: 'DOM: leia pealkiri ja muuda selle teksti.',
+        code: `const pealkiri = document.[[querySelector]]("#pealkiri");
+pealkiri.[[textContent]] = "Tere, JavaScript!";`,
+        extra: ['print', 'select'],
+      },
+      {
+        title: 'Sündmus: loenda nupuvajutusi.',
+        code: `const nupp = document.querySelector("button");
+let klikke = 0;
+
+nupp.[[addEventListener]]("[[click]]", () => {
+  klikke++;
+  nupp.textContent = klikke;
+});`,
+        extra: ['onClick', 'hover'],
+      },
+      {
+        title: 'Vorm: lisa loendisse uus rida ilma lehte uuesti laadimata.',
+        code: `vorm.addEventListener("submit", (event) => {
+  event.[[preventDefault]]();
+  const rida = document.[[createElement]]("li");
+  rida.textContent = sisend.[[value]];
+  loend.append(rida);
+});`,
+        extra: ['reload', 'print', 'text'],
+      },
+    ],
   };
 
   function shuffle<T>(list: T[]): T[] {
@@ -155,6 +245,8 @@ p {
     const progressEl = $('progress');
     const previewEl = $('preview');
     const frameEl = $<HTMLIFrameElement>('frame');
+    const pythonEl = $('python');
+    const pythonCodeEl = $('python-code');
     const codeEl = $('code');
     const bankEl = $('bank');
     const checkBtn = $<HTMLButtonElement>('check');
@@ -201,6 +293,8 @@ p {
       taskEl.textContent = task.title;
       progressEl.textContent = t.codeGame.progress(index + 1, tasks.length);
       checkBtn.textContent = t.codeGame.check;
+      pythonEl.hidden = !task.python;
+      pythonCodeEl.textContent = task.python ?? '';
       previewEl.hidden = !task.preview;
       frameEl.srcdoc = task.preview
         ? `<!doctype html><meta charset="utf-8"><body style="margin:10px;font-family:system-ui,sans-serif">${task.preview}`
@@ -293,6 +387,7 @@ p {
   .progress { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
   .hint { margin: 4px 0 12px; color: var(--muted); font-size: 0.9rem; }
   .preview { margin-bottom: 12px; }
+  .python .code { opacity: 0.8; }
   .preview-label { color: var(--muted); font-size: 0.85rem; margin-bottom: 4px; }
   .preview iframe {
     display: block;

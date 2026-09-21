@@ -182,3 +182,71 @@ posts:
       - type: file
         file: "kodutoo-minu-koduleht.zip"
         label: "Kodutöö lähtefailid (index.html ja stiil.css)"
+
+  - title: "Kolmas tund: JavaScript ja DOM"
+    course: 11it
+    date: 2026-09-22
+    text: "JavaScript on ainus programmeerimiskeel, mida brauser ise käivitab, ja just see paneb veebilehe midagi tegema. Alustame päris algusest: esimeses tunnis muutujad, tingimused, funktsioonid ja nimekirjad, teises paneme lehe nupuvajutustele reageerima. Hiljem läheme edasi Reacti juurde, aga ka see põhineb täpselt nendel asjadel.\nTunnis teeme tunniülesandeid ja alustame ülesannete nimekirja rakendusega, mida jätkame järgmisel nädalal. Kui oled varem valmis, proovi põgenemistuba!"
+    items:
+      - type: pdf
+        file: "javascript-konspekt.pdf"
+        label: "Konspekt: JavaScript algajale"
+      - type: pdf
+        file: "tunniulesanded-javascript.pdf"
+        label: "Tunniülesanded (1. ja 2. tund)"
+      - type: file
+        file: "tunnitoo-ulesanded.zip"
+        label: "Tunnitöö lähtefailid: ülesannete nimekiri"
+      - type: video
+        url: "https://www.youtube.com/watch?v=DHjqpvDnNGE"
+        label: "JavaScript 100 sekundiga (inglise keeles)"
+      - type: game
+        game: js
+      - type: game
+        game: escape-js
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_is_JavaScript"
+        label: "MDN: mis on JavaScript? (inglise keeles)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/DOM_scripting"
+        label: "MDN: lehe muutmine DOM-i kaudu (inglise keeles)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Events"
+        label: "MDN: sündmused (inglise keeles)"
+
+  - title: "Neljas tund: andmed API-st ja teekond Reacti poole"
+    course: 11it
+    date: 2026-09-29
+    draft: true
+    text: "Kuidas leht saab andmed serverist, mis on TypeScript ja miks puhtast JavaScriptist ühel hetkel enam ei piisa. Jätkame eelmise nädala ülesannete nimekirjaga, nii et hoia see alles.\nKodutöö: maagiline kaheksapall. Laadi alla üks HTML-fail, tee see juhendi järgi valmis ja saada fail aadressile mtsopo@taltech.ee enne 6.10."
+    items:
+      - type: pdf
+        file: "api-typescript-konspekt.pdf"
+        label: "Konspekt: andmed API-st ja TypeScript"
+      - type: video
+        url: "https://www.youtube.com/watch?v=zQnBQ4tB3ZA"
+        label: "TypeScript 100 sekundiga (inglise keeles)"
+      - type: link
+        url: "https://www.typescriptlang.org/play/"
+        label: "TypeScript Playground: proovi TypeScripti brauseris"
+      - type: link
+        url: "https://pokeapi.co/api/v2/pokemon/pikachu"
+        label: "Ava see link: nii näevad välja andmed API-st (JSON)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Network_requests"
+        label: "MDN: andmete pärimine fetch-iga (inglise keeles)"
+      - type: link
+        url: "https://jsonplaceholder.typicode.com/todos"
+        label: "Harjutamiseks: JSONPlaceholderi ülesannete API"
+      - type: video
+        url: "https://www.youtube.com/watch?v=Tn6-PIqc4UM"
+        label: "React 100 sekundiga (inglise keeles)"
+      - type: link
+        url: "https://react.dev/learn"
+        label: "React: mis meid ees ootab (inglise keeles)"
+      - type: pdf
+        file: "kodutoo-kaheksapall-juhend.pdf"
+        label: "Kodutöö juhend: maagiline kaheksapall"
+      - type: file
+        file: "kodutoo-kaheksapall.html"
+        label: "Kodutöö fail: maagiline kaheksapall (üks HTML-fail)"

@@ -22,7 +22,7 @@ const itemSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('form'), url, label: z.string().optional() }),
   z.object({ type: z.literal('pdf'), file: fileName, label: z.string().optional() }),
   z.object({ type: z.literal('file'), file: fileName, label: z.string().optional() }),
-  z.object({ type: z.literal('game'), game: z.enum(['binary', 'hex', 'escape', 'escape-web', 'html', 'css']), label: z.string().optional() }),
+  z.object({ type: z.literal('game'), game: z.enum(['binary', 'hex', 'escape', 'escape-web', 'escape-js', 'html', 'css', 'js']), label: z.string().optional() }),
 ]);
 
 const schema = z.object({
@@ -52,6 +52,7 @@ const schema = z.object({
         course: z.coerce.string(),
         date: z.coerce.date(),
         text: z.string().nullish(),
+        draft: z.boolean().default(false),
         items: z.array(itemSchema).default([]),
       }),
     )
@@ -119,7 +120,7 @@ export function getCourse(id: string): Course | undefined {
 }
 
 export function getPostsForCourse(id: string): Post[] {
-  return data.posts.filter((p) => p.course === id).sort(byNewest);
+  return data.posts.filter((p) => p.course === id && !p.draft).sort(byNewest);
 }
 
 export function fileSize(file: string): string {

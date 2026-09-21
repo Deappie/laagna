@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maagiline kaheksapall</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, #1d3d63, #0b1e35);
+      color: white;
+      font-family: system-ui, sans-serif;
+    }
+    main {
+      width: min(440px, 90vw);
+      text-align: center;
+    }
+    h1 { margin-bottom: 4px; }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      margin: 12px 0 8px;
+      padding: 12px;
+      border: 0;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 10px 22px;
+      border: 0;
+      border-radius: 8px;
+      background: #ffd43b;
+      color: #112d4e;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .pall {
+      width: 220px;
+      height: 220px;
+      margin: 28px auto 12px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #555, #000 60%);
+      box-shadow: 0 12px 30px rgb(0 0 0 / 0.5);
+    }
+    .aken {
+      width: 116px;
+      height: 116px;
+      display: grid;
+      place-items: center;
+      padding: 10px;
+      box-sizing: border-box;
+      border-radius: 50%;
+      background: radial-gradient(circle, #1c3faa, #0b1e5b);
+      color: #cfe0ff;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+    #vastus { font-size: 1rem; }
+    .vaike { color: #a9b8cf; }
+    /* Selle klassi lisab JavaScript, kui palli raputatakse. */
+    .raputa { animation: raputa 0.5s; }
+    @keyframes raputa {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-14px) rotate(-8deg); }
+      40% { transform: translateX(14px) rotate(8deg); }
+      60% { transform: translateX(-8px) rotate(-4deg); }
+      80% { transform: translateX(8px) rotate(4deg); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>🎱 Maagiline kaheksapall</h1>
+    <p class="vaike">Esita jah-ei küsimus ja pall vastab.</p>
+    <input id="kysimus" placeholder="Näiteks: kas ma saan homme kontrolltöös viie?">
+    <button id="kysi">Küsi</button>
+
+    <div class="pall">
+      <div class="aken"><span id="vastus">8</span></div>
+    </div>
+
+    <p class="vaike">Küsitud: <span id="loendur">0</span> korda</p>
+  </main>
+
+  <script>
+    // Palli vastused. Need on juba valmis, aga võid lisada ka oma vastuseid!
+    const vastused = [
+      "Kindlasti jah!",
+      "Tõenäoliselt jah.",
+      "Tähed ütlevad jah ✨",
+      "Ei usu.",
+      "Kindlasti mitte!",
+      "Küsi hiljem uuesti.",
+      "Parem ära praegu tea.",
+    ];
+
+    const kysimus = document.querySelector("#kysimus");
+    const vastus = document.querySelector("#vastus");
+    const pall = document.querySelector(".pall");
+    const loendur = document.querySelector("#loendur");
+    let kordi = 0;
+
+    // ÜLESANNE 1: kui nuppu "Küsi" vajutatakse, vali massiivist juhuslik vastus
+    //   ja näita seda pallis (#vastus).
+    //   Vihjed: document.querySelector("#kysi").addEventListener("click", () => { ... });
+    //           const i = Math.floor(Math.random() * vastused.length);  // juhuslik number 0 ... 6
+    //           vastused[i] on siis juhuslik vastus.
+
+    // ÜLESANNE 2: kui küsimuse väli on tühi, ära vasta, vaid kirjuta pallis "Küsi midagi!".
+    //   Vihje: if (kysimus.value.trim() === "") { ... } else { ... }
+
+    // ÜLESANNE 3: loe, mitu korda on palli käest küsitud, ja näita seda lehel (#loendur).
+
+    // ÜLESANNE 4: pane pall iga küsimuse peale raputama.
+    //   Vihje: pall.classList.add("raputa");
+    //          setTimeout(() => pall.classList.remove("raputa"), 500);
+    //   (setTimeout käivitab koodi 500 millisekundi ehk pool sekundit hiljem.)
+
+    // LISAÜLESANDED (vali vähemalt üks, võid ka ise midagi välja mõelda):
+    //   * Lisa massiivi vähemalt 5 oma vastust.
+    //   * Kui küsimus ei lõpe küsimärgiga, ütleb pall "See pole küsimus 🤔".
+    //     Vihje: kysimus.value.trim().endsWith("?")
+    //   * Positiivsed vastused rohelise ja negatiivsed punase tekstiga.
+    //   * Enter-klahv töötab samamoodi nagu nupp.
+  </script>
+</body>
+</html>
