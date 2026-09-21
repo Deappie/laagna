@@ -1,0 +1,386 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-practice>
+  <div class="game-label">{label || t.practice.title}</div>
+  <div class="box">
+    <p class="intro">{t.practice.intro}</p>
+    <p class="score" data-score></p>
+    <div data-sections></div>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  // num: decimal number (spaces, units and "0,5" allowed) · bin/hex: leading zeros ignored
+  // text: exact (case matters) · codes: list of numbers · word: one of several words, any case
+  type Kind = 'num' | 'bin' | 'hex' | 'text' | 'codes' | 'word';
+  interface Field {
+    label: string;
+    kind: Kind;
+    answer: string | string[];
+  }
+  interface Question {
+    text: string;
+    fields: Field[];
+    hint: string;
+    solution: string;
+    open?: boolean; // no automatic check, only a model answer
+  }
+  interface Section {
+    title: string;
+    questions: Question[];
+  }
+
+  const sections: Section[] = [
+    {
+      title: 'A. Teisendused',
+      questions: [
+        {
+          text: 'Teisenda 37 kahend- ja 16-süsteemi.',
+          fields: [{ label: 'Kahendsüsteemis', kind: 'bin', answer: '100101' }, { label: '16-süsteemis', kind: 'hex', answer: '25' }],
+          hint: 'Kahendsüsteemi jaoks otsi astmereast suurimad sobivad: 32 + 4 + 1. 16-süsteemi jaoks jaga kahendarv paremalt neljaks.',
+          solution: '37 = 32 + 4 + 1 = 100101. Neljaks jagatult 0010 0101, ehk 25.',
+        },
+        {
+          text: 'Teisenda 11001100 kümnend- ja 16-süsteemi.',
+          fields: [{ label: 'Kümnendsüsteemis', kind: 'num', answer: '204' }, { label: '16-süsteemis', kind: 'hex', answer: 'CC' }],
+          hint: 'Liida nende bittide väärtused, kus on 1: 128 + 64 + ... 16-süsteemis jaga neljaks: 1100 1100.',
+          solution: '128 + 64 + 8 + 4 = 204. 1100 on 12 ehk C, seega CC.',
+        },
+        {
+          text: 'Teisenda 7E kümnend- ja kahendsüsteemi.',
+          fields: [{ label: 'Kümnendsüsteemis', kind: 'num', answer: '126' }, { label: 'Kahendsüsteemis', kind: 'bin', answer: '1111110' }],
+          hint: '7E = 7 · 16 + E, kus E on 14. Kahendsüsteemis kirjuta iga sümbol nelja bitina: 7 = 0111, E = 1110.',
+          solution: '7 · 16 + 14 = 126. 0111 1110 ehk 1111110.',
+        },
+        {
+          text: 'Teisenda 250 16-süsteemi.',
+          fields: [{ label: '16-süsteemis', kind: 'hex', answer: 'FA' }],
+          hint: 'Mitu korda mahub 16 arvu 250 sisse ja mis jääb üle? 10 on A, 15 on F.',
+          solution: '250 = 15 · 16 + 10. 15 on F ja 10 on A, seega FA.',
+        },
+      ],
+    },
+    {
+      title: 'B. Bitid ja väärtused',
+      questions: [
+        {
+          text: 'Mitu erinevat väärtust mahub 5 bitti?',
+          fields: [{ label: 'Väärtusi', kind: 'num', answer: '32' }],
+          hint: 'Kahekordista viis korda: 2, 4, 8, ...',
+          solution: '2 · 2 · 2 · 2 · 2 = 32.',
+        },
+        {
+          text: 'Mitu bitti on vähemalt vaja, et kirjutada kõik arvud 0 kuni 200?',
+          fields: [{ label: 'Bitte', kind: 'num', answer: '8' }],
+          hint: 'Väärtusi on 201. Kahekordista, kuni jõuad vähemalt 201-ni, ja loe sammud kokku.',
+          solution: '7 bitti annab ainult 128 väärtust, 8 bitti annab 256. Vaja on 8 bitti.',
+        },
+        {
+          text: 'Miks on ASCII-tabelis just 128 kohta? Kirjuta vastus ja võrdle siis näidisvastusega.',
+          fields: [],
+          open: true,
+          hint: 'Mitu bitti kasutab ASCII?',
+          solution: 'ASCII kasutab 7 bitti ja 7 bitiga saab kirja panna 2 · 2 · 2 · 2 · 2 · 2 · 2 = 128 eri väärtust.',
+        },
+      ],
+    },
+    {
+      title: 'C. Failimahud',
+      questions: [
+        {
+          text: 'Raamatus on 200 lehekülge, igal umbes 2500 märki. Mitu baiti see võtab? Mitu MB?',
+          fields: [{ label: 'Baite', kind: 'num', answer: '500000' }, { label: 'MB', kind: 'num', answer: '0.5' }],
+          hint: 'Korruta lehekülgede arv märkide arvuga. Iga märk on üks bait ja miljon baiti on 1 MB.',
+          solution: '200 · 2500 = 500 000 baiti ehk 0,5 MB.',
+        },
+        {
+          text: 'Kui suur on 8-megapiksline foto pakkimata, kui iga piksel võtab 3 baiti? Vasta megabaitides.',
+          fields: [{ label: 'MB', kind: 'num', answer: '24' }],
+          hint: 'Megapikslite arv korda 3 baiti.',
+          solution: '8 miljonit pikslit · 3 baiti = 24 MB.',
+        },
+        {
+          text: 'Mitu 4 MB fotot mahub 128 GB telefoni? (1 GB = 1000 MB)',
+          fields: [{ label: 'Fotosid', kind: 'num', answer: '32000' }],
+          hint: 'Tee gigabaidid enne megabaitideks: 128 GB = 128 000 MB. Siis jaga foto suurusega.',
+          solution: '128 000 MB : 4 MB = 32 000 fotot.',
+        },
+      ],
+    },
+    {
+      title: 'D. Tekst',
+      questions: [
+        {
+          text: 'Mis sõna on 73 84?',
+          fields: [{ label: 'Sõna', kind: 'text', answer: 'IT' }],
+          hint: 'Otsi arvud ASCII-tabelist (konspektis või Tekstilaboris). Suur ja väike täht on erinevad.',
+          solution: '73 on I ja 84 on T: IT.',
+        },
+        {
+          text: 'Kirjuta sõna „Tere“ ASCII-koodidena.',
+          fields: [{ label: 'Koodid', kind: 'codes', answer: '84 101 114 101' }],
+          hint: 'T on 84. Väiketähed on alati 32 võrra suuremad kui samad suurtähed (E on 69).',
+          solution: 'T = 84, e = 101, r = 114, e = 101.',
+        },
+        {
+          text: 'Mitu märki ja mitu baiti (UTF-8) on sõnas „süda“?',
+          fields: [{ label: 'Märke', kind: 'num', answer: '4' }, { label: 'Baite', kind: 'num', answer: '5' }],
+          hint: 'Kõigepealt loe märgid kokku. Siis pea meeles, et täpitäht võtab UTF-8-s kaks baiti.',
+          solution: 'Märke on 4: s, ü, d, a. ü võtab kaks baiti, ülejäänud ühe: 1 + 2 + 1 + 1 = 5 baiti.',
+        },
+      ],
+    },
+    {
+      title: 'E. Värvikood',
+      questions: [
+        {
+          text: 'Värvikood on #FFA500. Kirjuta punane, roheline ja sinine kümnendsüsteemis. Mis värv see on?',
+          fields: [
+            { label: 'Punane (R)', kind: 'num', answer: '255' },
+            { label: 'Roheline (G)', kind: 'num', answer: '165' },
+            { label: 'Sinine (B)', kind: 'num', answer: '0' },
+            { label: 'Värv', kind: 'word', answer: ['oranž', 'oranz', 'orange', 'oranzh', 'kollakasoranž'] },
+          ],
+          hint: 'Iga kaks sümbolit on üks värv: FF, A5 ja 00. A5 = 10 · 16 + 5.',
+          solution: 'FF = 255, A5 = 165, 00 = 0. Täis punane, üle poole rohelist, sinist pole: oranž.',
+        },
+      ],
+    },
+  ];
+
+  const trimZeros = (s: string) => s.replace(/^0+(?=.)/, '');
+  function correct(field: Field, raw: string): boolean {
+    const value = raw.trim();
+    if (!value) return false;
+    const answers = Array.isArray(field.answer) ? field.answer : [field.answer];
+    switch (field.kind) {
+      case 'num': {
+        const n = Number(value.replace(/\s/g, '').replace(',', '.').replace(/[^\d.]+$/, ''));
+        return answers.some((a) => n === Number(a));
+      }
+      case 'bin':
+        return answers.some((a) => trimZeros(value.replace(/\s/g, '')) === trimZeros(a));
+      case 'hex': {
+        const v = trimZeros(value.toUpperCase().replace(/\s/g, '').replace(/^(#|0X)/, ''));
+        return answers.some((a) => v === trimZeros(a.toUpperCase()));
+      }
+      case 'text':
+        return answers.includes(value);
+      case 'codes':
+        return answers.some((a) => (value.match(/\d+/g) ?? []).join(' ') === a);
+      case 'word':
+        return answers.some((a) => value.toLowerCase() === a.toLowerCase());
+    }
+  }
+
+  function setup(root: HTMLElement) {
+    const scoreEl = root.querySelector<HTMLElement>('[data-score]')!;
+    const sectionsEl = root.querySelector<HTMLElement>('[data-sections]')!;
+    const solved = new Set<Question>();
+    const checkable = sections.flatMap((s) => s.questions).filter((q) => !q.open).length;
+    const updateScore = () => (scoreEl.textContent = t.practice.score(solved.size, checkable));
+
+    for (const section of sections) {
+      const heading = document.createElement('h3');
+      heading.textContent = section.title;
+      sectionsEl.append(heading);
+
+      section.questions.forEach((q) => {
+        const box = document.createElement('div');
+        box.className = 'question';
+        const text = document.createElement('p');
+        text.className = 'q-text';
+        text.textContent = q.text;
+        box.append(text);
+
+        const inputs = q.fields.map((field) => {
+          const wrap = document.createElement('label');
+          wrap.className = 'field';
+          const span = document.createElement('span');
+          span.textContent = field.label;
+          const input = document.createElement('input');
+          input.autocomplete = 'off';
+          input.spellcheck = false;
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') check();
+          });
+          wrap.append(span, input);
+          box.append(wrap);
+          return input;
+        });
+        if (q.open) {
+          const area = document.createElement('textarea');
+          area.rows = 2;
+          area.setAttribute('aria-label', t.practice.yourAnswer);
+          area.placeholder = t.practice.yourAnswer;
+          box.append(area);
+        }
+
+        const buttons = document.createElement('div');
+        buttons.className = 'buttons';
+        const checkBtn = document.createElement('button');
+        checkBtn.type = 'button';
+        checkBtn.className = 'btn';
+        checkBtn.textContent = q.open ? t.practice.showModel : t.practice.check;
+        const hintBtn = document.createElement('button');
+        hintBtn.type = 'button';
+        hintBtn.className = 'link';
+        hintBtn.textContent = t.practice.hint;
+        const solutionBtn = document.createElement('button');
+        solutionBtn.type = 'button';
+        solutionBtn.className = 'link';
+        solutionBtn.textContent = t.practice.showSolution;
+        solutionBtn.hidden = true;
+        buttons.append(checkBtn, hintBtn, solutionBtn);
+        box.append(buttons);
+
+        const feedback = document.createElement('p');
+        feedback.className = 'feedback';
+        const hint = document.createElement('p');
+        hint.className = 'hint';
+        hint.hidden = true;
+        hint.textContent = q.hint;
+        const solution = document.createElement('p');
+        solution.className = 'solution';
+        solution.hidden = true;
+        solution.textContent = q.solution;
+        box.append(feedback, hint, solution);
+
+        function check() {
+          if (q.open) {
+            solution.hidden = false;
+            return;
+          }
+          if (inputs.some((i) => !i.value.trim())) {
+            feedback.textContent = t.practice.fillAll;
+            feedback.className = 'feedback bad';
+            return;
+          }
+          let allRight = true;
+          q.fields.forEach((field, i) => {
+            const ok = correct(field, inputs[i].value);
+            inputs[i].classList.toggle('ok', ok);
+            inputs[i].classList.toggle('bad', !ok);
+            if (!ok) allRight = false;
+          });
+          if (allRight) {
+            solved.add(q);
+            feedback.textContent = t.practice.correct;
+            feedback.className = 'feedback ok';
+          } else {
+            solved.delete(q);
+            feedback.textContent = t.practice.wrong;
+            feedback.className = 'feedback bad';
+            solutionBtn.hidden = false;
+          }
+          updateScore();
+        }
+
+        checkBtn.addEventListener('click', check);
+        hintBtn.addEventListener('click', () => (hint.hidden = !hint.hidden));
+        solutionBtn.addEventListener('click', () => (solution.hidden = false));
+        sectionsEl.append(box);
+      });
+    }
+    updateScore();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-practice]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .intro { margin: 0 0 6px; }
+  .score {
+    position: sticky;
+    top: 60px;
+    z-index: 1;
+    margin: 0 0 8px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    font-weight: 650;
+  }
+  [data-sections] :global(h3) { margin: 18px 0 8px; color: var(--accent); font-size: 1.05rem; }
+  [data-sections] :global(.question) {
+    margin-bottom: 10px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  [data-sections] :global(.q-text) { margin: 0 0 8px; font-weight: 550; }
+  [data-sections] :global(.field) {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0 10px 8px 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  [data-sections] :global(.field input),
+  [data-sections] :global(textarea) {
+    box-sizing: border-box;
+    width: 150px;
+    min-height: 40px;
+    padding: 0 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 600 1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  [data-sections] :global(textarea) { width: 100%; padding: 8px 10px; font: inherit; margin-bottom: 8px; }
+  [data-sections] :global(input.ok) { border-color: #2e8b57; background: rgb(46 139 87 / 0.1); }
+  [data-sections] :global(input.bad) { border-color: #c0392b; background: rgb(192 57 43 / 0.08); }
+  [data-sections] :global(.buttons) { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  [data-sections] :global(.btn) {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  [data-sections] :global(.btn:hover) { background: var(--accent-hover); border-color: var(--accent-hover); }
+  [data-sections] :global(.link) {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  [data-sections] :global(.feedback) { margin: 8px 0 0; min-height: 1.2em; font-weight: 600; }
+  [data-sections] :global(.feedback.ok) { color: #2e8b57; }
+  [data-sections] :global(.feedback.bad) { color: #c0392b; }
+  [data-sections] :global(.hint),
+  [data-sections] :global(.solution) { margin: 6px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--accent-soft); }
+  [data-sections] :global(.solution) { border-left: 4px solid #2e8b57; }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+    [data-sections] :global(.field) { display: flex; }
+    [data-sections] :global(.field input) { width: 100%; }
+  }
+  @media (prefers-color-scheme: dark) {
+    [data-sections] :global(.feedback.ok) { color: #6fcf97; }
+    [data-sections] :global(.feedback.bad) { color: #ff8a80; }
+  }
+</style>

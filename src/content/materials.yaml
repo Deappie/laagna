@@ -114,9 +114,8 @@ posts:
         label: "Lisavideo: Unicode'i ime, kuidas kõik maailma tähed arvutisse said (inglise keeles)"
       - type: game
         game: sizes
-      - type: pdf
-        file: "tunnileht-kt1-harjutused.pdf"
-        label: "Tunnileht: KT1 tüüpi segaharjutused"
+      - type: game
+        game: kt1
       - type: link
         url: "https://et.wikipedia.org/wiki/Unicode"
         label: "Unicode (Vikipeedia)"

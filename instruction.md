@@ -42,7 +42,7 @@ Add a block under `posts:` in `materials.yaml`. Posts are sorted by date automat
 | `pdf`   | `file` | "Vaata" (in-browser viewer, works on phones) + "Laadi alla" |
 | `file`  | `file` | "Laadi alla" button with file type and size               |
 | `form`  | `url`  | "Täida vorm" button (Google Forms, Microsoft Forms, …)     |
-| `game`  | `game` | Interactive game in the page. Available: `binary` (base 2 ↔ base 10), `hex` (colour codes in base 16), `escape` (escape room with 7 binary/hex locks and a timer), `escape-web` (the same escape room with HTML/CSS locks), `escape-js` (escape room: predict what JavaScript prints), `text` (text lab: characters as numbers and UTF-8 bytes, plus ASCII secret messages), `sizes` (quiz: which file or number is bigger), `html` (fill in missing HTML tags), `css` (fill in missing CSS), `js` (JavaScript basics with Python comparisons, DOM and events) |
+| `game`  | `game` | Interactive game in the page. Available: `binary` (base 2 ↔ base 10), `hex` (colour codes in base 16), `escape` (escape room with 7 binary/hex locks and a timer), `escape-web` (the same escape room with HTML/CSS locks), `escape-js` (escape room: predict what JavaScript prints), `text` (text lab: characters as numbers and UTF-8 bytes, plus ASCII secret messages), `sizes` (quiz: which file or number is bigger), `kt1` (10IT KT1-style practice with instant checking), `html` (fill in missing HTML tags), `css` (fill in missing CSS), `js` (JavaScript basics with Python comparisons, DOM and events) |
 
 `label` is optional for every type.
 
