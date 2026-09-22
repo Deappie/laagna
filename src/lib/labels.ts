@@ -69,7 +69,7 @@ export const t = {
     restart: 'Alusta otsast',
   },
   practice: {
-    title: 'Segaharjutused: KT1 tüüpi ülesanded',
+    title: 'Segaharjutused tunnitööks',
     intro: 'Tee ülesanded järjest ja kontrolli iga vastust kohe. Kui jääd kinni, vaata vihjet. Lahenduse näed pärast esimest katset.',
     score: (n: number, total: number) => `Õigesti lahendatud: ${n}/${total}`,
     check: 'Kontrolli',
