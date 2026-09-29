@@ -24,6 +24,8 @@ courses:
     title: "10IT"
     description: "Sissejuhatus infotehnoloogiasse"
     links:
+      - file: "abileht-ascii-tabel.pdf"
+        label: "Abileht: ASCII-tabel, bitid ja ühikud"
       - url: "https://excalidraw.com/"
         label: "Excalidraw – joonistustahvel"
       - url: "https://moodle.taltech.ee/"
@@ -244,7 +246,6 @@ posts:
   - title: "Neljas tund: andmed API-st ja teekond Reacti poole"
     course: 11it
     date: 2026-09-29
-    draft: true
     text: "Kuidas leht saab andmed serverist, mis on TypeScript ja miks puhtast JavaScriptist ühel hetkel enam ei piisa. Jätkame eelmise nädala ülesannete nimekirjaga, nii et hoia see alles.\nKodutöö: maagiline kaheksapall. Laadi alla üks HTML-fail, tee see juhendi järgi valmis ja saada fail aadressile mtsopo@taltech.ee enne 6.10."
     items:
       - type: pdf

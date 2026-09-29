@@ -60,9 +60,15 @@ courses:
     links:             # optional "Kasulikud lingid", pinned on top of the class page
       - url: "https://vscode.dev/"
         label: "VS Code veebis"
+      - file: "abileht.pdf"          # a file in public/files instead of a link
+        label: "Abileht"
 ```
 
 When a class has `links`, its page also gets a **Kasulikud lingid** button in the header that jumps to them.
+
+Each pinned link is either a `url` (opens in a new tab) or a `file` from `public/files`. A `.pdf` file gets the
+same "Vaata" + "Laadi alla" buttons as in a post; any other file gets a download button. Use this for material
+that is not tied to one lesson, such as a reference sheet students need all year.
 
 ## Upload a file
 

@@ -25,6 +25,18 @@ const itemSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('game'), game: z.enum(['binary', 'hex', 'escape', 'escape-web', 'escape-js', 'html', 'css', 'js', 'text', 'sizes', 'kt1']), label: z.string().optional() }),
 ]);
 
+// "Kasulikud lingid" võib olla tavaline link või fail kaustas public/files.
+const courseLink = z
+  .union([
+    z.object({ url, label: z.string().optional() }),
+    z.object({ file: fileName, label: z.string().optional() }),
+  ])
+  .transform((l): Item =>
+    'file' in l
+      ? { type: l.file.toLowerCase().endsWith('.pdf') ? 'pdf' : 'file', ...l }
+      : { type: 'link', ...l },
+  );
+
 const schema = z.object({
   site: z.object({
     title: z.string(),
@@ -39,9 +51,9 @@ const schema = z.object({
         title: z.string(),
         description: z.string().nullish(),
         links: z
-          .array(z.object({ url, label: z.string().optional() }))
+          .array(courseLink)
           .nullish()
-          .transform((l) => (l ?? []).map((link) => ({ type: 'link' as const, ...link }))),
+          .transform((l) => l ?? []),
       }),
     )
     .min(1),
@@ -91,6 +103,11 @@ function load(): Data {
   for (const c of data.courses) {
     if (ids.has(c.id)) fail(`kursuse id "${c.id}" on kaks korda`);
     ids.add(c.id);
+    for (const link of c.links) {
+      if ('file' in link && !fs.existsSync(path.join(FILES_DIR, link.file))) {
+        fail(`courses → ${c.id} → links: faili "${link.file}" ei ole kaustas public/files`);
+      }
+    }
   }
   data.posts.forEach((post, i) => {
     if (!ids.has(post.course)) {
