@@ -1,0 +1,85 @@
+/* Söökla arvustused: valmis kujundus. Pane see fail src/App.css asemele. */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #f4f6fb;
+  color: #1d2433;
+  font: 16px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+h1 { margin: 0 0 16px; }
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+input,
+select,
+button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #c9d1e0;
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
+  color: inherit;
+}
+
+form input { flex: 1 1 180px; }
+
+button {
+  border-color: #3f72af;
+  background: #3f72af;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover { background: #335f94; }
+
+.otsing { width: 100%; }
+
+.kokku { color: #5b6578; }
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kaart {
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  border: 1px solid #dde3ee;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.kaart-pea {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.kaart p { margin: 4px 0 8px; }
+
+.kaart button {
+  min-height: 32px;
+  border-color: #e0b4b4;
+  background: #fff;
+  color: #b03a3a;
+}
+
+.kaart button:hover { background: #fbeeee; }
+
+.tahed { color: #e0a100; letter-spacing: 2px; }

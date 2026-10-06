@@ -128,6 +128,30 @@ posts:
         file: "kodutoo-kordamine.pdf"
         label: "Kodutöö: kordamine tunnitööks (täida veebis ja saada: mtsopo@taltech.ee)"
 
+  - title: "5. tund: mis on arvuti sees?"
+    course: 10it
+    date: 2026-10-06
+    text: "Esimeses pooles vaatame korpusesse: mis on protsessor, RAM, ketas ja emaplaat ning miks arvutis on nii palju eri mälusid. Teises pooles paned PCPartPickeris ise kokku kolm arvutit kolmele väga erinevale inimesele, igaühe eelarve 800 €.\nTunni- ja kodutöö: ava PDF nupuga „Vaata“, kleebi lahtritesse oma arvutite lingid ja põhjendused, tee kodus lõpuni, mis tunnis pooleli jäi, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 13.10."
+    items:
+      - type: pdf
+        file: "arvuti-sees-konspekt.pdf"
+        label: "Konspekt: mis on arvuti sees?"
+      - type: link
+        url: "https://de.pcpartpicker.com/list/"
+        label: "PCPartPicker: pane arvuti kokku (hinnad eurodes, inglise keeles)"
+      - type: pdf
+        file: "tunnitoo-arvuti.pdf"
+        label: "Tunni- ja kodutöö: pane arvuti kokku (täida veebis ja saada: mtsopo@taltech.ee)"
+      - type: link
+        url: "https://et.wikipedia.org/wiki/Protsessor"
+        label: "Protsessor (Vikipeedia)"
+      - type: link
+        url: "https://et.wikipedia.org/wiki/Muutmälu"
+        label: "Muutmälu ehk RAM (Vikipeedia)"
+      - type: link
+        url: "https://et.wikipedia.org/wiki/Emaplaat"
+        label: "Emaplaat (Vikipeedia)"
+
   - title: "Esimene tund: HTML-i alused"
     course: 11it
     date: 2026-09-08
@@ -243,38 +267,56 @@ posts:
         url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Events"
         label: "MDN: sündmused (inglise keeles)"
 
-  - title: "Neljas tund: andmed API-st ja teekond Reacti poole"
+  - title: "Neljas tund: andmed API-st"
     course: 11it
     date: 2026-09-29
-    text: "Kuidas leht saab andmed serverist, mis on TypeScript ja miks puhtast JavaScriptist ühel hetkel enam ei piisa. Jätkame eelmise nädala ülesannete nimekirjaga, nii et hoia see alles.\nKodutöö: maagiline kaheksapall. Laadi alla üks HTML-fail, tee see juhendi järgi valmis ja saada fail aadressile mtsopo@taltech.ee enne 6.10."
+    text: "Kuidas leht saab andmed serverist? Täna on üks uus asi: käsk fetch, mis toob andmed internetist sinu lehele. Lähtefailides on eelmise nädala töö juba valmis, nii et alustame kõik ühest kohast.\nKodutöö: maagiline kaheksapall. Laadi alla üks HTML-fail, tee see juhendi järgi valmis ja saada fail aadressile mtsopo@taltech.ee enne 6.10."
     items:
       - type: pdf
-        file: "api-typescript-konspekt.pdf"
-        label: "Konspekt: andmed API-st ja TypeScript"
-      - type: video
-        url: "https://www.youtube.com/watch?v=zQnBQ4tB3ZA"
-        label: "TypeScript 100 sekundiga (inglise keeles)"
-      - type: link
-        url: "https://www.typescriptlang.org/play/"
-        label: "TypeScript Playground: proovi TypeScripti brauseris"
+        file: "api-konspekt.pdf"
+        label: "Konspekt: andmed API-st"
+      - type: pdf
+        file: "tunniulesanded-api.pdf"
+        label: "Tunniülesanded: andmed API-st"
+      - type: file
+        file: "tunnitoo-api.zip"
+        label: "Tunnitöö lähtefailid (ZIP)"
       - type: link
         url: "https://pokeapi.co/api/v2/pokemon/pikachu"
         label: "Ava see link: nii näevad välja andmed API-st (JSON)"
-      - type: link
-        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Network_requests"
-        label: "MDN: andmete pärimine fetch-iga (inglise keeles)"
       - type: link
         url: "https://jsonplaceholder.typicode.com/todos"
         label: "Harjutamiseks: JSONPlaceholderi ülesannete API"
       - type: video
         url: "https://www.youtube.com/watch?v=Tn6-PIqc4UM"
-        label: "React 100 sekundiga (inglise keeles)"
-      - type: link
-        url: "https://react.dev/learn"
-        label: "React: mis meid ees ootab (inglise keeles)"
+        label: "Vaatamiseks: React 100 sekundiga (inglise keeles)"
       - type: pdf
         file: "kodutoo-kaheksapall-juhend.pdf"
         label: "Kodutöö juhend: maagiline kaheksapall"
       - type: file
         file: "kodutoo-kaheksapall.html"
         label: "Kodutöö fail: maagiline kaheksapall (üks HTML-fail)"
+
+  - title: "Viies tund: frontend, backend ja andmebaas"
+    course: 11it
+    date: 2026-10-06
+    text: "Peaaegu iga rakendus on kolmest tükist: üks näitab (frontend), teine otsustab (backend) ja kolmas mäletab (andmebaas). Esimeses pooles vaatame, kuidas nad omavahel räägivad. Teises pooles ehitad oma React + TypeScripti projekti söökla arvustuste rakenduse. Tunnijuhendis on iga samm koos koodiga ja iga rida on lahti seletatud: kirjuta kood ise ümber, ära kopeeri.\nHoia projekt alles: järgmises tunnis hakkame tegema sellele backendi."
+    items:
+      - type: pdf
+        file: "frontend-backend-konspekt.pdf"
+        label: "Konspekt: frontend, backend ja andmebaas"
+      - type: pdf
+        file: "tunnijuhend-sookla.pdf"
+        label: "Tunnijuhend: söökla arvustused samm-sammult"
+      - type: file
+        file: "App.css"
+        label: "Valmis kujundus (pane src/App.css asemele)"
+      - type: link
+        url: "https://react.dev/learn"
+        label: "Reacti dokumentatsioon (inglise keeles)"
+      - type: link
+        url: "https://react.dev/learn/typescript"
+        label: "TypeScript Reactis (inglise keeles)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview"
+        label: "MDN: kuidas klient ja server suhtlevad (inglise keeles)"
