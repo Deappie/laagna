@@ -270,7 +270,7 @@ posts:
   - title: "Neljas tund: andmed API-st"
     course: 11it
     date: 2026-09-29
-    text: "Kuidas leht saab andmed serverist? Täna on üks uus asi: käsk fetch, mis toob andmed internetist sinu lehele. Lähtefailides on eelmise nädala töö juba valmis, nii et alustame kõik ühest kohast.\nKodutöö: maagiline kaheksapall. Laadi alla üks HTML-fail, tee see juhendi järgi valmis ja saada fail aadressile mtsopo@taltech.ee enne 6.10."
+    text: "Kuidas leht saab andmed serverist? Täna on üks uus asi: käsk fetch, mis toob andmed internetist sinu lehele. Lähtefailides on eelmise nädala töö juba valmis, nii et alustame kõik ühest kohast."
     items:
       - type: pdf
         file: "api-konspekt.pdf"
@@ -290,12 +290,6 @@ posts:
       - type: video
         url: "https://www.youtube.com/watch?v=Tn6-PIqc4UM"
         label: "Vaatamiseks: React 100 sekundiga (inglise keeles)"
-      - type: pdf
-        file: "kodutoo-kaheksapall-juhend.pdf"
-        label: "Kodutöö juhend: maagiline kaheksapall"
-      - type: file
-        file: "kodutoo-kaheksapall.html"
-        label: "Kodutöö fail: maagiline kaheksapall (üks HTML-fail)"
 
   - title: "Viies tund: frontend, backend ja andmebaas"
     course: 11it
