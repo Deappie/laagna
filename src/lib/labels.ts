@@ -81,6 +81,22 @@ export const t = {
     correct: 'Õige! ✓',
     wrong: 'Mõni vastus on veel vale (punasega). Proovi uuesti või vaata vihjet.',
   },
+  terminalGame: {
+    title: 'Terminalimäng: missioonid käsureal',
+    intro:
+      'See on pärisasjaga sarnane PowerShell, aga mängu oma: siin ei saa midagi katki teha. Klõpsa musta kasti, kirjuta käsk ja vajuta Enter. Tab, ↑ ja Ctrl+C töötavad nagu päris terminalis.',
+    inputLabel: 'Käsk',
+    hint: 'Vihje',
+    restart: 'Alusta otsast',
+    tipPrefix: '💡',
+    progress: (i: number, n: number) => `Missioon ${i}/${n}`,
+    correct: 'Õige! ✓',
+    welcome: 'Mängu terminal. Käskude nimekirja näed käsuga help.',
+    help: 'Käsud: pwd, ls, cd, mkdir, ni, cat, cp, mv, rm, cls, code, node, npm, git, help',
+    codeOpens: (path: string) => `(Päris arvutis avaneks nüüd VS Code kaustas ${path})`,
+    finish: (hints: number) =>
+      `Kõik missioonid tehtud${hints === 0 ? ' ja ühegi vihjeta' : hints === 1 ? ', kasutasid ühe vihje' : `, kasutasid ${hints} vihjet`}! 🎉 Nüüd tee sama päris terminalis.`,
+  },
   sizeQuiz: {
     title: 'Kumb on suurem?',
     progress: (i: number, n: number) => `${i}/${n}`,

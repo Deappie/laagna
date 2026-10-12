@@ -9,6 +9,7 @@ import EscapeGame from './EscapeGame.astro';
 import TextLab from './TextLab.astro';
 import SizeQuiz from './SizeQuiz.astro';
 import PracticeSheet from './PracticeSheet.astro';
+import TerminalGame from './TerminalGame.astro';
 
 interface Props {
   item: Item;
@@ -52,6 +53,8 @@ const icons: Record<Item['type'], string> = {
         <SizeQuiz label={item.label} />
       ) : item.game === 'kt1' ? (
         <PracticeSheet label={item.label} />
+      ) : item.game === 'terminal' ? (
+        <TerminalGame label={item.label} />
       ) : item.game === 'escape' || item.game === 'escape-web' || item.game === 'escape-js' ? (
         <EscapeGame
           room={item.game === 'escape' ? 'hex' : item.game === 'escape-web' ? 'web' : 'js'}

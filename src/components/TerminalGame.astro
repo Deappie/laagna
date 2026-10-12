@@ -1,0 +1,800 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-terminal-game>
+  <div class="game-label">{label || t.terminalGame.title}</div>
+  <div class="box">
+    <p class="intro">{t.terminalGame.intro}</p>
+    <div class="mission">
+      <div class="mission-top">
+        <span class="progress" data-progress></span>
+        <button type="button" class="link-btn" data-hint-btn>{t.terminalGame.hint}</button>
+      </div>
+      <p class="mission-text" data-mission></p>
+      <p class="hint" data-hint hidden></p>
+      <p class="done" data-done aria-live="polite"></p>
+    </div>
+    <div class="term" data-term>
+      <div class="out" data-out aria-live="polite"></div>
+      <label class="line">
+        <span class="prompt" data-prompt></span>
+        <input
+          type="text"
+          data-input
+          spellcheck="false"
+          autocomplete="off"
+          autocapitalize="off"
+          aria-label={t.terminalGame.inputLabel}
+        />
+      </label>
+    </div>
+    <div class="keys">
+      <button type="button" class="key" data-key="tab">Tab</button>
+      <button type="button" class="key" data-key="up">↑</button>
+      <button type="button" class="key" data-key="ctrlc">Ctrl+C</button>
+      <button type="button" class="key" data-key="restart">{t.terminalGame.restart}</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  type File = { kind: 'file'; name: string; content: string };
+  type Dir = { kind: 'dir'; name: string; kids: Node[] };
+  type Node = File | Dir;
+
+  const file = (name: string, content = ''): File => ({ kind: 'file', name, content });
+  const dir = (name: string, ...kids: Node[]): Dir => ({ kind: 'dir', name, kids });
+
+  const PACKAGE_JSON = `{
+  "name": "sookla-arvustused",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}`;
+
+  // Kaustapuu: C:\Users\opilane on kodukaust (~).
+  function makeDisk(): Dir {
+    return dir(
+      'C:',
+      dir(
+        'Users',
+        dir(
+          'opilane',
+          dir('Desktop', file('meem.png', '(see on pilt, terminalis seda näha ei saa)')),
+          dir(
+            'Documents',
+            file('kodutoo.docx', '(Wordi fail, terminalis loetamatu)'),
+            dir('muusika', file('playlist.txt', 'laul 1\nlaul 2\nlaul 3')),
+            dir(
+              'kool',
+              dir('matemaatika', file('valemid.txt', 'a² + b² = c²')),
+              dir('ajalugu', file('kuupaevad.txt', '1918 – Eesti Vabariik\n1991 – taasiseseisvumine')),
+              dir('IT', dir('vana', file('parool.txt', 'Salasõna: LAAGNA\nPalju õnne, leidsid selle ainult terminaliga! 🎉'))),
+            ),
+          ),
+          dir(
+            'projektid',
+            dir(
+              'sookla-arvustused',
+              dir('node_modules', dir('react'), dir('vite')),
+              dir('public', file('vite.svg', '<svg>…</svg>')),
+              dir(
+                'src',
+                file('App.tsx', 'export default function App() {\n  return <h1>Söökla arvustused</h1>;\n}'),
+                file('App.css', '.app { max-width: 640px; }'),
+                file('main.tsx', "import { createRoot } from 'react-dom/client';"),
+                file('types.ts', 'export type Arvustus = { id: number; toit: string; hinne: number };'),
+                file('andmed.ts', "export const arvustused = [{ id: 1, toit: 'Seljanka', hinne: 5 }];"),
+              ),
+              file('index.html', '<!doctype html>\n<div id="root"></div>'),
+              file('package.json', PACKAGE_JSON),
+              file('vite.config.ts', "import { defineConfig } from 'vite';"),
+            ),
+            dir('vana-test', file('proov.js', 'console.log("test 1 2 3");')),
+          ),
+        ),
+      ),
+    );
+  }
+
+  const HOME = ['Users', 'opilane'];
+  const PROJECT = ['Users', 'opilane', 'projektid', 'sookla-arvustused'];
+
+  interface State {
+    disk: Dir;
+    cwd: string[];
+    serverRunning: boolean;
+    gitDirty: boolean;
+    gitStaged: boolean;
+    commits: number;
+  }
+
+  interface Event {
+    cmd: string;
+    ok: boolean;
+    catPath?: string[];
+    ctrlC?: boolean;
+  }
+
+  interface Mission {
+    text: string;
+    hint: string;
+    done: (e: Event, s: State) => boolean;
+  }
+
+  const same = (a: string[], b: string[]) =>
+    a.length === b.length && a.every((x, i) => x.toLowerCase() === b[i].toLowerCase());
+
+  const missions: Mission[] = [
+    {
+      text: 'Alustame. Kus sa praegu oled? Kirjuta käsk, mis näitab praegust kausta.',
+      hint: 'Kolm tähte: p, w, d (ingl print working directory).',
+      done: (e) => e.ok && e.cmd === 'pwd',
+    },
+    {
+      text: 'Vaata, mis selles kaustas on.',
+      hint: 'Käsk on ls.',
+      done: (e) => e.ok && (e.cmd === 'ls' || e.cmd === 'dir'),
+    },
+    {
+      text: 'Mine söökla projekti kausta. See on kaustas projektid ja kannab nime sookla-arvustused.',
+      hint: 'cd projektid ja siis cd sookla-arvustused. Või ühe käsuga: cd projektid/sookla-arvustused. Kirjuta nime algus ja vajuta Tab!',
+      done: (_e, s) => same(s.cwd, PROJECT),
+    },
+    {
+      text: 'Kust tuleb käsk npm run dev? Näita faili package.json sisu.',
+      hint: 'Faili sisu näitab cat. Kirjuta cat pa ja vajuta Tab.',
+      done: (e) => e.ok && !!e.catPath && e.catPath.at(-1)?.toLowerCase() === 'package.json',
+    },
+    {
+      text: 'Nägid, et scripts all on dev. Käivita nüüd arendusserver.',
+      hint: 'npm run dev (projekti kaustas).',
+      done: (_e, s) => s.serverRunning,
+    },
+    {
+      text: 'Server töötab ja terminal on hõivatud: uut käsku kirjutada ei saa. Peata server.',
+      hint: 'Ctrl+C. Telefonis vajuta all olevat nuppu Ctrl+C.',
+      done: (e, s) => !!e.ctrlC && !s.serverRunning,
+    },
+    {
+      text: 'Tee projekti sisse backendi jaoks kaust server ja selle sisse tühi fail server.js.',
+      hint: 'mkdir server, siis cd server ja ni server.js. Macis oleks touch, PowerShellis on ni.',
+      done: (_e, s) => !!find(s.disk, [...PROJECT, 'server', 'server.js']),
+    },
+    {
+      text: 'Vaata Gitiga, mis projektis muutus, ja salvesta see commit\'iga.',
+      hint: 'Projekti kaustas: git status, siis git add . ja git commit -m "Backendi kaust".',
+      done: (_e, s) => s.commits > 0 && !s.gitDirty,
+    },
+    {
+      text: 'Kaustas projektid on vana kaust vana-test, mida pole enam vaja. Kustuta see koos sisuga.',
+      hint: 'Mine kausta projektid (cd .. paar korda) ja kirjuta rm -r vana-test. rm ilma -r-ita kausta ei kustuta.',
+      done: (_e, s) => !find(s.disk, [...HOME, 'projektid', 'vana-test']),
+    },
+    {
+      text: 'Viimane missioon: kuskil kaustas Documents on peidetud fail parool.txt. Leia see ainult ls, cd ja cat abil ja loe läbi.',
+      hint: 'cd ~ viib koju. Siis cd Documents, ls, ja nii edasi, kuni leiad. cat parool.txt.',
+      done: (e) => e.ok && !!e.catPath && e.catPath.at(-1)?.toLowerCase() === 'parool.txt',
+    },
+  ];
+
+  function find(disk: Dir, path: string[]): Node | null {
+    let node: Node = disk;
+    for (const part of path) {
+      if (node.kind !== 'dir') return null;
+      const next: Node | undefined = node.kids.find((k) => k.name.toLowerCase() === part.toLowerCase());
+      if (!next) return null;
+      node = next;
+    }
+    return node;
+  }
+
+  // Muudab kasutaja kirjutatud tee (suhteline, ~, C:\...) absoluutseks nimede massiiviks.
+  function resolve(cwd: string[], raw: string): string[] {
+    let p = raw.replace(/\//g, '\\');
+    let base: string[];
+    if (/^[a-z]:(\\|$)/i.test(p)) {
+      base = [];
+      p = p.slice(2);
+    } else if (p === '~' || p.startsWith('~\\')) {
+      base = [...HOME];
+      p = p.slice(1);
+    } else if (p.startsWith('\\')) {
+      base = [];
+    } else {
+      base = [...cwd];
+    }
+    for (const part of p.split('\\')) {
+      if (part === '' || part === '.') continue;
+      if (part === '..') base.pop();
+      else base.push(part);
+    }
+    return base;
+  }
+
+  // Tõstab nimed sellisteks, nagu need kettal on (Windows ei vaata suurtähti).
+  function canonical(disk: Dir, path: string[]): string[] {
+    const out: string[] = [];
+    let node: Node = disk;
+    for (const part of path) {
+      const next = node.kind === 'dir' ? node.kids.find((k) => k.name.toLowerCase() === part.toLowerCase()) : undefined;
+      if (!next) return [...out, ...path.slice(out.length)];
+      out.push(next.name);
+      node = next;
+    }
+    return out;
+  }
+
+  const show = (path: string[]) => 'C:\\' + path.join('\\');
+
+  function tokenize(line: string): string[] {
+    const out: string[] = [];
+    const re = /"([^"]*)"|'([^']*)'|(\S+)/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(line))) out.push(m[1] ?? m[2] ?? m[3]);
+    return out;
+  }
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+    const out = $('out');
+    const input = $<HTMLInputElement>('input');
+    const promptEl = $('prompt');
+    const missionEl = $('mission');
+    const progressEl = $('progress');
+    const hintEl = $('hint');
+    const hintBtn = $<HTMLButtonElement>('hint-btn');
+    const doneEl = $('done');
+    const term = $('term');
+
+    let s: State;
+    let mission = 0;
+    let hints = 0;
+    let history: string[] = [];
+    let histPos = 0;
+
+    function print(text: string, cls = '') {
+      const el = document.createElement('div');
+      if (cls) el.className = cls;
+      el.textContent = text;
+      out.append(el);
+      term.scrollTop = term.scrollHeight;
+    }
+    const err = (text: string) => print(text, 'err');
+    const tip = (text: string) => print(`${t.terminalGame.tipPrefix} ${text}`, 'tip');
+
+    function updatePrompt() {
+      promptEl.textContent = s.serverRunning ? '' : `PS ${show(s.cwd)}> `;
+      input.disabled = false;
+    }
+
+    function showMission() {
+      hintEl.hidden = true;
+      if (mission >= missions.length) {
+        progressEl.textContent = t.terminalGame.progress(missions.length, missions.length);
+        missionEl.textContent = t.terminalGame.finish(hints);
+        hintBtn.hidden = true;
+        return;
+      }
+      hintBtn.hidden = false;
+      progressEl.textContent = t.terminalGame.progress(mission + 1, missions.length);
+      missionEl.textContent = missions[mission].text;
+      hintEl.textContent = missions[mission].hint;
+    }
+
+    function check(e: Event) {
+      if (mission >= missions.length) return;
+      if (missions[mission].done(e, s)) {
+        mission++;
+        doneEl.textContent = t.terminalGame.correct;
+        setTimeout(() => (doneEl.textContent = ''), 1800);
+        showMission();
+      }
+    }
+
+    function touchProject(path: string[]) {
+      if (path.length > PROJECT.length && same(path.slice(0, PROJECT.length), PROJECT)) {
+        if (path[PROJECT.length].toLowerCase() !== 'node_modules') s.gitDirty = true;
+      }
+    }
+
+    function listing(path: string[], nodes: Node[]) {
+      print('');
+      print(`    Directory: ${show(path)}`);
+      print('');
+      print('Mode     Name');
+      print('----     ----');
+      for (const n of nodes) print(`${n.kind === 'dir' ? 'd----' : '-a---'}    ${n.name}`);
+      print('');
+    }
+
+    function notFound(cmd: string, path: string[]) {
+      err(`${cmd} : Cannot find path '${show(path)}' because it does not exist.`);
+    }
+
+    // Loob uue faili või kausta. Tagastab false, kui ei õnnestunud.
+    function create(cmd: string, raw: string, kind: 'file' | 'dir'): boolean {
+      const path = resolve(s.cwd, raw);
+      const parent = find(s.disk, path.slice(0, -1));
+      const name = path.at(-1);
+      if (!name) return false;
+      if (!parent || parent.kind !== 'dir') {
+        err(`${cmd} : Could not find a part of the path '${show(path)}'.`);
+        return false;
+      }
+      if (parent.kids.some((k) => k.name.toLowerCase() === name.toLowerCase())) {
+        err(`${cmd} : An item with the specified name ${show(path)} already exists.`);
+        return false;
+      }
+      const node = kind === 'dir' ? dir(name) : file(name);
+      parent.kids.push(node);
+      touchProject(path);
+      listing(path.slice(0, -1), [node]);
+      return true;
+    }
+
+    function run(line: string): Event {
+      const args = tokenize(line);
+      const name = (args.shift() ?? '').toLowerCase();
+      const ev: Event = { cmd: name, ok: true };
+      const fail = () => ((ev.ok = false), ev);
+      const flags = args.filter((a) => /^-/.test(a)).map((a) => a.toLowerCase());
+      const operands = args.filter((a) => !/^-/.test(a));
+      const inProject = () => !!find(s.disk, [...s.cwd, 'package.json']);
+      const inRepo = () => s.cwd.length >= PROJECT.length && same(s.cwd.slice(0, PROJECT.length), PROJECT);
+
+      switch (name) {
+        case '':
+          return fail();
+        case 'pwd':
+          print('');
+          print('Path');
+          print('----');
+          print(show(s.cwd));
+          print('');
+          return ev;
+        case 'ls':
+        case 'dir':
+        case 'get-childitem': {
+          const path = operands[0] ? resolve(s.cwd, operands[0]) : s.cwd;
+          const node = find(s.disk, path);
+          if (!node) return notFound('Get-ChildItem', path), fail();
+          if (node.kind === 'file') return listing(path.slice(0, -1), [node]), ev;
+          const kids = [...node.kids].sort((a, b) =>
+            a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'dir' ? -1 : 1,
+          );
+          listing(canonical(s.disk, path), kids);
+          return ev;
+        }
+        case 'cd':
+        case 'set-location': {
+          if (operands.length > 1) {
+            err(`Set-Location : A positional parameter cannot be found that accepts argument '${operands[1]}'.`);
+            tip('Kui kausta nimes on tühik, pane nimi jutumärkidesse: cd "minu kaust".');
+            return fail();
+          }
+          const path = operands[0] ? resolve(s.cwd, operands[0]) : [...HOME];
+          const node = find(s.disk, path);
+          if (!node) {
+            notFound('Set-Location', path);
+            tip('Vaata ls-iga, mis kaustad siin on, ja kasuta Tab-klahvi.');
+            return fail();
+          }
+          if (node.kind === 'file') {
+            err(`Set-Location : '${show(path)}' is a file, not a folder.`);
+            return fail();
+          }
+          s.cwd = canonical(s.disk, path);
+          return ev;
+        }
+        case 'mkdir':
+        case 'md':
+          if (!operands[0]) return err('mkdir : Missing an argument for parameter \'Path\'.'), fail();
+          return create('mkdir', operands[0], 'dir') ? ev : fail();
+        case 'ni':
+        case 'new-item':
+          if (!operands[0]) return err('New-Item : Missing an argument for parameter \'Path\'.'), fail();
+          return create('New-Item', operands[0], flags.includes('directory') ? 'dir' : 'file') ? ev : fail();
+        case 'touch':
+          err("touch : The term 'touch' is not recognized as the name of a cmdlet, function, script file, or operable program.");
+          tip('touch on Maci ja Linuxi käsk. PowerShellis tee uus fail käsuga ni, näiteks ni server.js.');
+          return fail();
+        case 'cat':
+        case 'type':
+        case 'get-content': {
+          if (!operands[0]) return err('Get-Content : Missing an argument for parameter \'Path\'.'), fail();
+          const path = resolve(s.cwd, operands[0]);
+          const node = find(s.disk, path);
+          if (!node) return notFound('Get-Content', path), fail();
+          if (node.kind === 'dir') {
+            err(`Get-Content : Unable to get content because it is a directory: '${show(path)}'.`);
+            tip('cat loeb faile. Kausta sisu näed ls-iga.');
+            return fail();
+          }
+          print(node.content);
+          ev.catPath = canonical(s.disk, path);
+          return ev;
+        }
+        case 'cp':
+        case 'copy':
+        case 'mv':
+        case 'move':
+        case 'ren': {
+          const move = name !== 'cp' && name !== 'copy';
+          if (operands.length < 2) {
+            err(`${name} : Missing an argument. Kirjuta: ${name} vana-nimi uus-nimi`);
+            return fail();
+          }
+          const from = resolve(s.cwd, operands[0]);
+          const node = find(s.disk, from);
+          if (!node) return notFound(name, from), fail();
+          if (node.kind === 'dir' && !move && !flags.some((f) => f.startsWith('-r'))) {
+            err(`Copy-Item : Container cannot be copied without -Recurse.`);
+            tip('Kausta kopeerimiseks: cp -r kaust uus-kaust.');
+            return fail();
+          }
+          let to = resolve(s.cwd, operands[1]);
+          const target = find(s.disk, to);
+          if (target?.kind === 'dir') to = [...to, node.name];
+          else if (target) return err(`${name} : An item with the specified name already exists.`), fail();
+          const parent = find(s.disk, to.slice(0, -1));
+          if (!parent || parent.kind !== 'dir') return notFound(name, to), fail();
+          const copy: Node = move ? node : structuredClone(node);
+          if (move) {
+            const oldParent = find(s.disk, from.slice(0, -1)) as Dir;
+            oldParent.kids = oldParent.kids.filter((k) => k !== node);
+            touchProject(from);
+          }
+          copy.name = to.at(-1)!;
+          parent.kids.push(copy);
+          touchProject(to);
+          return ev;
+        }
+        case 'rm':
+        case 'del':
+        case 'rmdir':
+        case 'remove-item': {
+          if (!operands[0]) return err('Remove-Item : Missing an argument for parameter \'Path\'.'), fail();
+          const path = resolve(s.cwd, operands[0]);
+          const node = find(s.disk, path);
+          if (!node) return notFound('Remove-Item', path), fail();
+          const recurse = flags.some((f) => f.startsWith('-r') || f === '-force');
+          if (node.kind === 'dir' && node.kids.length > 0 && !recurse) {
+            err(`Remove-Item : The item at ${show(path)} has children and the Recurse parameter was not specified.`);
+            tip('Kaust ei ole tühi. Kausta koos sisuga kustutab rm -r. Vaata enne üle, et see on õige kaust!');
+            return fail();
+          }
+          if (s.cwd.length >= path.length && same(s.cwd.slice(0, path.length), path)) {
+            err(`Remove-Item : Cannot remove the item at '${show(path)}' because it is in use.`);
+            tip('Sa oled ise selles kaustas. Mine enne cd ..-ga välja.');
+            return fail();
+          }
+          const parent = find(s.disk, path.slice(0, -1)) as Dir;
+          parent.kids = parent.kids.filter((k) => k !== node);
+          touchProject(path);
+          return ev;
+        }
+        case 'cls':
+        case 'clear':
+          out.innerHTML = '';
+          return ev;
+        case 'code':
+          print(t.terminalGame.codeOpens(operands[0] ? show(resolve(s.cwd, operands[0])) : show(s.cwd)), 'tip');
+          return ev;
+        case 'echo':
+        case 'write-output':
+          print(operands.join(' '));
+          return ev;
+        case 'help':
+          print(t.terminalGame.help, 'tip');
+          return ev;
+        case 'node':
+          if (flags.includes('-v') || flags.includes('--version')) return print('v22.20.0'), ev;
+          if (operands[0]) {
+            const path = resolve(s.cwd, operands[0]);
+            const node = find(s.disk, path);
+            if (!node || node.kind === 'dir') {
+              err(`Error: Cannot find module '${show(path)}'`);
+              return fail();
+            }
+            const logged = /console\.log\("([^"]*)"\)/.exec(node.content);
+            if (logged) print(logged[1]);
+            return ev;
+          }
+          err('Selles mängus ei saa Node\'i interaktiivset režiimi avada. Proovi node -v.');
+          return fail();
+        case 'npm': {
+          const sub = (operands[0] ?? '').toLowerCase();
+          if (flags.includes('-v') || flags.includes('--version')) return print('10.9.3'), ev;
+          if (sub === 'init') {
+            if (inProject()) return err('package.json on siin juba olemas.'), fail();
+            const dirNode = find(s.disk, s.cwd) as Dir;
+            dirNode.kids.push(file('package.json', '{\n  "name": "' + s.cwd.at(-1) + '",\n  "version": "1.0.0"\n}'));
+            touchProject([...s.cwd, 'package.json']);
+            print(`Wrote to ${show([...s.cwd, 'package.json'])}`);
+            return ev;
+          }
+          if (!inProject()) {
+            err('npm error code ENOENT');
+            err(`npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '${show([...s.cwd, 'package.json'])}'`);
+            tip('Oled vales kaustas: siin pole package.json-i. Vaata pwd-ga, kus oled, ja mine projekti kausta.');
+            return fail();
+          }
+          if (sub === 'install' || sub === 'i') {
+            print(operands[1] ? `added 1 package, and audited 214 packages in 2s` : 'up to date, audited 213 packages in 1s');
+            if (operands[1]) s.gitDirty = true;
+            print('found 0 vulnerabilities');
+            return ev;
+          }
+          if (sub === 'run' && operands[1]?.toLowerCase() === 'dev') {
+            print('');
+            print('> sookla-arvustused@0.0.0 dev');
+            print('> vite');
+            print('');
+            print('  VITE v7.1.7  ready in 312 ms');
+            print('');
+            print('  ➜  Local:   http://localhost:5173/', 'ok');
+            print('  ➜  press h + enter to show help');
+            s.serverRunning = true;
+            return ev;
+          }
+          if (sub === 'run') {
+            err(`npm error Missing script: "${operands[1] ?? ''}"`);
+            tip('Vaata package.json-ist, mis nimed on scripts all.');
+            return fail();
+          }
+          err(`Selles mängus töötavad npm install, npm run dev, npm init ja npm -v.`);
+          return fail();
+        }
+        case 'git': {
+          const sub = (operands[0] ?? '').toLowerCase();
+          if (!inRepo()) {
+            err('fatal: not a git repository (or any of the parent directories): .git');
+            tip('Git töötab ainult projekti kaustas. Mine kausta sookla-arvustused.');
+            return fail();
+          }
+          if (sub === 'status') {
+            print('On branch main');
+            if (s.gitStaged) print('Changes to be committed:\n  (kõik muudatused on lisatud)', 'ok');
+            else if (s.gitDirty) print('Untracked files / changes not staged for commit:\n  (muudatused, mida pole veel lisatud)', 'err');
+            else print('nothing to commit, working tree clean');
+            return ev;
+          }
+          if (sub === 'add') {
+            if (!operands[1]) return err('Nothing specified, nothing added. Kirjuta git add .'), fail();
+            if (s.gitDirty) s.gitStaged = true;
+            return ev;
+          }
+          if (sub === 'commit') {
+            if (!flags.includes('-m') || operands.length < 2) {
+              err('Selles mängus kirjuta commit koos sõnumiga: git commit -m "Sõnum"');
+              return fail();
+            }
+            if (!s.gitStaged) {
+              print(s.gitDirty ? 'no changes added to commit (use "git add")' : 'nothing to commit, working tree clean');
+              return fail();
+            }
+            s.commits++;
+            s.gitDirty = false;
+            s.gitStaged = false;
+            print(`[main ${Math.random().toString(16).slice(2, 9)}] ${operands.slice(1).join(' ')}`);
+            return ev;
+          }
+          if (sub === 'log') {
+            for (let i = s.commits; i > 0; i--) print(`a1b2c3${i} Minu commit ${i}`);
+            print('3de79da Lisasin Tailwindi');
+            print('9d51f4e Esimene React projekt');
+            return ev;
+          }
+          err('Selles mängus töötavad git status, git add, git commit ja git log.');
+          return fail();
+        }
+        default:
+          err(`${name} : The term '${name}' is not recognized as the name of a cmdlet, function, script file, or operable program.`);
+          tip('Kontrolli kirjapilti. Käskude nimekirja näed käsuga help.');
+          return fail();
+      }
+    }
+
+    function submit() {
+      const line = input.value;
+      input.value = '';
+      if (s.serverRunning) return;
+      print(`PS ${show(s.cwd)}> ${line}`, 'cmd');
+      if (line.trim()) {
+        history.push(line);
+        histPos = history.length;
+      }
+      const ev = run(line.trim());
+      updatePrompt();
+      if (line.trim()) check(ev);
+    }
+
+    function ctrlC() {
+      if (s.serverRunning) {
+        s.serverRunning = false;
+        print('^C');
+      } else {
+        print(`PS ${show(s.cwd)}> ${input.value}^C`, 'cmd');
+        input.value = '';
+      }
+      updatePrompt();
+      check({ cmd: '', ok: true, ctrlC: true });
+    }
+
+    function complete() {
+      const value = input.value;
+      const m = /(^|\s)("?)([^\s"]*)$/.exec(value);
+      if (!m) return;
+      const word = m[3];
+      const cut = Math.max(word.lastIndexOf('/'), word.lastIndexOf('\\'));
+      const dirPart = cut >= 0 ? word.slice(0, cut + 1) : '';
+      const frag = word.slice(cut + 1).toLowerCase();
+      const node = find(s.disk, resolve(s.cwd, dirPart || '.'));
+      if (!node || node.kind !== 'dir') return;
+      const matches = node.kids.filter((k) => k.name.toLowerCase().startsWith(frag));
+      if (matches.length === 0) return;
+      if (matches.length > 1) {
+        print(matches.map((k) => k.name).join('    '), 'tip');
+        return;
+      }
+      const full = dirPart + matches[0].name;
+      const quoted = full.includes(' ') ? `"${full}"` : full;
+      input.value = value.slice(0, value.length - m[2].length - word.length) + quoted;
+    }
+
+    function historyUp() {
+      if (histPos > 0) histPos--;
+      input.value = history[histPos] ?? '';
+    }
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submit();
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        complete();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        historyUp();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        histPos = Math.min(history.length, histPos + 1);
+        input.value = history[histPos] ?? '';
+      } else if (e.key.toLowerCase() === 'c' && e.ctrlKey && input.selectionStart === input.selectionEnd) {
+        e.preventDefault();
+        ctrlC();
+      } else if (e.key.toLowerCase() === 'l' && e.ctrlKey) {
+        e.preventDefault();
+        out.innerHTML = '';
+      }
+    });
+
+    term.addEventListener('click', () => {
+      if (!window.getSelection()?.toString()) input.focus({ preventScroll: true });
+    });
+
+    root.querySelectorAll<HTMLButtonElement>('[data-key]').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        if (key === 'tab') complete();
+        else if (key === 'up') historyUp();
+        else if (key === 'ctrlc') ctrlC();
+        else if (key === 'restart') start();
+        if (key !== 'restart') input.focus({ preventScroll: true });
+      }),
+    );
+
+    hintBtn.addEventListener('click', () => {
+      if (hintEl.hidden) hints++;
+      hintEl.hidden = false;
+    });
+
+    function start() {
+      s = { disk: makeDisk(), cwd: [...HOME], serverRunning: false, gitDirty: false, gitStaged: false, commits: 0 };
+      mission = 0;
+      hints = 0;
+      history = [];
+      histPos = 0;
+      out.innerHTML = '';
+      print('Windows PowerShell');
+      print(t.terminalGame.welcome, 'tip');
+      print('');
+      updatePrompt();
+      showMission();
+    }
+
+    start();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-terminal-game]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .intro { margin: 0 0 12px; color: var(--muted); }
+  .mission { margin-bottom: 10px; padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); }
+  .mission-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .progress { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+  .mission-text { margin: 4px 0 0; font-weight: 600; }
+  .hint { margin: 6px 0 0; font-size: 0.92rem; }
+  .done { margin: 4px 0 0; min-height: 1.2em; color: #2e8b57; font-weight: 600; }
+  .link-btn {
+    min-height: 32px;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .link-btn[hidden] { display: none; }
+  .term {
+    height: 340px;
+    overflow-y: auto;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #1e1e1e;
+    color: #cccccc;
+    font: 0.85rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    cursor: text;
+  }
+  .out :global(div) { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.45em; }
+  .out :global(.err) { color: #f48771; }
+  .out :global(.tip) { color: #e5c07b; }
+  .out :global(.ok) { color: #89d185; }
+  .line { display: flex; align-items: baseline; }
+  .prompt { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .line input {
+    flex: 1;
+    min-width: 6ch;
+    padding: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #ffffff;
+    font: inherit;
+    caret-color: #ffffff;
+  }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .key {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 600 0.85rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    cursor: pointer;
+  }
+  .key:hover { border-color: var(--accent); }
+  .key[data-key='restart'] { margin-left: auto; font-family: inherit; font-weight: 550; }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+    .term { height: 300px; font-size: 0.78rem; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .done { color: #6fcf97; }
+  }
+</style>
