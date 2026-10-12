@@ -154,6 +154,26 @@ posts:
         url: "https://et.wikipedia.org/wiki/Emaplaat"
         label: "Emaplaat (Vikipeedia)"
 
+  - title: "6. tund: loogikaväravad"
+    course: 10it
+    date: 2026-10-13
+    text: "Eelmisel nädalal valisid arvutile protsessori. Täna vaatame, mis selle sees toimub. Protsessor on miljardid pisikesed lülitid ja neist saab kokku panna loogikaväravad: JA, VÕI ja EI. Tunni lõpuks ehitame väravatest masina, mis oskab liita kahendarve, täpselt nagu sinu arvuti.\nKodutöö: ava PDF nupuga „Vaata“, täida lahtrid otse veebis, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 20.10."
+    items:
+      - type: pdf
+        file: "loogikavaravad-konspekt.pdf"
+        label: "Konspekt: loogikaväravad"
+      - type: game
+        game: logic
+      - type: pdf
+        file: "kodutoo-loogikavaravad.pdf"
+        label: "Kodutöö: loogikaväravad (täida veebis ja saada: mtsopo@taltech.ee)"
+      - type: link
+        url: "https://circuitverse.org/simulator"
+        label: "CircuitVerse: ehita ise skeeme brauseris (inglise keeles)"
+      - type: video
+        url: "https://www.youtube.com/watch?v=gI-qXk7XojA"
+        label: "Lisavideo: Crash Course, loogika ja loogikaväravad (inglise keeles)"
+
   - title: "Esimene tund: HTML-i alused"
     course: 11it
     date: 2026-09-08

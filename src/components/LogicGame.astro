@@ -1,0 +1,470 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-logic-game>
+  <div class="game-label">{label || t.logicGame.title}</div>
+  <div class="box">
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="lab" role="tab">{t.logicGame.tabs.lab}</button>
+      <button type="button" class="tab" data-tab="tables" role="tab">{t.logicGame.tabs.tables}</button>
+      <button type="button" class="tab" data-tab="adder" role="tab">{t.logicGame.tabs.adder}</button>
+    </div>
+
+    <section data-panel="lab">
+      <p class="intro">{t.logicGame.labIntro}</p>
+      <div class="gates" data-gates></div>
+      <div class="circuit">
+        <div class="inputs" data-inputs></div>
+        <svg viewBox="0 0 170 100" class="gate-svg" data-svg aria-hidden="true"></svg>
+        <div class="lamp" data-lamp aria-live="polite"></div>
+      </div>
+      <p class="explain" data-explain></p>
+      <table class="tt" data-lab-table></table>
+    </section>
+
+    <section data-panel="tables" hidden>
+      <div class="top">
+        <p class="question" data-tt-question></p>
+        <span class="progress" data-tt-progress></span>
+      </div>
+      <p class="muted-text">{t.logicGame.tablesHint}</p>
+      <table class="tt" data-tt-table></table>
+      <p class="feedback" data-tt-feedback aria-live="polite"></p>
+      <p class="why" data-tt-why hidden></p>
+      <div class="row">
+        <button type="button" class="btn" data-tt-check>{t.logicGame.check}</button>
+        <button type="button" class="btn" data-tt-next hidden>{t.logicGame.next}</button>
+      </div>
+    </section>
+
+    <section data-panel="adder" hidden>
+      <p class="intro">{t.logicGame.adderIntro}</p>
+      <div class="adder" data-adder></div>
+      <p class="sum" data-sum></p>
+      <div class="mission">
+        <span class="progress" data-ad-progress></span>
+        <p class="mission-text" data-ad-mission></p>
+        <p class="feedback ok" data-ad-feedback aria-live="polite"></p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  type Bit = 0 | 1;
+  type GateName = 'AND' | 'OR' | 'NOT' | 'XOR' | 'NAND' | 'NOR';
+
+  const GATES: Record<GateName, { inputs: 1 | 2; fn: (a: Bit, b: Bit) => Bit }> = {
+    AND: { inputs: 2, fn: (a, b) => (a & b) as Bit },
+    OR: { inputs: 2, fn: (a, b) => (a | b) as Bit },
+    NOT: { inputs: 1, fn: (a) => (1 - a) as Bit },
+    XOR: { inputs: 2, fn: (a, b) => (a ^ b) as Bit },
+    NAND: { inputs: 2, fn: (a, b) => (1 - (a & b)) as Bit },
+    NOR: { inputs: 2, fn: (a, b) => (1 - (a | b)) as Bit },
+  };
+
+  // Värava kuju 170 × 100 kastis; keha x = 55…115, y = 25…75.
+  function shape(g: GateName): string {
+    const bubble = '<circle cx="119" cy="50" r="4" class="body" />';
+    switch (g) {
+      case 'AND':
+        return '<path class="body" d="M55 25 H90 A25 25 0 0 1 90 75 H55 Z" />';
+      case 'NAND':
+        return '<path class="body" d="M55 25 H86 A25 25 0 0 1 86 75 H55 Z" />' + bubble;
+      case 'OR':
+        return '<path class="body" d="M52 25 Q85 25 115 50 Q85 75 52 75 Q66 50 52 25 Z" />';
+      case 'NOR':
+        return '<path class="body" d="M52 25 Q82 25 111 50 Q82 75 52 75 Q66 50 52 25 Z" />' + bubble;
+      case 'XOR':
+        return (
+          '<path class="body" d="M58 25 Q88 25 115 50 Q88 75 58 75 Q72 50 58 25 Z" />' +
+          '<path class="edge" d="M50 25 Q64 50 50 75" />'
+        );
+      case 'NOT':
+        return '<path class="body" d="M58 28 L109 50 L58 72 Z" /><circle cx="114" cy="50" r="4" class="body" />';
+    }
+  }
+
+  function gateSvg(g: GateName, a: Bit, b: Bit): string {
+    const out = GATES[g].fn(a, b);
+    const wire = (on: Bit, d: string) => `<path class="wire${on ? ' on' : ''}" d="${d}" />`;
+    const ins =
+      GATES[g].inputs === 1
+        ? wire(a, 'M0 50 H62')
+        : wire(a, 'M0 37 H64') + wire(b, 'M0 63 H64');
+    const outX = g === 'NOT' ? 118 : g === 'NAND' || g === 'NOR' ? 123 : 115;
+    return ins + wire(out, `M${outX} 50 H170`) + shape(g);
+  }
+
+  interface Challenge {
+    name: string;
+    expr: string;
+    inputs: string[];
+    fn: (v: Bit[]) => Bit;
+    why: string;
+  }
+
+  const challenges: Challenge[] = [
+    { name: 'JA', expr: 'A AND B', inputs: ['A', 'B'], fn: ([a, b]) => (a & b) as Bit, why: 'AND annab 1 ainult siis, kui mõlemad sisendid on 1.' },
+    { name: 'VÕI', expr: 'A OR B', inputs: ['A', 'B'], fn: ([a, b]) => (a | b) as Bit, why: 'OR annab 1, kui vähemalt üks sisend on 1. Ka siis, kui mõlemad!' },
+    { name: 'XOR', expr: 'A XOR B', inputs: ['A', 'B'], fn: ([a, b]) => (a ^ b) as Bit, why: 'XOR annab 1, kui sisendid on erinevad.' },
+    { name: 'NAND', expr: 'A NAND B', inputs: ['A', 'B'], fn: ([a, b]) => (1 - (a & b)) as Bit, why: 'NAND on AND tagurpidi: 0 ainult siis, kui mõlemad on 1.' },
+    { name: 'NOR', expr: 'A NOR B', inputs: ['A', 'B'], fn: ([a, b]) => (1 - (a | b)) as Bit, why: 'NOR on OR tagurpidi: 1 ainult siis, kui mõlemad on 0.' },
+    { name: 'Skeem 1', expr: 'A AND (NOT B)', inputs: ['A', 'B'], fn: ([a, b]) => (a & (1 - b)) as Bit, why: 'Kõigepealt pööra B ümber, siis AND: 1 ainult siis, kui A = 1 ja B = 0.' },
+    { name: 'Skeem 2', expr: '(A OR B) AND C', inputs: ['A', 'B', 'C'], fn: ([a, b, c]) => ((a | b) & c) as Bit, why: 'C peab olema 1 ja lisaks vähemalt üks A-st ja B-st.' },
+    { name: 'Skeem 3', expr: 'A XOR B XOR C', inputs: ['A', 'B', 'C'], fn: ([a, b, c]) => (a ^ b ^ c) as Bit, why: 'Tulemus on 1, kui ühtesid on paaritu arv: üks või kolm. Täissummaatori summa arvutatakse just nii!' },
+  ];
+
+  interface AdderMission {
+    text: string;
+    done: (a: number, b: number) => boolean;
+  }
+
+  const adderMissions: AdderMission[] = [
+    { text: 'Liida 5 + 3, nagu konspektis. Klõpsa bittidel.', done: (a, b) => (a === 5 && b === 3) || (a === 3 && b === 5) },
+    { text: 'Tee nii, et ühtegi ülekannet ei tekiks, aga summa oleks 15.', done: (a, b) => a + b === 15 && (a & b) === 0 },
+    { text: 'Pane ülekanne jooksma läbi kõigi nelja veeru, nii et summa ei mahu enam nelja bitti.', done: (a, b) => a + b >= 16 },
+    { text: 'Suurim võimalik summa: mis tuleb 15 + 15?', done: (a, b) => a === 15 && b === 15 },
+  ];
+
+  const rowsFor = (n: number): Bit[][] =>
+    Array.from({ length: 2 ** n }, (_, i) =>
+      Array.from({ length: n }, (_, j) => ((i >> (n - 1 - j)) & 1) as Bit),
+    );
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+
+    // Vahelehed
+    const tabs = root.querySelectorAll<HTMLButtonElement>('[data-tab]');
+    tabs.forEach((tab) =>
+      tab.addEventListener('click', () => {
+        tabs.forEach((x) => x.classList.toggle('active', x === tab));
+        root.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== tab.dataset.tab));
+      }),
+    );
+
+    // 1. Labor
+    let gate: GateName = 'AND';
+    const ins: Bit[] = [0, 0];
+    const gatesEl = $('gates');
+    const inputsEl = $('inputs');
+    const svg = root.querySelector<SVGSVGElement>('[data-svg]')!;
+    const lamp = $('lamp');
+    const explain = $('explain');
+    const labTable = $<HTMLTableElement>('lab-table');
+
+    (Object.keys(GATES) as GateName[]).forEach((g) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = t.logicGame.gateNames[g];
+      b.dataset.gate = g;
+      b.addEventListener('click', () => {
+        gate = g;
+        drawLab();
+      });
+      gatesEl.append(b);
+    });
+
+    function drawLab() {
+      const def = GATES[gate];
+      const out = def.fn(ins[0], ins[1]);
+      gatesEl.querySelectorAll<HTMLButtonElement>('.chip').forEach((c) => c.classList.toggle('active', c.dataset.gate === gate));
+      inputsEl.innerHTML = '';
+      ['A', 'B'].slice(0, def.inputs).forEach((name, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = `switch${ins[i] ? ' on' : ''}`;
+        b.textContent = `${name} = ${ins[i]}`;
+        b.setAttribute('aria-pressed', String(!!ins[i]));
+        b.addEventListener('click', () => {
+          ins[i] = (1 - ins[i]) as Bit;
+          drawLab();
+        });
+        inputsEl.append(b);
+      });
+      svg.innerHTML = gateSvg(gate, ins[0], ins[1]);
+      lamp.className = `lamp${out ? ' on' : ''}`;
+      lamp.textContent = String(out);
+      lamp.setAttribute('aria-label', t.logicGame.lamp(out));
+      explain.textContent = t.logicGame.explain[gate];
+      const rows = rowsFor(def.inputs);
+      const names = def.inputs === 1 ? ['A'] : ['A', 'B'];
+      labTable.innerHTML = '';
+      const head = labTable.insertRow();
+      [...names, t.logicGame.output].forEach((n) => {
+        const th = document.createElement('th');
+        th.textContent = n;
+        head.append(th);
+      });
+      rows.forEach((r) => {
+        const tr = labTable.insertRow();
+        const current = r.every((v, i) => v === ins[i]);
+        if (current) tr.className = 'current';
+        [...r, def.fn(r[0], r[1] ?? 0)].forEach((v) => (tr.insertCell().textContent = String(v)));
+      });
+    }
+    drawLab();
+
+    // 2. Tõeväärtustabelid
+    let ci = 0;
+    let answers: (Bit | null)[] = [];
+    const ttQuestion = $('tt-question');
+    const ttProgress = $('tt-progress');
+    const ttTable = $<HTMLTableElement>('tt-table');
+    const ttFeedback = $('tt-feedback');
+    const ttWhy = $('tt-why');
+    const ttCheck = $<HTMLButtonElement>('tt-check');
+    const ttNext = $<HTMLButtonElement>('tt-next');
+
+    function loadChallenge() {
+      const ch = challenges[ci];
+      const rows = rowsFor(ch.inputs.length);
+      answers = rows.map(() => null);
+      ttQuestion.textContent = t.logicGame.fill(ch.expr);
+      ttProgress.textContent = t.logicGame.progress(ci + 1, challenges.length);
+      ttFeedback.textContent = '';
+      ttFeedback.className = 'feedback';
+      ttWhy.hidden = true;
+      ttCheck.hidden = false;
+      ttNext.hidden = true;
+      ttTable.innerHTML = '';
+      const head = ttTable.insertRow();
+      [...ch.inputs, ch.expr].forEach((n) => {
+        const th = document.createElement('th');
+        th.textContent = n;
+        head.append(th);
+      });
+      rows.forEach((r, i) => {
+        const tr = ttTable.insertRow();
+        r.forEach((v) => (tr.insertCell().textContent = String(v)));
+        const td = tr.insertCell();
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'bit';
+        b.textContent = '?';
+        b.setAttribute('aria-label', t.logicGame.cellLabel(r.join('')));
+        b.addEventListener('click', () => {
+          answers[i] = answers[i] === 1 ? 0 : 1;
+          b.textContent = String(answers[i]);
+          b.classList.remove('wrong', 'right');
+        });
+        td.append(b);
+      });
+    }
+
+    ttCheck.addEventListener('click', () => {
+      const ch = challenges[ci];
+      if (answers.some((a) => a === null)) {
+        ttFeedback.textContent = t.logicGame.fillAll;
+        ttFeedback.className = 'feedback bad';
+        return;
+      }
+      const rows = rowsFor(ch.inputs.length);
+      let wrong = 0;
+      ttTable.querySelectorAll<HTMLButtonElement>('.bit').forEach((b, i) => {
+        const ok = answers[i] === ch.fn(rows[i]);
+        if (!ok) wrong++;
+        b.classList.toggle('wrong', !ok);
+        b.classList.toggle('right', ok);
+      });
+      if (wrong) {
+        ttFeedback.textContent = t.logicGame.wrong(wrong);
+        ttFeedback.className = 'feedback bad';
+        return;
+      }
+      ttFeedback.textContent = t.logicGame.correct;
+      ttFeedback.className = 'feedback ok';
+      ttWhy.textContent = ch.why;
+      ttWhy.hidden = false;
+      ttCheck.hidden = true;
+      ttNext.hidden = false;
+      ttNext.textContent = ci === challenges.length - 1 ? t.logicGame.restart : t.logicGame.next;
+    });
+
+    ttNext.addEventListener('click', () => {
+      ci = (ci + 1) % challenges.length;
+      loadChallenge();
+    });
+    loadChallenge();
+
+    // 3. Liitja
+    const a: Bit[] = [0, 0, 0, 0];
+    const b: Bit[] = [0, 0, 0, 0];
+    let mi = 0;
+    const adderEl = $('adder');
+    const sumEl = $('sum');
+    const adProgress = $('ad-progress');
+    const adMission = $('ad-mission');
+    const adFeedback = $('ad-feedback');
+    const value = (bits: Bit[]) => bits.reduce<number>((n, x) => n * 2 + x, 0);
+
+    function drawAdder() {
+      // Veerud paremalt vasakule, täpselt nagu tulbas liites.
+      const carries: Bit[] = [0, 0, 0, 0, 0];
+      const sum: Bit[] = [0, 0, 0, 0];
+      for (let i = 3; i >= 0; i--) {
+        const total = a[i] + b[i] + carries[i + 1];
+        sum[i] = (total % 2) as Bit;
+        carries[i] = (total >= 2 ? 1 : 0) as Bit;
+      }
+      adderEl.innerHTML = '';
+      const row = (label: string, cells: (HTMLElement | string)[], cls = '') => {
+        const r = document.createElement('div');
+        r.className = `ad-row ${cls}`;
+        const l = document.createElement('span');
+        l.className = 'ad-label';
+        l.textContent = label;
+        r.append(l);
+        cells.forEach((c) => {
+          const cell = document.createElement('span');
+          cell.className = 'ad-cell';
+          if (typeof c === 'string') cell.textContent = c;
+          else cell.append(c);
+          r.append(cell);
+        });
+        return r;
+      };
+      const bitBtn = (bits: Bit[], i: number) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `bit${bits[i] ? ' on' : ''}`;
+        btn.textContent = String(bits[i]);
+        btn.addEventListener('click', () => {
+          bits[i] = (1 - bits[i]) as Bit;
+          drawAdder();
+        });
+        return btn;
+      };
+      adderEl.append(
+        row(t.logicGame.carry, carries.map((c, i) => (i === 4 || !c ? '' : '1')), 'carry'),
+        row(`A (${value(a)})`, ['', ...a.map((_, i) => bitBtn(a, i))]),
+        row(`B (${value(b)})`, ['+', ...b.map((_, i) => bitBtn(b, i))]),
+        row(t.logicGame.sumLabel, [carries[0] ? '1' : '', ...sum.map(String)], 'result'),
+      );
+      const total = value(a) + value(b);
+      sumEl.textContent = t.logicGame.sumLine(value(a), value(b), total, carries[0] === 1);
+      let solved = false;
+      while (mi < adderMissions.length && adderMissions[mi].done(value(a), value(b))) {
+        mi++;
+        solved = true;
+      }
+      if (solved) {
+        adFeedback.textContent = t.logicGame.correct;
+        setTimeout(() => (adFeedback.textContent = ''), 1800);
+      }
+      adProgress.textContent = t.logicGame.progress(Math.min(mi + 1, adderMissions.length), adderMissions.length);
+      adMission.textContent = mi < adderMissions.length ? adderMissions[mi].text : t.logicGame.adderDone;
+    }
+    drawAdder();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-logic-game]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .tab, .gates :global(.chip), .inputs :global(.switch), .btn {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .tab:hover, .gates :global(.chip:hover), .inputs :global(.switch:hover) { border-color: var(--accent); }
+  .tab.active, .gates :global(.chip.active) { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+  .intro, .muted-text { margin: 0 0 12px; color: var(--muted); }
+  .gates { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .circuit { display: flex; align-items: center; gap: 8px; }
+  .inputs { display: flex; flex-direction: column; gap: 8px; }
+  .inputs :global(.switch) { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; }
+  .inputs :global(.switch.on) { border-color: #2e8b57; background: rgb(46 139 87 / 0.12); }
+  .gate-svg { flex: 1; min-width: 0; max-width: 300px; height: auto; }
+  .gate-svg :global(.body) { fill: var(--surface); stroke: var(--text); stroke-width: 2.2; }
+  .gate-svg :global(.edge) { fill: none; stroke: var(--text); stroke-width: 2.2; }
+  .gate-svg :global(.wire) { fill: none; stroke: var(--muted); stroke-width: 2.5; }
+  .gate-svg :global(.wire.on) { stroke: #2e8b57; stroke-width: 4; }
+  .lamp {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--line);
+    border-radius: 50%;
+    font: 700 1.1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--muted);
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .lamp.on { border-color: #e0a100; background: #ffd34d; color: #5c4300; box-shadow: 0 0 18px #ffd34d; }
+  .explain { margin: 12px 0; min-height: 2.8em; }
+  .tt { border-collapse: collapse; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .tt :global(th), .tt :global(td) { padding: 5px 14px; border-bottom: 1px solid var(--line); text-align: center; }
+  .tt :global(th) { background: var(--accent-soft); font-size: 0.85rem; }
+  .tt :global(tr.current td) { background: rgb(255 211 77 / 0.35); font-weight: 700; }
+  .top { display: flex; align-items: baseline; gap: 12px; }
+  .question { flex: 1; margin: 0 0 4px; font-size: 1.1rem; font-weight: 600; }
+  .progress { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+  .box :global(.bit) {
+    min-width: 44px;
+    min-height: 40px;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 700 1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    cursor: pointer;
+  }
+  .box :global(.bit:hover) { border-color: var(--accent); }
+  .box :global(.bit.on) { border-color: var(--accent); background: var(--accent-soft); }
+  .box :global(.bit.right) { border-color: #2e8b57; }
+  .box :global(.bit.wrong) { border-color: #c0392b; background: rgb(192 57 43 / 0.1); }
+  .feedback { margin: 10px 0 0; min-height: 1.4em; font-weight: 600; }
+  .feedback.ok { color: #2e8b57; }
+  .feedback.bad { color: #c0392b; }
+  .why { margin: 4px 0 10px; padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); }
+  .row { display: flex; gap: 8px; margin-top: 8px; }
+  .btn { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn[hidden] { display: none; }
+  .adder { display: inline-flex; flex-direction: column; gap: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .adder :global(.ad-row) { display: flex; align-items: center; gap: 4px; }
+  .adder :global(.ad-label) { width: 92px; font-size: 0.85rem; color: var(--muted); }
+  .adder :global(.ad-cell) { display: grid; place-items: center; width: 46px; min-height: 30px; font-weight: 700; }
+  .adder :global(.carry .ad-cell) { min-height: 20px; color: #c0392b; font-size: 0.85rem; }
+  .adder :global(.result) { border-top: 2px solid var(--text); padding-top: 4px; }
+  .adder :global(.result .ad-cell) { font-size: 1.15rem; }
+  .sum { margin: 12px 0; font-weight: 600; }
+  .mission { padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); }
+  .mission-text { margin: 4px 0 0; font-weight: 600; }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+    .tt :global(th), .tt :global(td) { padding: 4px 8px; }
+    .adder :global(.ad-label) { width: 64px; font-size: 0.75rem; }
+    .adder :global(.ad-cell) { width: 40px; }
+    .box :global(.bit) { min-width: 38px; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+    .feedback.bad { color: #ff8a80; }
+    .gate-svg :global(.wire.on) { stroke: #6fcf97; }
+  }
+</style>
