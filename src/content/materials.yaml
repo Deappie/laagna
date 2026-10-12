@@ -39,6 +39,8 @@ courses:
         label: "VS Code veebis"
       - url: "https://www.w3schools.com/"
         label: "W3Schools"
+      - file: "abileht-terminal.pdf"
+        label: "Abileht: terminali käsud"
 
 posts:
   - title: "1. tund: miks just kahendsüsteem?"
@@ -314,3 +316,32 @@ posts:
       - type: link
         url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview"
         label: "MDN: kuidas klient ja server suhtlevad (inglise keeles)"
+
+  - title: "Kuues tund: terminal ja käsurida"
+    course: 11it
+    date: 2026-10-13
+    text: "Seni kirjutasid terminali käske juhendist maha nagu loitse. Täna võtame need lahti: kus sa terminalis oled, kuidas kaustade vahel liikuda ja mida npm run dev või git status tegelikult teevad. Järgmises tunnis on meil korraga kaks serverit ja ilma selleta oleks seal raske.\nTunnis teed läbi tunniülesanded ja aardejahi. Kodus mängi terminalimäng lõpuni. Söökla projekt peab tunni lõpuks olema kaustaga server ja commit'itud."
+    items:
+      - type: pdf
+        file: "terminal-konspekt.pdf"
+        label: "Konspekt: terminal ja käsurida"
+      - type: pdf
+        file: "tunniulesanded-terminal.pdf"
+        label: "Tunniülesanded: terminal"
+      - type: file
+        file: "tunnitoo-terminal.zip"
+        label: "Aardejaht: tunnitöö kaust (ZIP)"
+      - type: game
+        game: terminal
+      - type: pdf
+        file: "abileht-terminal.pdf"
+        label: "Abileht: terminali käsud (hoia käepärast)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Environment_setup/Command_line"
+        label: "MDN: käsurea kiirkursus (inglise keeles)"
+      - type: link
+        url: "https://code.visualstudio.com/docs/terminal/basics"
+        label: "VS Code'i terminal (inglise keeles)"
+      - type: link
+        url: "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository"
+        label: "Pro Git: git status, add ja commit (inglise keeles)"
