@@ -340,7 +340,7 @@ posts:
   - title: "Kuues tund: terminal ja käsurida"
     course: 11it
     date: 2026-10-13
-    text: "Seni kirjutasid terminali käske juhendist maha nagu loitse. Täna võtame need lahti: kus sa terminalis oled, kuidas kaustade vahel liikuda ja mida npm run dev või git status tegelikult teevad. Järgmises tunnis on meil korraga kaks serverit ja ilma selleta oleks seal raske.\nTunnis teeme tunniülesannete 1. ja 2. osa ehk harjutame ja käime läbi aardejahi.\nKodutöö: tee tunniülesannete 3. ja 4. osa ning mängi terminalimäng lõpuni. Siis ava kodutöö PDF nupuga „Vaata“, kleebi lahtritesse oma terminali väljundid, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 20.10."
+    text: "Seni kirjutasid terminali käske juhendist maha nagu loitse. Täna võtame need lahti: kus sa terminalis oled, kuidas kaustade vahel liikuda ja mida npm run dev või git status tegelikult teevad. Järgmises tunnis on meil korraga kaks serverit ja ilma selleta oleks seal raske.\nTunnis teeme tunniülesannete 1. ja 2. osa ehk harjutame ja käime läbi aardejahi. 3. ja 4. osaga jätkame järgmises tunnis.\nKodutöö: midagi alla laadida ega paigaldada pole vaja, piisab brauserist. Mängi siinsamas lehel terminalimäng lõpuni, siis ava kodutöö PDF nupuga „Vaata“, vasta küsimustele, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 20.10."
     items:
       - type: pdf
         file: "terminal-konspekt.pdf"
