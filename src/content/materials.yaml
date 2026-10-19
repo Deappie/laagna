@@ -368,3 +368,36 @@ posts:
       - type: link
         url: "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository"
         label: "Pro Git: git status, add ja commit (inglise keeles)"
+
+  - title: "Seitsmes tund: esimene backend"
+    course: 11it
+    date: 2026-10-20
+    text: "Seni küsisid andmeid teiste serveritelt. Täna kirjutad oma serveri: söökla projekt saab backendi, mis annab arvustused JSON-ina täpselt nagu PokeAPI. Kogu backend on üks JavaScripti fail ja Node.js käivitab selle.\nTunni alguses teeme ära terminali tunniülesannete 3. ja 4. osa (Node ja kaust server), siis läheme tunnijuhendiga edasi. Söökla projekt peab kaasas olema.\nKodutöö: midagi paigaldada pole vaja, piisab brauserist. Ava kodutöö PDF nupuga „Vaata“, vasta küsimustele, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 3.11."
+    items:
+      - type: pdf
+        file: "backend-konspekt.pdf"
+        label: "Konspekt: Node.js ja Express"
+      - type: pdf
+        file: "tunniulesanded-terminal.pdf"
+        label: "Tunni algus: terminali tunniülesannete 3. ja 4. osa"
+      - type: pdf
+        file: "tunnijuhend-backend.pdf"
+        label: "Tunnijuhend: söökla backend samm-sammult"
+      - type: pdf
+        file: "kodutoo-backend.pdf"
+        label: "Kodutöö: esimene backend (täida veebis ja saada: mtsopo@taltech.ee)"
+      - type: link
+        url: "https://expressjs.com/en/starter/hello-world.html"
+        label: "Express: Hello world (inglise keeles)"
+      - type: link
+        url: "https://expressjs.com/en/guide/routing.html"
+        label: "Express: marsruudid (inglise keeles)"
+      - type: link
+        url: "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs"
+        label: "Mis on Node.js? (inglise keeles)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/Express_Nodejs/Introduction"
+        label: "MDN: Express ja Node.js tutvustus (inglise keeles)"
+      - type: link
+        url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status"
+        label: "MDN: kõik HTTP staatusekoodid (inglise keeles)"
