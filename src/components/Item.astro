@@ -11,6 +11,7 @@ import SizeQuiz from './SizeQuiz.astro';
 import PracticeSheet from './PracticeSheet.astro';
 import TerminalGame from './TerminalGame.astro';
 import LogicGame from './LogicGame.astro';
+import CpuGame from './CpuGame.astro';
 
 interface Props {
   item: Item;
@@ -58,6 +59,8 @@ const icons: Record<Item['type'], string> = {
         <TerminalGame label={item.label} />
       ) : item.game === 'logic' ? (
         <LogicGame label={item.label} />
+      ) : item.game === 'cpu' ? (
+        <CpuGame label={item.label} />
       ) : item.game === 'escape' || item.game === 'escape-web' || item.game === 'escape-js' ? (
         <EscapeGame
           room={item.game === 'escape' ? 'hex' : item.game === 'escape-web' ? 'web' : 'js'}

@@ -174,6 +174,43 @@ posts:
         url: "https://www.youtube.com/watch?v=gI-qXk7XojA"
         label: "Lisavideo: Crash Course, loogika ja loogikaväravad (inglise keeles)"
 
+  - title: "7. tund: kuidas protsessor programmi täidab"
+    course: 10it
+    date: 2026-11-03
+    text: "Eelmisel korral ehitasime väravatest liitja. Aga kes ütleb protsessorile, mida liita ja millal? Täna vaatame, kuidas programm mälus välja näeb (spoiler: arvudena) ja mida protsessor teeb miljardeid kordi sekundis: too, dekodeeri, täida. Siis kirjutad protsessorimängus ise masinkoodi.\nKodutöö: ava PDF nupuga „Vaata“, täida lahtrid otse veebis, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 10.11."
+    items:
+      - type: pdf
+        file: "protsessor-konspekt.pdf"
+        label: "Konspekt: kuidas protsessor programmi täidab"
+      - type: game
+        game: cpu
+      - type: pdf
+        file: "kodutoo-protsessor.pdf"
+        label: "Kodutöö: protsessor (täida veebis ja saada: mtsopo@taltech.ee)"
+      - type: link
+        url: "https://peterhigginson.co.uk/lmc/"
+        label: "Lisamäng: Little Man Computer, sama idee suuremalt (inglise keeles)"
+
+  - title: "8. tund: pildid ja heli arvudena"
+    course: 10it
+    date: 2026-11-10
+    draft: true
+    text: "Kuidas foto, laul või video mahub arvutisse, kus on ainult nullid ja ühed? Pilt on pikslite ruudustik, iga piksel on kolm arvu. Heli on tuhandeid mõõtmisi sekundis. Arvutame, kui suur üks pilt päriselt on ja kuidas 36 MB-st saab 3 MB."
+    items:
+      - type: pdf
+        file: "pildid-heli-konspekt.pdf"
+        label: "Konspekt: pildid ja heli arvudena"
+
+  - title: "10. tund: kuidas internet töötab"
+    course: 10it
+    date: 2026-11-24
+    draft: true
+    text: "Klõpsad videol ja sekundi pärast see mängib. Kust see tuli? Täna ja järgmisel korral vaatame, kuidas internet päriselt töötab: IP-aadressid, paketid, ruuterid ja DNS. Terminali käskudega jälgime, kuidas meie paketid maailmas ringi käivad."
+    items:
+      - type: pdf
+        file: "internet-konspekt.pdf"
+        label: "Konspekt: kuidas internet töötab"
+
   - title: "Esimene tund: HTML-i alused"
     course: 11it
     date: 2026-09-08

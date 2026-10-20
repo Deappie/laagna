@@ -1,0 +1,543 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-cpu-game>
+  <div class="game-label">{label || t.cpuGame.title}</div>
+  <div class="box">
+    <p class="intro">{t.cpuGame.intro}</p>
+
+    <div class="mission">
+      <div class="mission-top">
+        <span class="progress" data-progress></span>
+        <div class="mission-nav" data-nav aria-label={t.cpuGame.missions}></div>
+      </div>
+      <p class="mission-text" data-mission></p>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+      <button type="button" class="btn" data-next hidden>{t.cpuGame.next}</button>
+    </div>
+
+    <div class="layout">
+      <div class="left">
+        <label class="caption" for="cpu-program">{t.cpuGame.program}</label>
+        <textarea id="cpu-program" class="code" rows="10" spellcheck="false" autocapitalize="off" data-code></textarea>
+        <div class="row">
+          <button type="button" class="btn" data-load>{t.cpuGame.load}</button>
+          <button type="button" class="btn ghost" data-step>{t.cpuGame.step}</button>
+          <button type="button" class="btn ghost" data-run>{t.cpuGame.run}</button>
+          <button type="button" class="btn ghost" data-reset>{t.cpuGame.reset}</button>
+        </div>
+        <div class="log" data-log aria-live="polite"></div>
+      </div>
+
+      <div class="right">
+        <div class="caption">{t.cpuGame.registers}</div>
+        <div class="regs">
+          <div class="reg"><span>{t.cpuGame.regA}</span><b data-a></b></div>
+          <div class="reg"><span>{t.cpuGame.regPc}</span><b data-pc></b></div>
+          <div class="reg"><span>{t.cpuGame.regIr}</span><b data-ir></b></div>
+          <div class="reg"><span>{t.cpuGame.clock}</span><b data-clock></b></div>
+        </div>
+        <div class="caption">{t.cpuGame.output}</div>
+        <div class="out" data-out></div>
+        <div class="caption">{t.cpuGame.memory}</div>
+        <div class="mem" data-mem></div>
+      </div>
+    </div>
+
+    <details class="ref">
+      <summary>{t.cpuGame.reference}</summary>
+      <table>
+        <thead>
+          <tr><th>{t.cpuGame.refCode}</th><th>{t.cpuGame.refCommand}</th><th>{t.cpuGame.refMeaning}</th></tr>
+        </thead>
+        <tbody data-ref></tbody>
+      </table>
+    </details>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  type Op = 'HALT' | 'LOAD' | 'ADD' | 'SUB' | 'STORE' | 'OUT' | 'JUMP' | 'JZ';
+  type Kind = 'code' | 'data' | 'empty';
+
+  // Käsu kood on arvu esimene 16-süsteemi number, aadress teine: LOAD 14 = 1E.
+  const OPS: Op[] = ['HALT', 'LOAD', 'ADD', 'SUB', 'STORE', 'OUT', 'JUMP', 'JZ'];
+  const NEEDS_ADDRESS: Record<Op, boolean> = {
+    HALT: false, LOAD: true, ADD: true, SUB: true, STORE: true, OUT: false, JUMP: true, JZ: true,
+  };
+  const MEANING: Record<Op, string> = {
+    HALT: 'peatab programmi',
+    LOAD: 'A = pesa x sisu',
+    ADD: 'A = A + pesa x sisu',
+    SUB: 'A = A − pesa x sisu',
+    STORE: 'kirjutab A väärtuse pessa x',
+    OUT: 'paneb A väärtuse väljundisse',
+    JUMP: 'järgmine käsk tuleb pesast x',
+    JZ: 'kui A on 0, järgmine käsk tuleb pesast x',
+  };
+
+  const SIZE = 16;
+  const LIMIT = 500;
+  const hex = (n: number) => n.toString(16).toUpperCase().padStart(2, '0');
+  const decodeText = (v: number) => {
+    const op = OPS[v >> 4];
+    if (!op) return '?';
+    return NEEDS_ADDRESS[op] ? `${op} ${v & 15}` : op;
+  };
+
+  interface Mission {
+    text: string;
+    start: string;
+    data: Record<number, number>;
+    // Kontrollitakse peatumisel; live = kontrollitakse ka iga OUT-i järel.
+    check: (out: number[], mem: number[]) => boolean;
+    live?: boolean;
+  }
+
+  const same = (a: number[], b: number[]) => a.length === b.length && a.every((x, i) => x === b[i]);
+
+  const missions: Mission[] = [
+    {
+      text: 'Programm on juba olemas. Vajuta „Lae mällu“ ja siis mitu korda „Samm“. Jälgi, kuidas PC liigub ja A muutub. Mis tuleb väljundisse?',
+      start: 'LOAD 14\nADD 15\nOUT\nHALT',
+      data: { 14: 5, 15: 3 },
+      check: (out) => same(out, [8]),
+    },
+    {
+      text: 'Muuda programmi nii, et see arvutaks 5 − 3. Vihje: vahetada tuleb ainult üks sõna.',
+      start: 'LOAD 14\nADD 15\nOUT\nHALT',
+      data: { 14: 5, 15: 3 },
+      check: (out) => same(out, [2]),
+    },
+    {
+      text: 'Kirjuta ise programm, mis paneb väljundisse kõigepealt 5 ja siis 8. Arvud 5 ja 3 on pesades 14 ja 15.',
+      start: '; kirjuta siia\n',
+      data: { 14: 5, 15: 3 },
+      check: (out) => same(out, [5, 8]),
+    },
+    {
+      text: 'Arvuta 5 + 3, aga ära pane seda väljundisse. Kirjuta tulemus hoopis pessa 13 ja peatu. Vaata mälust, kas 08 jõudis kohale.',
+      start: '; kirjuta siia\n',
+      data: { 14: 5, 15: 3 },
+      check: (_, mem) => mem[13] === 8,
+    },
+    {
+      text: 'Pane väljundisse 1, 2, 3, 4, 5 ja nii edasi lõputult. Pesas 15 on arv 1. Vihje: JUMP viib programmi algusesse tagasi. Kolmest reast piisab!',
+      start: '; kirjuta siia\n',
+      data: { 15: 1 },
+      check: (out) => out.length >= 5 && same(out.slice(0, 5), [1, 2, 3, 4, 5]),
+      live: true,
+    },
+    {
+      text: 'Loenda 1 kuni 10 ja peatu. Loendurit hoia pesas 13, pesas 14 on 10 ja pesas 15 on 1. Vihje: kui lahutad loendurist 10 ja saad 0, oled kohal. Selleks on JZ.',
+      start: '; kirjuta siia\n',
+      data: { 13: 0, 14: 10, 15: 1 },
+      check: (out) => same(out, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    },
+    {
+      text: 'Sellel protsessoril pole korrutamist! Arvuta 4 × 3 ainult liitmisega: liida 4 kolm korda. Pesas 15 on loendur 3, pesas 14 arv 4, pesas 12 arv 1. Tulemust hoia pesas 13 ja pane see lõpuks väljundisse.',
+      start: '; kirjuta siia\n',
+      data: { 12: 1, 13: 0, 14: 4, 15: 3 },
+      check: (out) => same(out, [12]),
+    },
+  ];
+
+  type Parsed = { ok: true; values: number[]; kinds: Kind[] } | { ok: false; error: string };
+
+  function assemble(source: string): Parsed {
+    const values: number[] = [];
+    const kinds: Kind[] = [];
+    const lines = source.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].replace(/(;|\/\/).*$/, '').trim();
+      if (!line) continue;
+      const [word, arg, ...rest] = line.toUpperCase().split(/[\s,]+/);
+      const n = i + 1;
+      if (values.length >= SIZE) return { ok: false, error: t.cpuGame.errFull };
+      if (word === 'DAT') {
+        const v = Number(arg);
+        if (arg === undefined || rest.length || !Number.isInteger(v) || v < 0 || v > 255)
+          return { ok: false, error: t.cpuGame.errDat(n) };
+        values.push(v);
+        kinds.push('data');
+        continue;
+      }
+      const op = OPS.indexOf(word as Op);
+      if (op < 0) return { ok: false, error: t.cpuGame.errUnknown(n, line.split(/\s+/)[0]) };
+      if (NEEDS_ADDRESS[word as Op]) {
+        const a = Number(arg);
+        if (arg === undefined || rest.length || !Number.isInteger(a) || a < 0 || a >= SIZE)
+          return { ok: false, error: t.cpuGame.errAddress(n) };
+        values.push(op * 16 + a);
+      } else {
+        if (arg !== undefined) return { ok: false, error: t.cpuGame.errNoAddress(n, word) };
+        values.push(op * 16);
+      }
+      kinds.push('code');
+    }
+    return { ok: true, values, kinds };
+  }
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+    const code = $<HTMLTextAreaElement>('code');
+    const log = $('log');
+    const memEl = $('mem');
+    const outEl = $('out');
+    const feedback = $('feedback');
+    const nextBtn = $<HTMLButtonElement>('next');
+    const runBtn = $<HTMLButtonElement>('run');
+
+    let mi = 0;
+    const done = new Set<number>();
+    let mem: number[] = [];
+    let kinds: Kind[] = [];
+    let a = 0;
+    let pc = 0;
+    let ir: number | null = null;
+    let clock = 0;
+    let out: number[] = [];
+    let halted = false;
+    let loaded = false;
+    let touched: number | null = null;
+    let timer: number | undefined;
+
+    $('ref').innerHTML = OPS.map(
+      (op, i) =>
+        `<tr><td>${i}${NEEDS_ADDRESS[op] ? 'x' : '0'}</td><td>${op}${NEEDS_ADDRESS[op] ? ' x' : ''}</td><td>${MEANING[op]}</td></tr>`,
+    ).join('') + '<tr><td>—</td><td>DAT n</td><td>ei ole käsk: paneb sellesse pessa lihtsalt arvu n</td></tr>';
+
+    function clearMachine() {
+      stop();
+      const m = missions[mi];
+      mem = Array(SIZE).fill(0);
+      kinds = Array(SIZE).fill('empty');
+      for (const [addr, v] of Object.entries(m.data)) {
+        mem[Number(addr)] = v;
+        kinds[Number(addr)] = 'data';
+      }
+      a = 0;
+      pc = 0;
+      ir = null;
+      clock = 0;
+      out = [];
+      halted = false;
+      loaded = false;
+      touched = null;
+    }
+
+    function draw() {
+      $('a').textContent = `${a}`;
+      $('pc').textContent = `${pc}`;
+      $('ir').textContent = ir === null ? '–' : `${hex(ir)} = ${decodeText(ir)}`;
+      $('clock').textContent = `${clock}`;
+      outEl.textContent = out.join(', ');
+      memEl.innerHTML = '';
+      mem.forEach((v, i) => {
+        const cell = document.createElement('div');
+        cell.className = `cell ${kinds[i]}${loaded && !halted && i === pc ? ' pc' : ''}${i === touched ? ' touched' : ''}`;
+        const meaning = kinds[i] === 'code' ? decodeText(v) : kinds[i] === 'data' ? `= ${v}` : t.cpuGame.empty;
+        cell.innerHTML = `<span class="addr">${i}</span><span class="val">${hex(v)}</span><span class="mean">${meaning}</span>`;
+        memEl.append(cell);
+      });
+    }
+
+    function loadMission() {
+      const m = missions[mi];
+      code.value = m.start;
+      clearMachine();
+      log.textContent = '';
+      $('progress').textContent = t.cpuGame.progress(mi + 1, missions.length);
+      $('mission').textContent = m.text;
+      feedback.textContent = '';
+      feedback.className = 'feedback';
+      nextBtn.hidden = true;
+      $('nav').innerHTML = '';
+      missions.forEach((_, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = `chip${i === mi ? ' active' : ''}${done.has(i) ? ' done' : ''}`;
+        b.textContent = done.has(i) ? `${i + 1} ✓` : `${i + 1}`;
+        b.addEventListener('click', () => {
+          mi = i;
+          loadMission();
+        });
+        $('nav').append(b);
+      });
+      draw();
+    }
+
+    function load() {
+      clearMachine();
+      const parsed = assemble(code.value);
+      if (!parsed.ok) {
+        log.textContent = parsed.error;
+        log.className = 'log bad';
+        draw();
+        return false;
+      }
+      const notes: string[] = [];
+      parsed.values.forEach((v, i) => {
+        if (kinds[i] === 'data') notes.push(t.cpuGame.overlap(i));
+        mem[i] = v;
+        kinds[i] = parsed.kinds[i];
+      });
+      loaded = true;
+      log.className = 'log';
+      log.textContent = [t.cpuGame.loaded(parsed.values.length), ...notes].join('\n');
+      draw();
+      return true;
+    }
+
+    function finish(success: boolean, message: string) {
+      stop();
+      if (success) {
+        done.add(mi);
+        const all = done.size === missions.length;
+        feedback.textContent = all ? t.cpuGame.allDone : t.cpuGame.correct;
+        feedback.className = 'feedback ok';
+        nextBtn.hidden = all;
+        const chip = $('nav').children[mi] as HTMLElement;
+        chip.textContent = `${mi + 1} ✓`;
+        chip.classList.add('done');
+      } else if (message) {
+        feedback.textContent = message;
+        feedback.className = 'feedback bad';
+      }
+    }
+
+    function step() {
+      if (!loaded && !load()) return;
+      if (halted) return;
+      const m = missions[mi];
+      const value = mem[pc];
+      const op = OPS[value >> 4];
+      const x = value & 15;
+      ir = value;
+      touched = null;
+      const lines = [t.cpuGame.fetch(pc, hex(value)), t.cpuGame.decode(hex(value), op ? decodeText(value) : '?')];
+      let next = (pc + 1) % SIZE;
+      let exec = '';
+      switch (op) {
+        case 'LOAD':
+          a = mem[x];
+          touched = x;
+          exec = `panen A-sse pesa ${x} arvu ${a}.`;
+          break;
+        case 'ADD':
+          a = (a + mem[x]) % 256;
+          touched = x;
+          exec = `liidan A-le pesa ${x} arvu ${mem[x]}. Nüüd A = ${a}.`;
+          break;
+        case 'SUB':
+          a = (a - mem[x] + 256) % 256;
+          touched = x;
+          exec = `lahutan A-st pesa ${x} arvu ${mem[x]}. Nüüd A = ${a}.`;
+          break;
+        case 'STORE':
+          mem[x] = a;
+          if (kinds[x] === 'empty') kinds[x] = 'data';
+          touched = x;
+          exec = `kirjutan A väärtuse ${a} pessa ${x}.`;
+          break;
+        case 'OUT':
+          out.push(a);
+          exec = `panen väljundisse ${a}.`;
+          break;
+        case 'JUMP':
+          next = x;
+          exec = `järgmine käsk tuleb pesast ${x}.`;
+          break;
+        case 'JZ':
+          if (a === 0) next = x;
+          exec = a === 0 ? `A on 0, nii et hüppan pessa ${x}.` : `A on ${a}, mitte 0, nii et lähen edasi.`;
+          break;
+        default:
+          halted = true;
+          exec = 'peatun.';
+      }
+      clock++;
+      if (!halted) pc = next;
+      log.className = 'log';
+      log.textContent = [...lines, `3. Täida: ${exec}`].join('\n');
+      draw();
+
+      if (m.live && op === 'OUT' && m.check(out, mem)) return finish(true, '');
+      if (halted) {
+        const ok = m.check(out, mem);
+        finish(ok, ok ? '' : `${t.cpuGame.halted} ${t.cpuGame.wrong(out.length ? out.join(', ') : 'tühi')}`);
+      } else if (clock >= LIMIT) {
+        halted = true;
+        finish(false, t.cpuGame.tooLong);
+      }
+    }
+
+    function stop() {
+      if (timer !== undefined) clearInterval(timer);
+      timer = undefined;
+      runBtn.textContent = t.cpuGame.run;
+    }
+
+    $('load').addEventListener('click', () => {
+      feedback.textContent = '';
+      load();
+    });
+    $('step').addEventListener('click', step);
+    runBtn.addEventListener('click', () => {
+      if (timer !== undefined) return stop();
+      if (!loaded && !load()) return;
+      if (halted) return;
+      runBtn.textContent = t.cpuGame.pause;
+      timer = window.setInterval(step, 350);
+    });
+    $('reset').addEventListener('click', () => {
+      clearMachine();
+      log.textContent = '';
+      feedback.textContent = '';
+      draw();
+    });
+    code.addEventListener('input', () => {
+      if (loaded) {
+        clearMachine();
+        draw();
+      }
+    });
+    nextBtn.addEventListener('click', () => {
+      mi = (mi + 1) % missions.length;
+      loadMission();
+    });
+
+    loadMission();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-cpu-game]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .intro { margin: 0 0 12px; color: var(--muted); }
+  .mission { padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); margin-bottom: 14px; }
+  .mission-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .progress { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+  .mission-nav { display: flex; flex-wrap: wrap; gap: 4px; }
+  .mission-nav :global(.chip) {
+    min-width: 34px;
+    min-height: 30px;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .mission-nav :global(.chip.done) { border-color: #2e8b57; color: #2e8b57; }
+  .mission-nav :global(.chip.active) { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+  .mission-text { margin: 8px 0 0; font-weight: 600; }
+  .feedback { margin: 8px 0 0; min-height: 1.2em; font-weight: 600; }
+  .feedback:empty { display: none; }
+  .feedback.ok { color: #2e8b57; }
+  .feedback.bad { color: #c0392b; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 16px; }
+  .caption { display: block; margin: 0 0 6px; font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+  .right .caption:not(:first-child) { margin-top: 12px; }
+  .code {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 0.95rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    resize: vertical;
+  }
+  .code:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .btn {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn.ghost { background: var(--surface); color: var(--text); border-color: var(--line); }
+  .btn.ghost:hover { border-color: var(--accent); background: var(--surface); }
+  .btn[hidden] { display: none; }
+  .mission .btn { margin-top: 8px; }
+  .log {
+    margin-top: 10px;
+    min-height: 4.5em;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: var(--accent-soft);
+    font: 0.85rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    white-space: pre-wrap;
+  }
+  .log:empty { visibility: hidden; }
+  .log.bad { background: rgb(192 57 43 / 0.1); color: #c0392b; }
+  .regs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .reg { display: flex; flex-direction: column; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; }
+  .reg span { font-size: 0.75rem; color: var(--muted); }
+  .reg b { font: 700 1.05rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .out {
+    min-height: 2.2em;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #10202f;
+    color: #7CFC9A;
+    font: 700 1rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    overflow-wrap: anywhere;
+  }
+  .mem { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .mem :global(.cell) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 2px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    transition: background 0.15s;
+  }
+  .mem :global(.addr) { align-self: flex-start; padding-left: 4px; font-size: 0.7rem; color: var(--muted); }
+  .mem :global(.val) { font-size: 1.1rem; font-weight: 700; }
+  .mem :global(.mean) { font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
+  .mem :global(.cell.empty .val) { color: var(--muted); font-weight: 400; }
+  .mem :global(.cell.code) { background: var(--accent-soft); }
+  .mem :global(.cell.pc) { border: 2px solid var(--accent); }
+  .mem :global(.cell.touched) { background: rgb(255 211 77 / 0.45); }
+  .ref { margin-top: 14px; }
+  .ref summary { cursor: pointer; font-weight: 600; }
+  .ref table { margin-top: 8px; border-collapse: collapse; font-size: 0.9rem; }
+  .ref :global(td), .ref th { padding: 4px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+  .ref :global(td:nth-child(-n+2)) { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; }
+  .ref th { background: var(--accent-soft); font-size: 0.85rem; }
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .box { padding: 12px; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+    .feedback.bad, .log.bad { color: #ff8a80; }
+    .mem :global(.cell.touched) { background: rgb(255 211 77 / 0.25); }
+  }
+</style>
