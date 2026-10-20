@@ -211,7 +211,7 @@ posts:
         file: "internet-konspekt.pdf"
         label: "Konspekt: kuidas internet töötab"
 
-  - title: "Esimene tund: HTML-i alused"
+  - title: "1. tund: HTML-i alused"
     course: 11it
     date: 2026-09-08
     text: "HTML on keel, millega veebilehed kirja pannakse. Leht koosneb elementidest: pealkirjad, tekstilõigud, lingid, pildid ja loetelud. Loe materjal läbi, proovi näiteid VS Code'is ja tee lõpus harjutus ning test."
@@ -246,7 +246,7 @@ posts:
         url: "https://www.w3schools.com/html/html_quiz.asp"
         label: "W3Schools HTML-i test (inglise keeles)"
 
-  - title: "Teine tund: CSS-i alused"
+  - title: "2. tund: CSS-i alused"
     course: 11it
     date: 2026-09-15
     text: "HTML ütleb, mis lehel on, CSS aga seda, kuidas see välja näeb: värvid, fondid, suurused ja paigutus. Loe materjal läbi ja tee lõpus harjutus ning test. Kui jõuad, proovi põgenemistuba: kas päästad kooli kodulehe?\nKodutöö: laadi alla lähtefailid, tee juhendi järgi oma koduleht ja saada ZIP-fail aadressile mtsopo@taltech.ee."
@@ -295,7 +295,7 @@ posts:
         file: "kodutoo-minu-koduleht.zip"
         label: "Kodutöö lähtefailid (index.html ja stiil.css)"
 
-  - title: "Kolmas tund: JavaScript ja DOM"
+  - title: "3. tund: JavaScript ja DOM"
     course: 11it
     date: 2026-09-22
     text: "JavaScript on ainus programmeerimiskeel, mida brauser ise käivitab, ja just see paneb veebilehe midagi tegema. Alustame päris algusest: esimeses tunnis muutujad, tingimused, funktsioonid ja nimekirjad, teises paneme lehe nupuvajutustele reageerima. Hiljem läheme edasi Reacti juurde, aga ka see põhineb täpselt nendel asjadel.\nTunnis teeme tunniülesandeid ja alustame ülesannete nimekirja rakendusega, mida jätkame järgmisel nädalal. Kui oled varem valmis, proovi põgenemistuba!"
@@ -326,7 +326,7 @@ posts:
         url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Events"
         label: "MDN: sündmused (inglise keeles)"
 
-  - title: "Neljas tund: andmed API-st"
+  - title: "4. tund: andmed API-st"
     course: 11it
     date: 2026-09-29
     text: "Kuidas leht saab andmed serverist? Täna on üks uus asi: käsk fetch, mis toob andmed internetist sinu lehele. Lähtefailides on eelmise nädala töö juba valmis, nii et alustame kõik ühest kohast."
@@ -350,7 +350,7 @@ posts:
         url: "https://www.youtube.com/watch?v=Tn6-PIqc4UM"
         label: "Vaatamiseks: React 100 sekundiga (inglise keeles)"
 
-  - title: "Viies tund: frontend, backend ja andmebaas"
+  - title: "5. tund: frontend, backend ja andmebaas"
     course: 11it
     date: 2026-10-06
     text: "Peaaegu iga rakendus on kolmest tükist: üks näitab (frontend), teine otsustab (backend) ja kolmas mäletab (andmebaas). Esimeses pooles vaatame, kuidas nad omavahel räägivad. Teises pooles ehitad oma React + TypeScripti projekti söökla arvustuste rakenduse. Tunnijuhendis on iga samm koos koodiga ja iga rida on lahti seletatud: kirjuta kood ise ümber, ära kopeeri.\nHoia projekt alles: järgmises tunnis hakkame tegema sellele backendi."
@@ -374,7 +374,7 @@ posts:
         url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview"
         label: "MDN: kuidas klient ja server suhtlevad (inglise keeles)"
 
-  - title: "Kuues tund: terminal ja käsurida"
+  - title: "6. tund: terminal ja käsurida"
     course: 11it
     date: 2026-10-13
     text: "Seni kirjutasid terminali käske juhendist maha nagu loitse. Täna võtame need lahti: kus sa terminalis oled, kuidas kaustade vahel liikuda ja mida npm run dev või git status tegelikult teevad. Järgmises tunnis on meil korraga kaks serverit ja ilma selleta oleks seal raske.\nTunnis teeme tunniülesannete 1. ja 2. osa ehk harjutame ja käime läbi aardejahi. 3. ja 4. osaga jätkame järgmises tunnis.\nKodutöö: midagi alla laadida ega paigaldada pole vaja, piisab brauserist. Mängi siinsamas lehel terminalimäng lõpuni, siis ava kodutöö PDF nupuga „Vaata“, vasta küsimustele, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 20.10."
@@ -406,7 +406,7 @@ posts:
         url: "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository"
         label: "Pro Git: git status, add ja commit (inglise keeles)"
 
-  - title: "Seitsmes tund: esimene server"
+  - title: "7. tund: esimene server"
     course: 11it
     date: 2026-10-20
     text: "Mis on server ja kuidas see töötab? Täna alustame päris algusest: klient, päring, vastus ja JSON. Siis kirjutad ise oma esimese serveri. See on umbes kümme rida JavaScripti ja annab söökla arvustused välja.\nTunni alguses teeme ära terminali tunniülesannete 3. ja 4. osa (Node ja kaust server), siis läheme tunnijuhendiga edasi. Söökla projekt peab kaasas olema.\nKodutöö: midagi paigaldada pole vaja, piisab brauserist. Ava kodutöö PDF nupuga „Vaata“, vasta küsimustele, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 3.11."
