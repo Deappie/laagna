@@ -130,6 +130,11 @@ posts:
         file: "kodutoo-kordamine.pdf"
         label: "Kodutöö: kordamine tunnitööks (täida veebis ja saada: mtsopo@taltech.ee)"
 
+  - title: "4. tund: kontrolltöö 1"
+    course: 10it
+    date: 2026-09-29
+    text: "Selles tunnis oli kontrolltöö 1: kahendsüsteem, kuueteistkümnendsüsteem, tekst ja failimahud."
+
   - title: "5. tund: mis on arvuti sees?"
     course: 10it
     date: 2026-10-06
