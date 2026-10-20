@@ -198,16 +198,57 @@ konspekt = [
     KeepTogether([p('Node’i programm käivitatakse terminalis nii:'), *code_parts('node index.js')]),
 
     p('JSON: andmed tekstina', h2),
-    p('Server võib saata vastuseks HTML-lehe, aga meie server saadab andmeid. Andmed liiguvad serverist brauserisse '
-      'kujul, mida nimetatakse <b>JSON</b>-iks. See näeb välja peaaegu nagu JavaScripti massiiv ja objektid:'),
+    p('Kujuta ette, et pead sõbrale sõnumis saatma oma tunniplaani. Kirjutad selle tekstina ja sõber saab aru, sest '
+      'te mõlemad oskate eesti keelt. Server ja brauser on samas olukorras. Nad peavad andmeid saatma, aga mööda '
+      'internetti liigub ainult tekst. Seega on vaja kokkulepet, kuidas andmed tekstiks kirjutada, et teine pool '
+      'saaks neist jälle andmed teha.'),
+    p('Selline kokkulepe on <b>JSON</b> (loe „džeison“, lühend sõnadest <i>JavaScript Object Notation</i>). Seda '
+      'kasutavad peaaegu kõik veebirakendused: ilmateade, Instagram, Bolt. Kui telefonis olev äpp küsib serverilt '
+      'andmeid, tulevad need väga suure tõenäosusega JSON-ina.'),
+    p('Üks söökla arvustus näeb JSON-ina välja nii:'),
+    code('''
+{
+  "id": 1,
+  "toit": "Kanakaste riisiga",
+  "hinne": 5,
+  "taimetoit": false
+}
+'''),
+    p('See on <b>objekt</b>: loogelised sulud ja nende sees paarid <i>nimi: väärtus</i>, komadega eraldatud. Nimi on '
+      'alati jutumärkides. Väärtus võib olla:'),
+    table(['Väärtus', 'Näide', 'Mis see on'], [
+        ['tekst', c('"Hernesupp"'), 'alati <b>jutumärkides</b>, ülakomad ' + c("'…'") + ' ei sobi'],
+        ['arv', c('5') + ' või ' + c('4.5'), 'ilma jutumärkideta. ' + c('"5"') + ' oleks tekst, mitte arv'],
+        ['tõene või väär', c('true') + ', ' + c('false'), 'jah või ei'],
+        ['tühi', c('null'), 'väärtust pole'],
+        ['massiiv', c('[1, 2, 3]'), 'nimekiri, nurksulgudes'],
+        ['objekt', c('{ "nimi": "Mari" }'), 'objekt objekti sees'],
+    ], [WIDTH * 0.2, WIDTH * 0.3, WIDTH * 0.5]),
+    Spacer(1, 6),
+    p('Mitu arvustust on <b>massiiv</b>, mille sees on objektid. Nurksulud ümber, objektid komadega järjest:'),
     code('''
 [
   { "id": 1, "toit": "Kanakaste riisiga", "hinne": 5 },
   { "id": 2, "toit": "Hernesupp", "hinne": 3 }
 ]
 '''),
-    p('Nurksulud on massiiv, loogelised sulud on üks objekt. Ainus erinevus JavaScriptist on see, et JSON-is on ka '
-      'väljade nimed jutumärkides. Seda ei pea ise kirjutama, Express teeb selle meie eest.'),
+    p('See näeb välja peaaegu nagu JavaScript ja see pole juhus, sest JSON võeti JavaScriptist. Erinevusi on vähe, '
+      'aga JSON on rangem:'),
+    table(['JavaScriptis lubatud', 'JSON-is'], [
+        ['nimed ilma jutumärkideta: ' + c('{ toit: "Supp" }'), 'nimed <b>alati</b> jutumärkides: '
+         + c('{ "toit": "Supp" }')],
+        ['tekst ülakomades: ' + c("'Supp'"), 'tekst <b>ainult</b> jutumärkides: ' + c('"Supp"')],
+        ['koma viimase elemendi järel: ' + c('[1, 2, 3,]'), 'viimase järel koma <b>ei tohi</b> olla: '
+         + c('[1, 2, 3]')],
+        ['kommentaarid ' + c('// …'), 'kommentaare ei saa kirjutada'],
+    ], [WIDTH * 0.5, WIDTH * 0.5]),
+    Spacer(1, 6),
+    p('Üks JSON-fail on sul tegelikult juba olemas: ' + c('package.json') + '. Ava see ja vaata. Jutumärgid, '
+      'koolonid ja komad on täpselt nagu ülal.'),
+    note('<b>Hea uudis:</b> JSON-it ei pea me ise käsitsi kirjutama. Meie serveris on tavaline JavaScripti massiiv ja '
+         + c('res.json(arvustused)') + ' teeb sellest ise JSON-teksti. Järgmises tunnis teeb React sama asja '
+         'vastupidi: JSON-tekstist saab jälle massiiv. JSON-it on vaja <b>lugeda</b> oskada, et brauseris näeksid, '
+         'mida server saatis.'),
 
     p('Pakett ja npm', h2),
     p('Serveri saaks kirjutada ka puhta Node’iga, aga see on pikk ja tülikas. Seepärast kasutame <b>Expressi</b>. '
@@ -293,7 +334,8 @@ konspekt = [
         ['<b>Node.js</b>', 'programm, mis käivitab JavaScripti ilma brauserita'],
         ['<b>Express</b>', 'pakett, millega on lihtne serverit teha'],
         ['<b>pakett</b>', 'kellegi teise kirjutatud kood, mille saad ' + c('npm install') + '-iga'],
-        ['<b>JSON</b>', 'andmed tekstina, näevad välja nagu JavaScripti massiivid ja objektid'],
+        ['<b>JSON</b>', 'kokkulepe, kuidas andmeid tekstina kirjutada. Näeb välja nagu JavaScripti massiivid ja '
+         'objektid'],
         ['<b>port</b>', 'ukse number, mille taga server arvutis ootab'],
         ['<b>marsruut</b>', 'reegel: see aadress käivitab selle funktsiooni'],
     ], [WIDTH * 0.22, WIDTH * 0.78]),
@@ -519,7 +561,20 @@ for key, word in [('server', 'server'), ('klient', 'klient'), ('paring', 'pärin
     kodutoo.append(row([p(f'<b>{word}</b>', label), Field(f's_{key}', WIDTH - 90)], [90, WIDTH - 90]))
 
 kodutoo += [
-    p('2. Raamatukogu server', h2),
+    p('2. JSON', h2),
+    p('Igas tükis on üks viga. Kirjuta, mis on valesti. Vaata konspektist tabelit JavaScripti ja JSON-i '
+      'erinevustega.'),
+]
+for key, bad in [('a', '{ toit: "Hernesupp", "hinne": 3 }'), ('b', "{ \"toit\": 'Hernesupp', \"hinne\": 3 }"),
+                 ('c', '["Hernesupp", "Pannkoogid", "Kalapulgad",]')]:
+    kodutoo.append(row([p(f'<b>{key})</b> ' + c(bad), label), Field(f'json_{key}', WIDTH - 250)], [250, WIDTH - 250]))
+kodutoo += [
+    Spacer(1, 8),
+    question('<b>d)</b> Kirjuta JSON-objektina üks toit: tema nimi, hind eurodes (arv) ja kas see on taimetoit '
+             '(' + c('true') + ' või ' + c('false') + ').', 'json_d', 56),
+    question('<b>e)</b> Mis vahe on JSON-is ' + c('"5"') + '-l ja ' + c('5') + '-l?', 'json_e'),
+
+    p('3. Raamatukogu server', h2),
     p('Kooli raamatukogu tegi endale serveri. Loe kood läbi:'),
     code(RAAMATUD, 'index.js'),
     p('Server töötab. Mis ilmub brauserisse, kui avad need aadressid? Kui midagi ei ilmu, kirjuta, miks.'),
@@ -533,7 +588,7 @@ kodutoo += [
     question('<b>e)</b> Kuhu ilmub tekst ' + c('Raamatukogu server töötab') + '? Brauserisse või kuhugi mujale?',
              'q_log'),
 
-    p('3. Leia viga', h2),
+    p('4. Leia viga', h2),
     p('Kirjuta, mis on valesti ja kuidas seda parandada.'),
     question('<b>a)</b> Mari tegi marsruudi, aga brauser laeb ja laeb ning midagi ei tule.', 'viga_mari', 40,
              extra=code_parts('''
@@ -548,10 +603,10 @@ app.get('/api/toidud', (req, res) => {
              + '. Mis käsud ta peaks kirjutama?', 'viga_karl', 40),
 
     CondPageBreak(200),
-    p('4. Kirjuta ise', h2),
+    p('5. Kirjuta ise', h2),
     question('Kirjuta marsruut aadressile ' + c('/api/lemmikud') + ', mis annab vastuseks massiivi sinu kolme '
              'lemmiktoiduga. Vaata konspektist, kuidas marsruut välja näeb.', 'lemmikud', 90),
-    question('<b>5. Mõtle.</b> Miks on söökla rakendusele serverit vaja? Mis juhtus arvustustega ilma serverita?',
+    question('<b>6. Mõtle.</b> Miks on söökla rakendusele serverit vaja? Mis juhtus arvustustega ilma serverita?',
              'motle', 56),
 ]
 
