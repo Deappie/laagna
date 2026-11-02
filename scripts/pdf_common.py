@@ -135,7 +135,7 @@ class Field(Flowable):
             name=self.name, x=x, y=y, width=self.width, height=self.height,
             fontName='Helvetica', fontSize=10, textColor=NAVY,
             borderColor=BLUE, fillColor=FIELD, borderWidth=0.8, borderStyle='solid',
-            fieldFlags='multiline' if self.multiline else '', forceBorder=True,
+            fieldFlags='multiline' if self.multiline else '', forceBorder=True, maxlen=None,
         )
 
 

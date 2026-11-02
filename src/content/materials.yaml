@@ -181,8 +181,8 @@ posts:
 
   - title: "7. tund: kuidas protsessor programmi täidab"
     course: 10it
-    date: 2026-11-03
-    text: "Eelmisel korral ehitasime väravatest liitja. Aga kes ütleb protsessorile, mida liita ja millal? Täna vaatame, kuidas programm mälus välja näeb (spoiler: arvudena) ja mida protsessor teeb miljardeid kordi sekundis: too, dekodeeri, täida. Siis kirjutad protsessorimängus ise masinkoodi.\nKodutöö: ava PDF nupuga „Vaata“, täida lahtrid otse veebis, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 10.11."
+    date: 2026-10-20
+    text: "Eelmisel korral ehitasime väravatest liitja. Aga kes ütleb protsessorile, mida liita ja millal? Täna vaatame, kuidas programm mälus välja näeb (spoiler: arvudena) ja mida protsessor teeb miljardeid kordi sekundis: too, dekodeeri, täida. Siis kirjutad protsessorimängus ise masinkoodi.\nKodutöö: ava PDF nupuga „Vaata“, täida lahtrid otse veebis, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee enne 03.11."
     items:
       - type: pdf
         file: "protsessor-konspekt.pdf"
@@ -198,17 +198,36 @@ posts:
 
   - title: "8. tund: pildid ja heli arvudena"
     course: 10it
-    date: 2026-11-10
-    draft: true
-    text: "Kuidas foto, laul või video mahub arvutisse, kus on ainult nullid ja ühed? Pilt on pikslite ruudustik, iga piksel on kolm arvu. Heli on tuhandeid mõõtmisi sekundis. Arvutame, kui suur üks pilt päriselt on ja kuidas 36 MB-st saab 3 MB."
+    date: 2026-11-03
+    text: "Kuidas foto, laul või video mahub arvutisse, kus on ainult nullid ja ühed? Pilt on pikslite ruudustik ja RGB-pildis kirjeldavad iga pikslit kolm arvu. Heli on tuhandeid mõõtmisi sekundis. Konspekt selgitab kõik algusest peale, nii et saad seda lugeda ka üksi. Pildilaboris joonistad bittidega, segad värve ja näed, mida teeb helile mõõtmiste arv.\nKodutöö: ava PDF nupuga „Vaata“, täida lahtrid otse veebis, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee hiljemalt 09.11 kell 23.59."
     items:
       - type: pdf
         file: "pildid-heli-konspekt.pdf"
         label: "Konspekt: pildid ja heli arvudena"
+      - type: game
+        game: pixels
+      - type: pdf
+        file: "kodutoo-pildid.pdf"
+        label: "Kodutöö: pildid ja heli (täida veebis ja saada: mtsopo@taltech.ee)"
+
+  - title: "9. tund: pakkimise töötuba"
+    course: 10it
+    date: 2026-11-10
+    draft: true
+    text: "Eelmisel korral nägime, et 12-megapikslise pildi pakkimata andmed võtaksid 36 MB, aga pakitud fotofail võib olla näiteks 3 MB. Täna teed pakkimist ise: kõigepealt käsitsi ridade kaupa, siis päris gzip-i ja JPEG-iga. Mõõdad, milliste andmete maht pakkimisel väheneb ja milliste oma mitte ning miks pilt korduval muutmisel ja salvestamisel koledamaks läheb.\nTunni- ja kodutöö: ava PDF nupuga „Vaata“, täida lahtrid otse veebis, tee kodus lõpuni, mis tunnis pooleli jäi, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee hiljemalt 16.11 kell 23.59."
+    items:
+      - type: pdf
+        file: "pakkimine-konspekt.pdf"
+        label: "Konspekt: pakkimine"
+      - type: game
+        game: compress
+      - type: pdf
+        file: "kodutoo-pakkimine.pdf"
+        label: "Tunni- ja kodutöö: pakkimine (täida veebis ja saada: mtsopo@taltech.ee)"
 
   - title: "10. tund: kuidas internet töötab"
     course: 10it
-    date: 2026-11-24
+    date: 2026-11-17
     draft: true
     text: "Klõpsad videol ja sekundi pärast see mängib. Kust see tuli? Täna ja järgmisel korral vaatame, kuidas internet päriselt töötab: IP-aadressid, paketid, ruuterid ja DNS. Terminali käskudega jälgime, kuidas meie paketid maailmas ringi käivad."
     items:
@@ -440,3 +459,42 @@ posts:
       - type: link
         url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status"
         label: "MDN: kõik HTTP staatusekoodid (inglise keeles)"
+
+  - title: "8. tund: React küsib andmed serverilt"
+    course: 11it
+    date: 2026-11-03
+    text: "Sinu söökla lehel on ikka veel näidisandmed, kuigi päris server on olemas. Täna ühendame nad: fail andmed.ts läheb prügikasti ja leht küsib arvustused serverilt. Konspekt selgitab kõik algusest peale, nii et saad seda lugeda ka üksi. Tunnijuhendis on iga samm koos koodiga ja kirjas on ka see, mida peaksid pärast igat sammu ekraanil nägema. Ennusta, kirjuta kood, käivita ja selgita, mis muutus.\nSöökla projekt peab kaasas olema. Kui seda pole või see ei tööta, laadi alla algfailid.\nKodutöö: midagi paigaldada pole vaja, piisab brauserist. Ava kodutöö PDF nupuga „Vaata“, täida lahtrid, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee hiljemalt 09.11 kell 23.59."
+    items:
+      - type: pdf
+        file: "react-server-konspekt.pdf"
+        label: "Konspekt: React küsib andmed serverilt"
+      - type: pdf
+        file: "tunnijuhend-react-server.pdf"
+        label: "Tunnijuhend: React räägib serveriga"
+      - type: file
+        file: "tunnitoo-react-server.zip"
+        label: "Algfailid: söökla projekt koos serveriga"
+      - type: pdf
+        file: "kodutoo-react-server.pdf"
+        label: "Kodutöö: React ja server (täida veebis ja saada: mtsopo@taltech.ee)"
+
+  - title: "9. tund: arvustuste lisamine ja kustutamine"
+    course: 11it
+    date: 2026-11-10
+    draft: true
+    text: "Praegu oskab meie server arvustusi ainult välja anda. Täna õpetame ta neid ka vastu võtma ja kustutama, nii et lisatud arvustus jääb alles ka pärast lehe värskendamist. Õpid meetodeid GET, POST ja DELETE ning staatusekoode. Päringulabor on serveri simulatsioon, kus saad päringuid proovida ilma midagi paigaldamata.\nSöökla projekt peab kaasas olema. Kui seda pole või see ei tööta, laadi alla algfailid.\nKodutöö: midagi paigaldada pole vaja, piisab brauserist. Ava kodutöö PDF nupuga „Vaata“, täida lahtrid, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee hiljemalt 16.11 kell 23.59."
+    items:
+      - type: pdf
+        file: "lisamine-kustutamine-konspekt.pdf"
+        label: "Konspekt: arvustuste lisamine ja kustutamine"
+      - type: pdf
+        file: "tunnijuhend-lisamine.pdf"
+        label: "Tunnijuhend: lisamine ja kustutamine"
+      - type: file
+        file: "tunnitoo-lisamine.zip"
+        label: "Algfailid: söökla projekt pärast 8. tundi"
+      - type: game
+        game: api
+      - type: pdf
+        file: "kodutoo-lisamine.pdf"
+        label: "Kodutöö: lisamine ja kustutamine (täida veebis ja saada: mtsopo@taltech.ee)"

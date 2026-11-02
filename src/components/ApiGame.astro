@@ -1,0 +1,267 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-api-game>
+  <div class="game-label">{label || t.apiGame.title}</div>
+  <div class="box">
+    <p class="intro">{t.apiGame.intro}</p>
+
+    <div class="mission">
+      <span class="progress" data-progress></span>
+      <p class="success" data-success aria-live="polite"></p>
+      <p class="mission-text" data-mission aria-live="polite"></p>
+      <p class="hint" data-hint></p>
+    </div>
+
+    <form class="request" data-form>
+      <div class="line">
+        <label class="field method">{t.apiGame.method}
+          <select data-method>
+            <option>GET</option>
+            <option>POST</option>
+            <option>DELETE</option>
+          </select>
+        </label>
+        <label class="field path">{t.apiGame.address}
+          <input type="text" autocomplete="off" spellcheck="false" autocapitalize="off" value="/api/arvustused" data-path />
+        </label>
+      </div>
+      <label class="field" data-body-wrap hidden>{t.apiGame.body}
+        <textarea rows="3" spellcheck="false" data-body></textarea>
+      </label>
+      <button type="submit" class="btn">{t.apiGame.send}</button>
+    </form>
+
+    <div class="response" data-response hidden>
+      <div class="status-line">
+        <span class="status" data-status></span>
+        <span data-status-text></span>
+      </div>
+      <pre data-output></pre>
+    </div>
+
+    <div class="memory">
+      <div class="memory-head">
+        <strong>{t.apiGame.memory}</strong>
+        <button type="button" class="btn ghost" data-restart>{t.apiGame.restart}</button>
+      </div>
+      <p class="restart-note" data-restart-note aria-live="polite"></p>
+      <ul data-list></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  type Arvustus = { id: number; toit: string; hinne: number; kommentaar: string };
+  type Result = { method: string; path: string; status: number; afterRestart: boolean; body?: unknown };
+
+  const START: Arvustus[] = [
+    { id: 1, toit: 'Kanakaste riisiga', hinne: 5, kommentaar: 'Parim toit sel nädalal!' },
+    { id: 2, toit: 'Hernesupp', hinne: 3, kommentaar: 'Natuke liiga paks.' },
+    { id: 3, toit: 'Makaronid hakklihaga', hinne: 4, kommentaar: 'Klassika, alati hea.' },
+  ];
+  const SAMPLE = '{ "toit": "Pannkoogid", "hinne": 5, "kommentaar": "Maitsev!" }';
+  const isList = (r: Result) => r.path === '/api/arvustused';
+  const hasText = (v: unknown) => typeof v === 'string' && v.trim() !== '';
+  const sent = (r: Result) => (r.body ?? {}) as { toit?: unknown; hinne?: unknown; kommentaar?: unknown };
+
+  // Each mission is met by the result of one request.
+  const CHECKS: ((r: Result) => boolean)[] = [
+    (r) => r.method === 'GET' && isList(r) && r.status === 200,
+    (r) => r.method === 'POST' && r.status === 201,
+    (r) => r.method === 'POST' && isList(r) && r.status === 400 && sent(r).hinne === 9 && hasText(sent(r).toit) && hasText(sent(r).kommentaar),
+    (r) => {
+      const { toit, hinne, kommentaar } = sent(r);
+      return r.method === 'POST' && isList(r) && r.status === 400 && toit === undefined && hasText(kommentaar)
+        && Number.isInteger(hinne) && (hinne as number) >= 1 && (hinne as number) <= 5;
+    },
+    (r) => r.method === 'DELETE' && r.status === 200,
+    (r) => r.method === 'DELETE' && r.status === 404 && r.path.startsWith('/api/arvustused/'),
+    (r) => r.method === 'GET' && r.status === 404,
+    (r) => r.method === 'GET' && isList(r) && r.status === 200 && r.afterRestart,
+  ];
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+    const methodEl = $<HTMLSelectElement>('method');
+    const pathEl = $<HTMLInputElement>('path');
+    const bodyEl = $<HTMLTextAreaElement>('body');
+
+    let arvustused = START.map((a) => ({ ...a }));
+    let jargmineId = 4;
+    let mission = 0;
+    let afterRestart = false;
+
+    // The same rules as server/index.js in the lesson guide.
+    function server(method: string, path: string, text: string): { status: number; json?: unknown; raw?: string; sent?: unknown } {
+      if (method === 'GET' && path === '/') return { status: 200, raw: 'Tere! Söökla server töötab.' };
+      if (method === 'GET' && path === '/api/arvustused') return { status: 200, json: arvustused };
+      if (method === 'GET' && path === '/api/menyy') return { status: 200, json: ['Hernesupp', 'Kanakaste riisiga', 'Pannkoogid'] };
+      if (method === 'POST' && path === '/api/arvustused') {
+        let sent: { toit?: unknown; hinne?: unknown; kommentaar?: unknown };
+        try {
+          sent = text.trim() === '' ? {} : JSON.parse(text);
+        } catch {
+          return { status: 400, raw: t.apiGame.badJson };
+        }
+        const { toit, hinne, kommentaar } = sent ?? {};
+        if (!hasText(toit) || !hasText(kommentaar) || !Number.isInteger(hinne) || (hinne as number) < 1 || (hinne as number) > 5) {
+          return { status: 400, json: { viga: 'Täida kõik lahtrid, hinne on 1 kuni 5.' }, sent };
+        }
+        const uus = { id: jargmineId, toit: String(toit).trim(), hinne: hinne as number, kommentaar: String(kommentaar).trim() };
+        jargmineId = jargmineId + 1;
+        arvustused = [uus, ...arvustused];
+        return { status: 201, json: uus, sent };
+      }
+      const match = path.match(/^\/api\/arvustused\/([^/]+)$/);
+      if (method === 'DELETE' && match) {
+        const id = Number(match[1]);
+        const leitud = arvustused.find((a) => a.id === id);
+        if (!leitud) return { status: 404, json: { viga: 'Sellist arvustust pole.' } };
+        arvustused = arvustused.filter((a) => a.id !== id);
+        return { status: 200, json: leitud };
+      }
+      return { status: 404, raw: `Cannot ${method} ${path}` };
+    }
+
+    function drawList() {
+      const list = $('list');
+      list.innerHTML = '';
+      arvustused.forEach((a) => {
+        const li = document.createElement('li');
+        li.textContent = `${a.id}: ${a.toit} (${a.hinne}/5)`;
+        list.append(li);
+      });
+      if (!arvustused.length) {
+        const li = document.createElement('li');
+        li.textContent = t.apiGame.empty;
+        list.append(li);
+      }
+    }
+
+    function drawMission() {
+      const done = mission >= CHECKS.length;
+      $('progress').textContent = done ? '' : `${t.apiGame.missionWord} ${mission + 1}/${CHECKS.length}`;
+      $('mission').textContent = done ? t.apiGame.done : t.apiGame.missions[mission];
+      $('hint').textContent = done ? '' : t.apiGame.hints[mission];
+    }
+
+    function drawBody() {
+      const needsBody = methodEl.value === 'POST';
+      $('body-wrap').hidden = !needsBody;
+      if (needsBody && !bodyEl.value) bodyEl.value = SAMPLE;
+    }
+
+    methodEl.addEventListener('change', drawBody);
+
+    $('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const method = methodEl.value;
+      const path = pathEl.value.trim();
+      const answer = server(method, path, bodyEl.value);
+      $('response').hidden = false;
+      const statusEl = $('status');
+      statusEl.textContent = String(answer.status);
+      statusEl.className = `status s${String(answer.status)[0]}`;
+      $('status-text').textContent = t.apiGame.statuses[answer.status as 200 | 201 | 400 | 404];
+      $('output').textContent = answer.raw ?? JSON.stringify(answer.json, null, 2);
+      drawList();
+      $('success').textContent = '';
+      if (mission < CHECKS.length && CHECKS[mission]({ method, path, status: answer.status, afterRestart, body: answer.sent })) {
+        mission++;
+        $('success').textContent = t.apiGame.correct;
+        drawMission();
+      }
+    });
+
+    $('restart').addEventListener('click', () => {
+      arvustused = START.map((a) => ({ ...a }));
+      jargmineId = 4;
+      // Only a restart made during the last mission counts for it.
+      afterRestart = mission === CHECKS.length - 1;
+      $('restart-note').textContent = t.apiGame.restarted;
+      drawList();
+    });
+
+    drawBody();
+    drawList();
+    drawMission();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-api-game]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .intro { margin: 0 0 12px; }
+  .mission { padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); }
+  .progress { color: var(--muted); font-size: 0.9rem; }
+  .mission-text { margin: 4px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+  .success { margin: 4px 0 0; color: #2e8b57; font-weight: 600; }
+  .success:empty { display: none; }
+  .hint { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
+  .hint:empty { display: none; }
+  .request { display: grid; gap: 10px; margin-top: 12px; }
+  .request[hidden] { display: none; }
+  .line { display: flex; flex-wrap: wrap; gap: 10px; }
+  .field { display: grid; gap: 4px; font-size: 0.9rem; font-weight: 550; }
+  .field[hidden] { display: none; }
+  .path { flex: 1 1 220px; }
+  select, input, textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 40px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 0.95rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  textarea { padding: 10px; resize: vertical; }
+  .btn {
+    justify-self: start;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn.ghost { background: var(--surface); color: var(--text); border-color: var(--line); }
+  .btn.ghost:hover { background: var(--surface); border-color: var(--accent); }
+  .response { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
+  .response[hidden] { display: none; }
+  .status-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.92rem; }
+  .status { padding: 2px 8px; border-radius: 6px; color: #ffffff; font: 700 0.95rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .status.s2 { background: #2e8b57; }
+  .status.s4 { background: #c0392b; }
+  pre { margin: 8px 0 0; font-size: 0.85rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .memory { margin-top: 12px; }
+  .memory-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .restart-note { margin: 6px 0 0; color: var(--muted); font-size: 0.9rem; }
+  .restart-note:empty { display: none; }
+  ul { margin: 8px 0 0; padding-left: 18px; font-size: 0.92rem; overflow-wrap: anywhere; }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .success { color: #6fcf97; }
+  }
+</style>

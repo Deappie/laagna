@@ -1,0 +1,437 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-pixel-game>
+  <div class="game-label">{label || t.pixelGame.title}</div>
+  <div class="box">
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="bits" role="tab">{t.pixelGame.tabs.bits}</button>
+      <button type="button" class="tab" data-tab="colour" role="tab">{t.pixelGame.tabs.colour}</button>
+      <button type="button" class="tab" data-tab="sound" role="tab">{t.pixelGame.tabs.sound}</button>
+    </div>
+
+    <section data-panel="bits">
+      <p class="intro">{t.pixelGame.bitsIntro}</p>
+      <div class="bitpic">
+        <div class="grid" data-grid></div>
+        <div class="rows" data-rows></div>
+      </div>
+      <div class="row">
+        <button type="button" class="btn ghost" data-clear>{t.pixelGame.clear}</button>
+        <button type="button" class="btn ghost" data-smile>{t.pixelGame.smile}</button>
+      </div>
+      <div class="mission">
+        <span class="progress" data-m-progress></span>
+        <p class="mission-text" data-m-text></p>
+        <p class="bytes" data-m-bytes></p>
+        <p class="feedback ok" data-m-feedback aria-live="polite"></p>
+        <button type="button" class="btn" data-m-next hidden>{t.pixelGame.next}</button>
+      </div>
+    </section>
+
+    <section data-panel="colour" hidden>
+      <p class="intro">{t.pixelGame.colourIntro}</p>
+      <div class="mixer">
+        <div class="sliders">
+          <label class="slider"><span>R</span><input type="range" min="0" max="255" value="255" data-r /><output data-r-out></output></label>
+          <label class="slider"><span>G</span><input type="range" min="0" max="255" value="136" data-g /><output data-g-out></output></label>
+          <label class="slider"><span>B</span><input type="range" min="0" max="255" value="0" data-b /><output data-b-out></output></label>
+        </div>
+        <div class="pixel-view">
+          <div class="lamps" aria-hidden="true"><i data-lamp-r></i><i data-lamp-g></i><i data-lamp-b></i></div>
+          <div class="swatch" data-swatch></div>
+          <code class="hex" data-hex></code>
+        </div>
+      </div>
+      <p class="explain">{t.pixelGame.lampsHint}</p>
+
+      <h4>{t.pixelGame.resolutionTitle}</h4>
+      <canvas class="picture" width="640" height="360" data-picture></canvas>
+      <div class="controls">
+        <label>{t.pixelGame.resolution}
+          <select data-res></select>
+        </label>
+        <label>{t.pixelGame.depth}
+          <select data-depth>
+            <option value="1bit">{t.pixelGame.depths.bit}</option>
+            <option value="1byte">{t.pixelGame.depths.byte}</option>
+            <option value="3byte" selected>{t.pixelGame.depths.rgb}</option>
+          </select>
+        </label>
+      </div>
+      <p class="calc" data-size aria-live="polite"></p>
+      <p class="explain">{t.pixelGame.resolutionPredict}</p>
+    </section>
+
+    <section data-panel="sound" hidden>
+      <p class="intro">{t.pixelGame.soundIntro}</p>
+      <svg class="wave" viewBox="0 0 600 180" data-wave role="img" aria-label={t.pixelGame.waveAlt}></svg>
+      <label class="wide-slider">
+        <span>{t.pixelGame.rate}: <b data-rate-out></b></span>
+        <input type="range" min="0" max="6" value="6" step="1" data-rate />
+      </label>
+      <p class="explain" data-rate-note></p>
+      <div class="controls">
+        <label>{t.pixelGame.sampleSize}
+          <select data-bytes>
+            <option value="1">{t.pixelGame.sampleSizes.one}</option>
+            <option value="2" selected>{t.pixelGame.sampleSizes.two}</option>
+          </select>
+        </label>
+        <label>{t.pixelGame.channels}
+          <select data-channels>
+            <option value="1">{t.pixelGame.channelNames.mono}</option>
+            <option value="2" selected>{t.pixelGame.channelNames.stereo}</option>
+          </select>
+        </label>
+      </div>
+      <p class="calc" data-sound-size aria-live="polite"></p>
+    </section>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  const SMILE = [0x3c, 0x42, 0xa5, 0x81, 0xa5, 0x99, 0x42, 0x3c];
+  const MISSIONS = [
+    { name: t.pixelGame.missions[0], bytes: [0x66, 0xff, 0xff, 0xff, 0x7e, 0x3c, 0x18, 0x00] },
+    { name: t.pixelGame.missions[1], bytes: [0xff, 0xff, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18] },
+    { name: t.pixelGame.missions[2], bytes: [0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55] },
+    { name: t.pixelGame.missions[3], bytes: [0x18, 0x18, 0x18, 0x18, 0xff, 0x7e, 0x3c, 0x18] },
+  ];
+  const RESOLUTIONS: [number, number][] = [
+    [16, 9], [32, 18], [64, 36], [160, 90], [320, 180], [640, 360], [1280, 720], [1920, 1080],
+  ];
+  const RATES = [1000, 2000, 4000, 8000, 16000, 22050, 44100];
+
+  const num = (n: number, digits = 0) =>
+    n.toLocaleString('et-EE', { maximumFractionDigits: digits }).replace(/ /g, ' ');
+  const hex2 = (n: number) => n.toString(16).toUpperCase().padStart(2, '0');
+  const bin8 = (n: number) => n.toString(2).padStart(8, '0');
+
+  function sizeText(bytes: number): string {
+    if (bytes >= 1e9) return `${num(bytes / 1e9, 1)} GB`;
+    if (bytes >= 1e6) return `${num(bytes / 1e6, 1)} MB`;
+    if (bytes >= 1000) return `${num(bytes / 1000, 1)} KB`;
+    return `${num(bytes)} ${t.pixelGame.byteWord}`;
+  }
+
+  function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number) {
+    const sky = ctx.createLinearGradient(0, 0, 0, h * 0.7);
+    sky.addColorStop(0, '#2f6fc0');
+    sky.addColorStop(1, '#bfe0f5');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#ffd34d';
+    ctx.beginPath();
+    ctx.arc(w * 0.76, h * 0.26, h * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    [[0.2, 0.2, 0.07], [0.27, 0.18, 0.09], [0.34, 0.21, 0.06]].forEach(([x, y, r]) => {
+      ctx.beginPath();
+      ctx.arc(w * x, h * y, h * r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.fillStyle = '#3f8f54';
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for (let x = 0; x <= w; x += 4) ctx.lineTo(x, h * (0.68 + 0.07 * Math.sin((x / w) * 7)));
+    ctx.lineTo(w, h);
+    ctx.fill();
+    ctx.fillStyle = '#b5482f';
+    ctx.fillRect(w * 0.14, h * 0.55, w * 0.14, h * 0.2);
+    ctx.fillStyle = '#6d2b1b';
+    ctx.beginPath();
+    ctx.moveTo(w * 0.12, h * 0.56);
+    ctx.lineTo(w * 0.21, h * 0.42);
+    ctx.lineTo(w * 0.3, h * 0.56);
+    ctx.fill();
+    ctx.fillStyle = '#fff4c8';
+    ctx.fillRect(w * 0.18, h * 0.6, w * 0.04, h * 0.06);
+  }
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+
+    root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((tab, _i, tabs) =>
+      tab.addEventListener('click', () => {
+        tabs.forEach((x) => x.classList.toggle('active', x === tab));
+        root.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== tab.dataset.tab));
+      }),
+    );
+
+    // 1. Bitipilt
+    const pic = [...SMILE];
+    const gridEl = $('grid');
+    const rowsEl = $('rows');
+    const cells: HTMLButtonElement[] = [];
+    const rowEls: HTMLElement[] = [];
+    let mission = 0;
+    let solved = false;
+
+    for (let r = 0; r < 8; r++) {
+      for (let col = 0; col < 8; col++) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cell';
+        b.setAttribute('aria-label', t.pixelGame.cellLabel(r + 1, col + 1));
+        b.addEventListener('click', () => {
+          pic[r] ^= 1 << (7 - col);
+          drawBits();
+        });
+        gridEl.append(b);
+        cells.push(b);
+      }
+      const line = document.createElement('div');
+      line.className = 'rowline';
+      rowsEl.append(line);
+      rowEls.push(line);
+    }
+
+    function drawBits() {
+      cells.forEach((b, i) => {
+        const on = Boolean(pic[i >> 3] & (1 << (7 - (i & 7))));
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      rowEls.forEach((el, r) => {
+        el.innerHTML = `<span>${bin8(pic[r])}</span><b>${hex2(pic[r])}</b>`;
+      });
+      checkMission();
+    }
+
+    function drawMission() {
+      const done = mission >= MISSIONS.length;
+      $('m-progress').textContent = done ? '' : t.pixelGame.missionProgress(mission + 1, MISSIONS.length);
+      $('m-text').textContent = done ? t.pixelGame.missionsDone : t.pixelGame.missionTask(MISSIONS[mission].name);
+      $('m-bytes').textContent = done ? '' : MISSIONS[mission].bytes.map(hex2).join(' ');
+      $('m-feedback').textContent = '';
+      $('m-next').hidden = true;
+      solved = false;
+    }
+
+    function checkMission() {
+      if (solved || mission >= MISSIONS.length) return;
+      if (MISSIONS[mission].bytes.every((v, i) => v === pic[i])) {
+        solved = true;
+        $('m-feedback').textContent = t.pixelGame.correct;
+        $('m-next').hidden = false;
+      }
+    }
+
+    $('m-next').addEventListener('click', () => {
+      mission++;
+      pic.fill(0);
+      drawMission();
+      drawBits();
+    });
+    $('clear').addEventListener('click', () => {
+      pic.fill(0);
+      drawBits();
+    });
+    $('smile').addEventListener('click', () => {
+      SMILE.forEach((v, i) => (pic[i] = v));
+      drawBits();
+    });
+
+    // 2. Värv ja resolutsioon
+    const rIn = $<HTMLInputElement>('r');
+    const gIn = $<HTMLInputElement>('g');
+    const bIn = $<HTMLInputElement>('b');
+
+    function drawColour() {
+      const [r, g, b] = [rIn, gIn, bIn].map((x) => Number(x.value));
+      $('r-out').textContent = String(r);
+      $('g-out').textContent = String(g);
+      $('b-out').textContent = String(b);
+      $('lamp-r').style.background = `rgb(${r} 0 0)`;
+      $('lamp-g').style.background = `rgb(0 ${g} 0)`;
+      $('lamp-b').style.background = `rgb(0 0 ${b})`;
+      $('swatch').style.background = `rgb(${r} ${g} ${b})`;
+      $('hex').textContent = `#${hex2(r)}${hex2(g)}${hex2(b)}`;
+    }
+    [rIn, gIn, bIn].forEach((x) => x.addEventListener('input', drawColour));
+
+    const picture = $<HTMLCanvasElement>('picture');
+    const pctx = picture.getContext('2d')!;
+    const master = document.createElement('canvas');
+    master.width = 640;
+    master.height = 360;
+    drawScene(master.getContext('2d')!, 640, 360);
+    const resSel = $<HTMLSelectElement>('res');
+    const depthSel = $<HTMLSelectElement>('depth');
+    RESOLUTIONS.forEach(([w, h], i) => {
+      const o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = `${w} × ${h}`;
+      resSel.append(o);
+    });
+    resSel.value = '2';
+
+    function drawPicture() {
+      const [w, h] = RESOLUTIONS[Number(resSel.value)];
+      const depth = depthSel.value;
+      const sw = Math.min(w, 640);
+      const sh = Math.min(h, 360);
+      const small = document.createElement('canvas');
+      small.width = sw;
+      small.height = sh;
+      const sctx = small.getContext('2d', { willReadFrequently: true })!;
+      sctx.drawImage(master, 0, 0, sw, sh);
+      if (depth !== '3byte') {
+        const img = sctx.getImageData(0, 0, sw, sh);
+        const d = img.data;
+        for (let i = 0; i < d.length; i += 4) {
+          if (depth === '1bit') {
+            const v = 0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2] > 128 ? 255 : 0;
+            d[i] = d[i + 1] = d[i + 2] = v;
+          } else {
+            d[i] = Math.round(d[i] / 36.43) * 36.43;
+            d[i + 1] = Math.round(d[i + 1] / 36.43) * 36.43;
+            d[i + 2] = Math.round(d[i + 2] / 85) * 85;
+          }
+        }
+        sctx.putImageData(img, 0, 0);
+      }
+      pctx.imageSmoothingEnabled = false;
+      pctx.drawImage(small, 0, 0, picture.width, picture.height);
+
+      const pixels = w * h;
+      const bytes = depth === '1bit' ? pixels / 8 : depth === '1byte' ? pixels : pixels * 3;
+      const per = depth === '1bit' ? t.pixelGame.perBit : depth === '1byte' ? t.pixelGame.perByte : t.pixelGame.perRgb;
+      $('size').textContent = `${num(w)} × ${num(h)} = ${num(pixels)} ${t.pixelGame.pixelWord}, ${per}: ${num(bytes)} ${t.pixelGame.byteWord} ≈ ${sizeText(bytes)}`;
+    }
+    resSel.addEventListener('change', drawPicture);
+    depthSel.addEventListener('change', drawPicture);
+
+    // 3. Heli
+    const rateIn = $<HTMLInputElement>('rate');
+    const wave = $('wave');
+    const WINDOW = 0.005;
+    const signal = (s: number) =>
+      0.55 * Math.sin(2 * Math.PI * 400 * s) + 0.3 * Math.sin(2 * Math.PI * 1500 * s) + 0.15 * Math.sin(2 * Math.PI * 5200 * s);
+    const X = (s: number) => (s / WINDOW) * 600;
+    const Y = (v: number) => 90 - v * 80;
+
+    function drawSound() {
+      const rate = RATES[Number(rateIn.value)];
+      const bytes = Number($<HTMLSelectElement>('bytes').value);
+      const channels = Number($<HTMLSelectElement>('channels').value);
+      const count = Math.floor(WINDOW * rate);
+      let truth = '';
+      for (let i = 0; i <= 600; i++) truth += `${i ? 'L' : 'M'}${i} ${Y(signal((i / 600) * WINDOW)).toFixed(1)}`;
+      let steps = '';
+      let dots = '';
+      for (let i = 0; i <= count; i++) {
+        const s = i / rate;
+        const y = Y(signal(s)).toFixed(1);
+        const x1 = X(s).toFixed(1);
+        const x2 = Math.min(600, X((i + 1) / rate)).toFixed(1);
+        steps += `${i ? 'L' : 'M'}${x1} ${y}L${x2} ${y}`;
+        if (count <= 120) dots += `<circle cx="${x1}" cy="${y}" r="3" />`;
+      }
+      wave.innerHTML =
+        `<line class="axis" x1="0" y1="90" x2="600" y2="90" />` +
+        `<path class="truth" d="${truth}" />` +
+        `<path class="steps" d="${steps}" />` +
+        `<g class="dots">${dots}</g>`;
+      $('rate-out').textContent = `${num(rate)} ${t.pixelGame.timesPerSecond}`;
+      $('rate-note').textContent =
+        rate >= 22050 ? t.pixelGame.rateHigh : rate >= 8000 ? t.pixelGame.rateMid : t.pixelGame.rateLow;
+      const perSecond = rate * bytes * channels;
+      $('sound-size').textContent = `${num(rate)} × ${bytes} × ${channels} = ${num(perSecond)} ${t.pixelGame.bytesPerSecond}. ${t.pixelGame.oneMinute}: ${num(perSecond)} × 60 ≈ ${sizeText(perSecond * 60)}`;
+    }
+    rateIn.addEventListener('input', drawSound);
+    $('bytes').addEventListener('change', drawSound);
+    $('channels').addEventListener('change', drawSound);
+
+    drawMission();
+    drawBits();
+    drawColour();
+    drawPicture();
+    drawSound();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-pixel-game]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .tab, .btn {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .tab:hover, .btn:hover { border-color: var(--accent); }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn.ghost { background: var(--surface); color: var(--text); border-color: var(--line); }
+  .btn.ghost:hover { background: var(--surface); border-color: var(--accent); }
+  .btn[hidden] { display: none; }
+  .intro { margin: 0 0 12px; }
+  .explain { margin: 8px 0 0; color: var(--muted); font-size: 0.9rem; }
+  h4 { margin: 18px 0 8px; font-size: 1rem; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .bitpic { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+  .grid { display: grid; grid-template-columns: repeat(8, 34px); grid-auto-rows: 34px; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .grid :global(.cell) { padding: 0; border: 0; background: #ffffff; cursor: pointer; }
+  .grid :global(.cell:hover) { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .grid :global(.cell.on) { background: #000000; }
+  .rows { display: grid; grid-auto-rows: 34.1px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .rows :global(.rowline) { display: flex; align-items: center; gap: 14px; }
+  .rows :global(.rowline b) { color: var(--accent); }
+  .mission { padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); }
+  .mission-text { margin: 4px 0 0; font-weight: 600; }
+  .bytes { margin: 6px 0 0; font: 700 1.05rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+  .progress { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+  .feedback { margin: 6px 0; min-height: 1.4em; font-weight: 600; }
+  .feedback.ok { color: #2e8b57; }
+  .mixer { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .sliders { flex: 1 1 240px; display: grid; gap: 8px; }
+  .slider { display: grid; grid-template-columns: 18px 1fr 36px; gap: 8px; align-items: center; font-weight: 600; }
+  .slider output { text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  input[type='range'] { width: 100%; min-height: 28px; accent-color: var(--accent); }
+  .pixel-view { display: flex; align-items: center; gap: 10px; }
+  .lamps { display: grid; grid-template-columns: repeat(3, 22px); gap: 3px; height: 72px; padding: 3px; background: #000; border-radius: 4px; }
+  .lamps i { display: block; border-radius: 2px; }
+  .swatch { width: 72px; height: 72px; border: 1px solid var(--line); border-radius: 8px; }
+  .hex { font: 700 1.05rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .picture { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+  .controls label { display: grid; gap: 4px; font-size: 0.9rem; font-weight: 550; }
+  select { min-height: 40px; padding: 0 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; }
+  .calc { margin: 10px 0 0; padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); font-weight: 550; overflow-wrap: anywhere; }
+  .wave { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+  .wave :global(.axis) { stroke: var(--line); }
+  .wave :global(.truth) { fill: none; stroke: var(--muted); stroke-width: 1.5; opacity: 0.6; }
+  .wave :global(.steps) { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .wave :global(.dots) { fill: var(--accent); }
+  .wide-slider { display: grid; gap: 4px; margin-top: 10px; font-weight: 550; }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+    .grid { grid-template-columns: repeat(8, 32px); grid-auto-rows: 32px; }
+    .rows { grid-auto-rows: 32.1px; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+  }
+</style>

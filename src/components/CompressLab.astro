@@ -1,0 +1,513 @@
+---
+import { t } from '../lib/labels';
+
+interface Props {
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="game" data-compress-lab>
+  <div class="game-label">{label || t.compressLab.title}</div>
+  <div class="box">
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="rle" role="tab">{t.compressLab.tabs.rle}</button>
+      <button type="button" class="tab" data-tab="zip" role="tab">{t.compressLab.tabs.zip}</button>
+      <button type="button" class="tab" data-tab="jpeg" role="tab">{t.compressLab.tabs.jpeg}</button>
+    </div>
+
+    <section data-panel="rle">
+      <p class="intro">{t.compressLab.rleIntro}</p>
+      <div class="top">
+        <p class="question" data-r-question></p>
+        <span class="progress" data-r-progress></span>
+      </div>
+      <div class="cells" data-r-cells></div>
+      <code class="packed" data-r-packed></code>
+      <form class="answer" data-r-form>
+        <input type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" data-r-input aria-label={t.compressLab.answer} />
+        <button type="submit" class="btn" data-r-check>{t.compressLab.check}</button>
+      </form>
+      <p class="feedback" data-r-feedback aria-live="polite"></p>
+      <p class="why" data-r-why hidden></p>
+      <button type="button" class="btn" data-r-next hidden>{t.compressLab.next}</button>
+    </section>
+
+    <section data-panel="zip" hidden>
+      <p class="intro">{t.compressLab.zipIntro}</p>
+      <div class="row">
+        <button type="button" class="btn ghost" data-preset="repeat">{t.compressLab.presets.repeat}</button>
+        <button type="button" class="btn ghost" data-preset="normal">{t.compressLab.presets.normal}</button>
+        <button type="button" class="btn ghost" data-preset="random">{t.compressLab.presets.random}</button>
+      </div>
+      <textarea rows="6" data-z-text aria-label={t.compressLab.zipText} placeholder={t.compressLab.zipPlaceholder}></textarea>
+      <p class="unsupported" data-z-unsupported hidden>{t.compressLab.zipUnsupported}</p>
+      <div class="results">
+        <div><span>{t.compressLab.before}</span><b data-z-before>–</b></div>
+        <div><span>{t.compressLab.after}</span><b data-z-after>–</b></div>
+        <div><span>{t.compressLab.again}</span><b data-z-again>–</b></div>
+      </div>
+      <div class="bar" aria-hidden="true"><i data-z-bar></i></div>
+      <p class="calc" data-z-calc aria-live="polite"></p>
+      <p class="explain" data-z-note></p>
+    </section>
+
+    <section data-panel="jpeg" hidden>
+      <p class="intro">{t.compressLab.jpegIntro}</p>
+      <div class="row">
+        <button type="button" class="btn ghost" data-pic="photo">{t.compressLab.pics.photo}</button>
+        <button type="button" class="btn ghost" data-pic="logo">{t.compressLab.pics.logo}</button>
+        <label class="btn ghost file">{t.compressLab.pics.own}<input type="file" accept="image/*" data-j-file /></label>
+      </div>
+      <canvas class="picture" width="480" height="320" data-j-view></canvas>
+      <label class="wide-slider">
+        <span>{t.compressLab.quality}: <b data-j-q-out></b></span>
+        <input type="range" min="1" max="100" value="50" data-j-q />
+      </label>
+      <div class="results">
+        <div><span>PNG</span><b data-j-png>–</b></div>
+        <div><span>JPEG</span><b data-j-jpeg>–</b></div>
+        <div><span>{t.compressLab.saves}</span><b data-j-saves>0</b></div>
+      </div>
+      <div class="row">
+        <button type="button" class="btn" data-j-resave>{t.compressLab.resave}</button>
+        <button type="button" class="btn ghost" data-j-restart>{t.compressLab.restart}</button>
+        <label class="check"><input type="checkbox" data-j-zoom /> {t.compressLab.zoom}</label>
+      </div>
+      <p class="explain">{t.compressLab.jpegNote}</p>
+    </section>
+  </div>
+</div>
+
+<script>
+  import { t } from '../lib/labels';
+
+  type Round = { mode: 'pack' | 'unpack'; row: string };
+  const ROUNDS: Round[] = [
+    { mode: 'pack', row: 'VVVMMMMMMV' },
+    { mode: 'pack', row: 'MMMMMMMMVV' },
+    { mode: 'unpack', row: 'VVVVMM' },
+    { mode: 'pack', row: 'VVMMMVVMMM' },
+    { mode: 'unpack', row: 'MVVVVVVM' },
+    { mode: 'pack', row: 'MVVVVVVVVVVVVVVM' },
+    { mode: 'pack', row: 'VMVMVMVM' },
+  ];
+
+  const num = (n: number, digits = 0) =>
+    n.toLocaleString('et-EE', { maximumFractionDigits: digits }).replace(/ /g, ' ');
+  const kb = (bytes: number) => `${num(bytes / 1000, 1)} KB`;
+
+  function pack(row: string): string {
+    return (row.match(/(.)\1*/g) ?? []).map((run) => `${run.length}${run[0]}`).join('');
+  }
+
+  const clean = (s: string) => s.replace(/\s+/g, '').toUpperCase();
+
+  async function gzip(bytes: Uint8Array): Promise<Uint8Array> {
+    const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+
+  function randomText(length: number): string {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const values = crypto.getRandomValues(new Uint8Array(length));
+    return Array.from(values, (v) => alphabet[v % alphabet.length]).join('');
+  }
+
+  function paintPhoto(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d')!;
+    const { width: w, height: h } = canvas;
+    const img = ctx.createImageData(w, h);
+    // Fixed seed so that every student measures the same picture.
+    let seed = 12345;
+    const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const horizon = h * (0.55 + 0.05 * Math.sin(x / 40));
+        const n = (rand() - 0.5) * (y > horizon ? 70 : 14);
+        const cloud = y < horizon ? 40 * Math.max(0, Math.sin(x / 57 + y / 31) * Math.sin(y / 23)) : 0;
+        const r = y > horizon ? 60 + (y - horizon) * 0.25 : 90 + cloud + y * 0.3;
+        const g = y > horizon ? 120 - (y - horizon) * 0.1 : 150 + cloud + y * 0.2;
+        const b = y > horizon ? 50 : 215 + cloud * 0.5;
+        const i = (y * w + x) * 4;
+        img.data[i] = r + n;
+        img.data[i + 1] = g + n;
+        img.data[i + 2] = b + n;
+        img.data[i + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  function paintLogo(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d')!;
+    const { width: w, height: h } = canvas;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#112d4e';
+    ctx.fillRect(40, 40, w - 80, h - 80);
+    ctx.fillStyle = '#ffd34d';
+    ctx.beginPath();
+    ctx.arc(w / 2, 110, 46, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 64px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('10IT', w / 2, 230);
+  }
+
+  function setup(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(name: string) => root.querySelector<T>(`[data-${name}]`)!;
+
+    root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((tab, _i, tabs) =>
+      tab.addEventListener('click', () => {
+        tabs.forEach((x) => x.classList.toggle('active', x === tab));
+        root.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== tab.dataset.tab));
+      }),
+    );
+
+    // 1. RLE
+    let round = 0;
+    let score = 0;
+    let tried = false;
+    const rInput = $<HTMLInputElement>('r-input');
+    const rFeedback = $('r-feedback');
+    const rWhy = $('r-why');
+    const rNext = $<HTMLButtonElement>('r-next');
+    const rCheck = $<HTMLButtonElement>('r-check');
+
+    function drawCells(row: string) {
+      const el = $('r-cells');
+      el.innerHTML = '';
+      el.style.setProperty('--n', String(row.length));
+      for (const ch of row) {
+        const c = document.createElement('i');
+        c.className = ch === 'M' ? 'on' : '';
+        el.append(c);
+      }
+    }
+
+    function loadRound() {
+      const done = round >= ROUNDS.length;
+      rFeedback.textContent = '';
+      rFeedback.className = 'feedback';
+      rWhy.hidden = true;
+      rNext.hidden = !done;
+      rInput.value = '';
+      tried = false;
+      $('r-form').hidden = done;
+      if (done) {
+        $('r-question').textContent = t.compressLab.rleFinal(score, ROUNDS.length);
+        $('r-progress').textContent = '';
+        $('r-packed').textContent = '';
+        $('r-cells').innerHTML = '';
+        rNext.textContent = t.compressLab.again2;
+        return;
+      }
+      const r = ROUNDS[round];
+      rInput.disabled = false;
+      rCheck.disabled = false;
+      rNext.textContent = t.compressLab.next;
+      $('r-progress').textContent = `${round + 1}/${ROUNDS.length}`;
+      if (r.mode === 'pack') {
+        $('r-question').textContent = t.compressLab.packTask;
+        $('r-packed').textContent = r.row;
+        drawCells(r.row);
+      } else {
+        $('r-question').textContent = t.compressLab.unpackTask;
+        $('r-packed').textContent = pack(r.row);
+        $('r-cells').innerHTML = '';
+      }
+    }
+
+    $('r-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (round >= ROUNDS.length || rInput.disabled) return;
+      const r = ROUNDS[round];
+      const right = r.mode === 'pack' ? pack(r.row) : r.row;
+      if (clean(rInput.value) !== right) {
+        tried = true;
+        const firstRun = pack(r.row).match(/\d+./)![0];
+        rFeedback.textContent = r.mode === 'pack' ? t.compressLab.wrongPack(firstRun) : t.compressLab.wrongUnpack(firstRun);
+        rFeedback.className = 'feedback bad';
+        return;
+      }
+      if (!tried) score++;
+      rInput.disabled = true;
+      rCheck.disabled = true;
+      rFeedback.textContent = t.compressLab.correct;
+      rFeedback.className = 'feedback ok';
+      const packedBytes = pack(r.row).match(/\d+./g)!.length * 2;
+      rWhy.textContent = t.compressLab.rleResult(right, r.row.length, packedBytes);
+      rWhy.hidden = false;
+      drawCells(r.row);
+      rNext.hidden = false;
+    });
+    rNext.addEventListener('click', () => {
+      if (round >= ROUNDS.length) {
+        round = 0;
+        score = 0;
+      } else {
+        round++;
+      }
+      loadRound();
+    });
+
+    // 2. ZIP
+    const zText = $<HTMLTextAreaElement>('z-text');
+    const supported = 'CompressionStream' in window;
+    let zToken = 0;
+    let zNote = '';
+    $('z-unsupported').hidden = supported;
+
+    async function measureZip() {
+      const token = ++zToken;
+      const bytes = new TextEncoder().encode(zText.value);
+      if (!bytes.length || !supported) {
+        $('z-before').textContent = $('z-after').textContent = $('z-again').textContent = '–';
+        $('z-calc').textContent = '';
+        $<HTMLElement>('z-bar').style.width = '0';
+        $('z-note').textContent = '';
+        return;
+      }
+      const once = await gzip(bytes);
+      const twice = await gzip(once);
+      if (token !== zToken) return;
+      const unit = t.compressLab.bytes;
+      $('z-before').textContent = `${num(bytes.length)} ${unit}`;
+      $('z-after').textContent = `${num(once.length)} ${unit}`;
+      $('z-again').textContent = `${num(twice.length)} ${unit}`;
+      $<HTMLElement>('z-bar').style.width = `${Math.min(100, (once.length / bytes.length) * 100)}%`;
+      $('z-calc').textContent =
+        once.length < bytes.length
+          ? t.compressLab.zipResult(num(bytes.length / once.length, 1), num((1 - once.length / bytes.length) * 100))
+          : t.compressLab.zipGrew;
+      $('z-note').textContent = zNote;
+    }
+    zText.addEventListener('input', () => {
+      zNote = '';
+      measureZip();
+    });
+    root.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const preset = b.dataset.preset as 'repeat' | 'normal' | 'random';
+        zText.value =
+          preset === 'repeat'
+            ? t.compressLab.repeatLine.repeat(60)
+            : preset === 'normal'
+              ? t.compressLab.normalText
+              : randomText(t.compressLab.normalText.length);
+        zNote = t.compressLab.notes[preset];
+        measureZip();
+      }),
+    );
+
+    // 3. JPEG
+    const view = $<HTMLCanvasElement>('j-view');
+    const vctx = view.getContext('2d')!;
+    const qIn = $<HTMLInputElement>('j-q');
+    const zoomIn = $<HTMLInputElement>('j-zoom');
+    let source = document.createElement('canvas');
+    let current: HTMLCanvasElement | null = null;
+    let saves = 0;
+    let jToken = 0;
+
+    const blobOf = (canvas: HTMLCanvasElement, type: string, quality?: number) =>
+      new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob'))), type, quality),
+      );
+
+    async function decode(blob: Blob, w: number, h: number) {
+      const bitmap = await createImageBitmap(blob);
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      c.getContext('2d')!.drawImage(bitmap, 0, 0);
+      bitmap.close();
+      return c;
+    }
+
+    function show(canvas: HTMLCanvasElement) {
+      view.width = canvas.width;
+      view.height = canvas.height;
+      vctx.imageSmoothingEnabled = false;
+      if (zoomIn.checked) {
+        const w = canvas.width / 4;
+        const h = canvas.height / 4;
+        vctx.drawImage(canvas, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h, 0, 0, canvas.width, canvas.height);
+      } else {
+        vctx.drawImage(canvas, 0, 0);
+      }
+    }
+
+    async function renderJpeg() {
+      const token = ++jToken;
+      const q = Number(qIn.value);
+      $('j-q-out').textContent = String(q);
+      saves = 0;
+      $('j-saves').textContent = '0';
+      const blob = await blobOf(source, 'image/jpeg', q / 100);
+      const decoded = await decode(blob, source.width, source.height);
+      if (token !== jToken) return;
+      current = decoded;
+      $('j-jpeg').textContent = kb(blob.size);
+      show(decoded);
+    }
+
+    async function usePicture(canvas: HTMLCanvasElement) {
+      source = canvas;
+      renderJpeg();
+      const png = await blobOf(canvas, 'image/png');
+      if (source === canvas) $('j-png').textContent = kb(png.size);
+    }
+
+    function generated(paint: (c: HTMLCanvasElement) => void) {
+      const c = document.createElement('canvas');
+      c.width = 480;
+      c.height = 320;
+      paint(c);
+      return c;
+    }
+
+    root.querySelectorAll<HTMLButtonElement>('[data-pic]').forEach((b) =>
+      b.addEventListener('click', () => {
+        root.querySelectorAll('[data-pic]').forEach((x) => x.classList.toggle('picked', x === b));
+        usePicture(generated(b.dataset.pic === 'logo' ? paintLogo : paintPhoto));
+      }),
+    );
+
+    $<HTMLInputElement>('j-file').addEventListener('change', async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, 800 / bitmap.width);
+      const c = document.createElement('canvas');
+      c.width = Math.round(bitmap.width * scale);
+      c.height = Math.round(bitmap.height * scale);
+      c.getContext('2d')!.drawImage(bitmap, 0, 0, c.width, c.height);
+      bitmap.close();
+      root.querySelectorAll('[data-pic]').forEach((x) => x.classList.remove('picked'));
+      usePicture(c);
+    });
+
+    qIn.addEventListener('input', renderJpeg);
+    zoomIn.addEventListener('change', () => current && show(current));
+    $('j-restart').addEventListener('click', renderJpeg);
+
+    const resaveBtn = $<HTMLButtonElement>('j-resave');
+    resaveBtn.addEventListener('click', async () => {
+      if (!current) return;
+      const token = ++jToken;
+      const q = Number(qIn.value) / 100;
+      let c = current;
+      let blob: Blob | null = null;
+      resaveBtn.disabled = true;
+      try {
+        for (let i = 0; i < 5; i++) {
+          // Everyone who shares a meme crops or scales it a little. That is what keeps the damage growing,
+          // because saving the very same grid again changes almost nothing.
+          const shifted = document.createElement('canvas');
+          shifted.width = c.width;
+          shifted.height = c.height;
+          const ctx = shifted.getContext('2d')!;
+          ctx.drawImage(c, 1, 1, c.width - 1, c.height - 1, 0, 0, c.width, c.height);
+          blob = await blobOf(shifted, 'image/jpeg', q);
+          c = await decode(blob, c.width, c.height);
+        }
+      } finally {
+        resaveBtn.disabled = false;
+      }
+      if (token !== jToken) return;
+      current = c;
+      saves += 5;
+      $('j-saves').textContent = String(saves);
+      $('j-jpeg').textContent = kb(blob!.size);
+      show(c);
+    });
+
+    loadRound();
+    root.querySelector<HTMLButtonElement>('[data-pic="photo"]')!.classList.add('picked');
+    usePicture(generated(paintPhoto));
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-compress-lab]').forEach(setup);
+</script>
+
+<style>
+  .game { padding: 14px 0; }
+  .game-label { font-weight: 550; margin-bottom: 8px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .tab, .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  .tab:hover, .btn:hover { border-color: var(--accent); }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn.ghost { background: var(--surface); color: var(--text); border-color: var(--line); }
+  .btn.ghost:hover { background: var(--surface); border-color: var(--accent); }
+  .btn.ghost.picked { background: var(--accent-soft); border-color: var(--accent); }
+  .btn[hidden], form[hidden] { display: none; }
+  .file { position: relative; overflow: hidden; }
+  .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .intro { margin: 0 0 12px; }
+  .explain { margin: 8px 0 0; color: var(--muted); font-size: 0.9rem; }
+  .explain:empty, .calc:empty { display: none; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
+  .top { display: flex; align-items: baseline; gap: 12px; }
+  .question { flex: 1; margin: 0 0 10px; font-size: 1.05rem; font-weight: 600; }
+  .progress { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+  .cells { display: grid; grid-template-columns: repeat(var(--n, 10), minmax(0, 28px)); gap: 1px; margin-bottom: 8px; }
+  .cells :global(i) { aspect-ratio: 1; border: 1px solid var(--line); background: #ffffff; }
+  .cells :global(i.on) { background: #000000; }
+  .packed { display: block; margin-bottom: 10px; font: 700 1.05rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+  .answer { display: flex; gap: 8px; }
+  .answer input, textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    box-sizing: border-box;
+  }
+  .answer input { flex: 1; min-width: 0; min-height: 40px; padding: 0 10px; }
+  textarea { padding: 10px; resize: vertical; font-size: 0.9rem; }
+  .feedback { margin: 10px 0 0; min-height: 1.4em; font-weight: 600; }
+  .feedback.ok { color: #2e8b57; }
+  .feedback.bad { color: #c0392b; }
+  .why { margin: 4px 0 10px; padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); }
+  .unsupported { color: #c0392b; font-weight: 600; }
+  .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .results div { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+  .results span { color: var(--muted); font-size: 0.82rem; }
+  .results b { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+  .bar { height: 10px; margin-top: 8px; border-radius: 5px; background: var(--accent-soft); overflow: hidden; }
+  .bar i { display: block; width: 0; height: 100%; background: var(--accent); transition: width 0.2s; }
+  .calc { margin: 10px 0 0; padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 6px; background: var(--accent-soft); font-weight: 550; }
+  .picture { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+  .wide-slider { display: grid; gap: 4px; margin-top: 10px; font-weight: 550; }
+  input[type='range'] { width: 100%; min-height: 28px; accent-color: var(--accent); }
+  .check { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font-size: 0.9rem; }
+  @media (max-width: 520px) {
+    .box { padding: 12px; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .feedback.ok { color: #6fcf97; }
+    .feedback.bad, .unsupported { color: #ff8a80; }
+  }
+</style>
