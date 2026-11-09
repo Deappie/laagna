@@ -48,6 +48,8 @@ Add a block under `posts:` in `materials.yaml`. Posts are sorted by date automat
 
 **Prepare a post in advance:** add `draft: true` under the post's `date`. The post is checked like any other (missing files still cause an error) but is not shown on the site. Delete the line to publish it.
 
+**Open and closed posts:** every post can be opened and closed by clicking its title. When the page loads, only this week's lesson is open: the newest post dated no later than this Sunday (weeks run Monday to Sunday). On Monday the next week's post opens by itself and the previous one closes.
+
 **YAML tips:** indentation matters (use spaces, not tabs), and put text containing `:` or `#` in quotes.
 
 ## Add a class

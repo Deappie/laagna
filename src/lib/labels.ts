@@ -70,6 +70,8 @@ export const t = {
   },
   practice: {
     title: 'Segaharjutused tunnitööks',
+    open: 'Ava harjutus',
+    close: 'Peida',
     intro: 'Tee ülesanded järjest ja kontrolli iga vastust kohe. Kui jääd kinni, vaata vihjet. Lahenduse näed pärast esimest katset.',
     score: (n: number, total: number) => `Õigesti lahendatud: ${n}/${total}`,
     check: 'Kontrolli',

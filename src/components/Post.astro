@@ -5,22 +5,30 @@ import Item from './Item.astro';
 
 interface Props {
   post: Post;
+  open?: boolean;
 }
 
-const { post } = Astro.props;
+const { post, open = false } = Astro.props;
+const day = post.date.toISOString().slice(0, 10);
 ---
 
-<article class="post">
-  <div class="meta">
-    <time datetime={post.date.toISOString().slice(0, 10)}>{formatDate(post.date)}</time>
-  </div>
-  <h2>{post.title}</h2>
-  {post.text && <p class="text">{post.text}</p>}
-  {post.items.length > 0 && (
-    <div class="items">
-      {post.items.map((item) => <Item item={item} />)}
+<article class="post" data-date={day}>
+  <details open={open}>
+    <summary>
+      <div class="meta">
+        <time datetime={day}>{formatDate(post.date)}</time>
+      </div>
+      <h2>{post.title}</h2>
+    </summary>
+    <div class="body">
+      {post.text && <p class="text">{post.text}</p>}
+      {post.items.length > 0 && (
+        <div class="items">
+          {post.items.map((item) => <Item item={item} />)}
+        </div>
+      )}
     </div>
-  )}
+  </details>
 </article>
 
 <style>
@@ -32,9 +40,33 @@ const { post } = Astro.props;
     padding: 18px 20px 8px;
     margin-bottom: 16px;
   }
+  summary {
+    position: relative;
+    list-style: none;
+    padding-right: 32px;
+    padding-bottom: 10px;
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 9px;
+    height: 9px;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: translateY(-75%) rotate(45deg);
+    transition: transform 0.15s;
+  }
+  details[open] > summary::after { transform: translateY(-25%) rotate(-135deg); }
+  summary:hover h2 { color: var(--accent); }
+  summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+  details[open] > summary { padding-bottom: 0; }
   .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 2px; }
   h2 { font-size: 1.25rem; margin-bottom: 6px; }
   .text { margin: 0 0 10px; white-space: pre-line; }
   .items { margin-top: 6px; }
-  .post > :last-child:not(.items) { margin-bottom: 10px; }
+  .body > :last-child:not(.items) { margin-bottom: 10px; }
 </style>

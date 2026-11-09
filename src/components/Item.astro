@@ -56,8 +56,8 @@ const icons: Record<Item['type'], string> = {
         <TextLab label={item.label} />
       ) : item.game === 'sizes' ? (
         <SizeQuiz label={item.label} />
-      ) : item.game === 'kt1' ? (
-        <PracticeSheet label={item.label} />
+      ) : item.game === 'kt1' || item.game === 'kt2' ? (
+        <PracticeSheet sheet={item.game} label={item.label} />
       ) : item.game === 'terminal' ? (
         <TerminalGame label={item.label} />
       ) : item.game === 'logic' ? (

@@ -1,0 +1,394 @@
+[
+ {
+  "title": "1. Mõisted (5 p)",
+  "questions": [
+   {
+    "text": "Kirjuta iga mõiste juurde õige selgituse täht. A: teeb arvutused ja täidab programmi käske · B: aadress, kust tuleb järgmine käsk · C: sama info kirjutamine vähemate baitidega · D: värvimudel: punane, roheline ja sinine · E: tabel, kus on kõik sisendite kombinatsioonid ja igaühe väljund",
+    "fields": [
+     {
+      "label": "protsessor",
+      "kind": "word",
+      "answer": [
+       "A"
+      ]
+     },
+     {
+      "label": "tõeväärtustabel",
+      "kind": "word",
+      "answer": [
+       "E"
+      ]
+     },
+     {
+      "label": "PC",
+      "kind": "word",
+      "answer": [
+       "B"
+      ]
+     },
+     {
+      "label": "RGB",
+      "kind": "word",
+      "answer": [
+       "D"
+      ]
+     },
+     {
+      "label": "pakkimine",
+      "kind": "word",
+      "answer": [
+       "C"
+      ]
+     }
+    ],
+    "hint": "Alusta mõistetest, mida tead kindlalt, ja jäta raskemad lõppu. Sõnastikud on iga konspekti lõpus.",
+    "solution": "protsessor = A, tõeväärtustabel = E, PC = B, RGB = D, pakkimine = C."
+   }
+  ]
+ },
+ {
+  "title": "2. Arvuti sees (4 p)",
+  "questions": [
+   {
+    "text": "Järjesta kiiremast aeglasemani: kõvaketas, RAM, register, SSD.",
+    "fields": [
+     {
+      "label": "Järjestus",
+      "kind": "list",
+      "answer": "register ram ssd kõvaketas"
+     }
+    ],
+    "hint": "Mäluredelil on üleval protsessorile kõige lähemal olev mälu. Kirjuta sõnad komadega.",
+    "solution": "register, RAM, SSD, kõvaketas. Mida lähemal protsessorile, seda kiirem."
+   },
+   {
+    "text": "Kuulutus: Core i7-13700 · 64 GB DDR5 · 2 TB NVMe SSD · RTX 4080 16 GB. Mitu GB on selles arvutis RAM-i?",
+    "fields": [
+     {
+      "label": "GB",
+      "kind": "num",
+      "answer": "64"
+     }
+    ],
+    "hint": "RAM-i juures on mälutüüp DDR4 või DDR5. Videokaardi taga olev GB on tema enda mälu.",
+    "solution": "64 GB DDR5. Videokaardi mälu ja SSD ei ole RAM."
+   },
+   {
+    "text": "AM4 pesaga protsessor ja AM5 pesaga emaplaat. Kas need töötavad koos?",
+    "fields": [
+     {
+      "label": "jah või ei",
+      "kind": "word",
+      "answer": [
+       "ei"
+      ]
+     }
+    ],
+    "hint": "Kontrolli protsessori ja emaplaadi pesa. Kontrolltöös pead ka põhjendama.",
+    "solution": "Ei sobi: protsessori pesa ja emaplaadi pesa peavad olema samad, AM4 ei lähe AM5 pessa."
+   },
+   {
+    "text": "Miks ei tehta kogu arvuti mälu sama kiireks kui vahemälu?",
+    "fields": [],
+    "open": true,
+    "hint": "Mõtle köögile: mis on tööpind ja mis on kelder?",
+    "solution": "Mida kiirem mälu, seda kallim see on ja seda vähem seda protsessori kõrvale mahub. Seepärast on vähe kiiret ja palju aeglast mälu."
+   }
+  ]
+ },
+ {
+  "title": "3. Loogikaväravad (7 p)",
+  "questions": [
+   {
+    "text": "Kirjuta iga värava väljundid ridades A B = 00, 01, 10, 11, näiteks 0001.",
+    "fields": [
+     {
+      "label": "A AND B",
+      "kind": "compact",
+      "answer": "0001"
+     },
+     {
+      "label": "A OR B",
+      "kind": "compact",
+      "answer": "0111"
+     },
+     {
+      "label": "A XOR B",
+      "kind": "compact",
+      "answer": "0110"
+     },
+     {
+      "label": "A NOR B",
+      "kind": "compact",
+      "answer": "1000"
+     }
+    ],
+    "hint": "AND vajab mõlemat, OR ühest piisab, XOR tahab erinevaid. NAND ja NOR on AND ja OR vastupidi.",
+    "solution": "AND: 0001 · OR: 0111 · XOR: 0110 · NOR: 1000"
+   },
+   {
+    "text": "Arvuta NOT (A XOR B), kui A = 1, B = 0.",
+    "fields": [
+     {
+      "label": "Väljund",
+      "kind": "num",
+      "answer": "0"
+     }
+    ],
+    "hint": "Kõigepealt sulgudes olev osa, siis ülejäänu.",
+    "solution": "Väljund on 0."
+   },
+   {
+    "text": "Arvuta (A OR B) AND C, kui A = 0, B = 1, C = 0.",
+    "fields": [
+     {
+      "label": "Väljund",
+      "kind": "num",
+      "answer": "0"
+     }
+    ],
+    "hint": "Kõigepealt sulgudes olev osa, siis ülejäänu.",
+    "solution": "Väljund on 0."
+   },
+   {
+    "text": "Mitu rida on tõeväärtustabelis, kui sisendeid on 3?",
+    "fields": [
+     {
+      "label": "Ridu",
+      "kind": "num",
+      "answer": "8"
+     }
+    ],
+    "hint": "Iga lisasisend kahekordistab ridade arvu. Kahe sisendiga on 4 rida.",
+    "solution": "2 astmel 3 = 8."
+   }
+  ]
+ },
+ {
+  "title": "4. Liitmine (3 p)",
+  "questions": [
+   {
+    "text": "Liida kahendsüsteemis 0100 + 0111.",
+    "fields": [
+     {
+      "label": "Kahendsüsteemis",
+      "kind": "bin",
+      "answer": "1011"
+     },
+     {
+      "label": "Kümnendsüsteemis",
+      "kind": "num",
+      "answer": "11"
+     }
+    ],
+    "hint": "Alusta paremalt. 1 + 1 = 10: kirjuta 0 ja pane 1 meelde järgmisse tulpa.",
+    "solution": "0100 + 0111 = 1011. Kontroll: 4 + 7 = 11."
+   },
+   {
+    "text": "Pooliitja sisendid on A = 0 ja B = 1. Mis on summa S ja ülekanne C?",
+    "fields": [
+     {
+      "label": "Summa S",
+      "kind": "num",
+      "answer": "1"
+     },
+     {
+      "label": "Ülekanne C",
+      "kind": "num",
+      "answer": "0"
+     }
+    ],
+    "hint": "Pooliitjas annab summa XOR ja ülekande AND.",
+    "solution": "S = 1, C = 0."
+   }
+  ]
+ },
+ {
+  "title": "5. Protsessor (6 p)",
+  "questions": [
+   {
+    "text": "Mis käsk on bait 1C? Kirjuta assembleris, näiteks LOAD 14.",
+    "fields": [
+     {
+      "label": "Käsk",
+      "kind": "word",
+      "answer": [
+       "LOAD 12"
+      ]
+     }
+    ],
+    "hint": "Esimene number on käsk (1 LOAD, 2 ADD, 3 SUB, 4 STORE, 5 OUT, 6 JUMP, 7 JZ), teine pesa.",
+    "solution": "1 on LOAD ja C on 12: LOAD 12."
+   },
+   {
+    "text": "Kirjuta käsk SUB 15 16-süsteemi baidina.",
+    "fields": [
+     {
+      "label": "Bait",
+      "kind": "hex",
+      "answer": "3F"
+     }
+    ],
+    "hint": "Käsu number ette, pesa number 16-süsteemis taha. 10 on A, 15 on F.",
+    "solution": "SUB 15 on 3F."
+   },
+   {
+    "text": "Programm: 0 LOAD 12; 1 ADD 13; 2 STORE 14; 3 OUT; 4 HALT; pesas 12 on 3; pesas 13 on 4. Alguses A = 0. Mis on A pärast takte 2, 3 ja 4 ja mis tuleb väljundisse?",
+    "fields": [
+     {
+      "label": "A pärast takti 2",
+      "kind": "num",
+      "answer": "7"
+     },
+     {
+      "label": "A pärast takti 3",
+      "kind": "num",
+      "answer": "7"
+     },
+     {
+      "label": "A pärast takti 4",
+      "kind": "num",
+      "answer": "7"
+     },
+     {
+      "label": "Väljund",
+      "kind": "num",
+      "answer": "7"
+     }
+    ],
+    "hint": "Tee iga takt eraldi. STORE ja OUT ei muuda A-d.",
+    "solution": "takt 1: LOAD 12, A = 3, väljund – · takt 2: ADD 13, A = 7, väljund – · takt 3: STORE 14, A = 7, väljund – · takt 4: OUT, A = 7, väljund 7"
+   },
+   {
+    "text": "Miks kirjutatakse programme Pythonis, mitte masinkoodis?",
+    "fields": [],
+    "open": true,
+    "hint": "Mõtle tsüklile too, dekodeeri, täida.",
+    "solution": "Masinkoodi on inimesel raske lugeda ja kirjutada, isegi korrutamiseks kulub palju ridu. Pythonis kirjutad ühe rea ja arvuti teeb sellest ise masinkoodi."
+   }
+  ]
+ },
+ {
+  "title": "6. Pildid ja heli (5 p)",
+  "questions": [
+   {
+    "text": "Mustvalge pilt on 8 × 16 pikslit, igal pikslil 1 bitt. Mitu baiti?",
+    "fields": [
+     {
+      "label": "Baite",
+      "kind": "num",
+      "answer": "16"
+     }
+    ],
+    "hint": "Pikslite arv on bittide arv. Baitideks jaga 8-ga.",
+    "solution": "8 × 16 = 128 bitti, 128 : 8 = 16 baiti."
+   },
+   {
+    "text": "Kirjuta pildi rida 00011000 16-süsteemis.",
+    "fields": [
+     {
+      "label": "16-süsteemis",
+      "kind": "hex",
+      "answer": "18"
+     }
+    ],
+    "hint": "Jaga pooleks: kaks korda neli bitti. Iga pool on üks märk.",
+    "solution": "0001 1000 → 18."
+   },
+   {
+    "text": "Kirjuta värvikoodina RGB (0, 128, 0).",
+    "fields": [
+     {
+      "label": "Värvikood",
+      "kind": "hex",
+      "answer": "008000"
+     }
+    ],
+    "hint": "Iga arv kaheks 16-süsteemi märgiks: jaga 16-ga, täisosa ja jääk.",
+    "solution": "#008000."
+   },
+   {
+    "text": "RGB-pilt on 500 pikslit lai ja 400 kõrge. Pakkimata andmemaht megabaitides?",
+    "fields": [
+     {
+      "label": "MB",
+      "kind": "num",
+      "answer": "0.6"
+     }
+    ],
+    "hint": "Laius × kõrgus × 3 baiti, siis jaga miljoniga.",
+    "solution": "500 × 400 × 3 = 600 000 baiti = 0,6 MB."
+   },
+   {
+    "text": "Mitu baiti võtab 1 sekundit pakkimata CD-heli monos?",
+    "fields": [
+     {
+      "label": "Baite",
+      "kind": "num",
+      "answer": "88200"
+     }
+    ],
+    "hint": "44 100 mõõtmist sekundis × 2 baiti × kanalite arv × sekundid. Mono on 1 kanal, stereo 2.",
+    "solution": "44 100 × 2 × 1 × 1 = 88 200 baiti."
+   }
+  ]
+ },
+ {
+  "title": "7. Pakkimine (5 p)",
+  "questions": [
+   {
+    "text": "Paki RLE-ga MMMMMVVVMM. Mitu baiti see pakituna võtab?",
+    "fields": [
+     {
+      "label": "Pakituna",
+      "kind": "compact",
+      "answer": "5M3V2M"
+     },
+     {
+      "label": "Baite",
+      "kind": "num",
+      "answer": "6"
+     }
+    ],
+    "hint": "Loe kokku, mitu ühesugust on järjest. Iga paar on 2 baiti.",
+    "solution": "5M 3V 2M, 3 paari, 6 baiti."
+   },
+   {
+    "text": "Paki lahti 4V1M.",
+    "fields": [
+     {
+      "label": "Rida",
+      "kind": "compact",
+      "answer": "VVVVM"
+     }
+    ],
+    "hint": "2M tähendab kaks musta: MM.",
+    "solution": "VVVVM."
+   },
+   {
+    "text": "Fail oli 12 MB, pärast pakkimist 3 MB. Mitu korda väiksem, mitu % säästeti?",
+    "fields": [
+     {
+      "label": "Korda",
+      "kind": "num",
+      "answer": "4.0"
+     },
+     {
+      "label": "Säästetud %",
+      "kind": "num",
+      "answer": "75.0"
+     }
+    ],
+    "hint": "Korda: enne : pärast. Protsent: (enne − pärast) : enne × 100.",
+    "solution": "12 : 3 = 4 korda. (12 − 3) : 12 × 100 = 75 %."
+   },
+   {
+    "text": "Meemi on korduvalt muudetud ja JPEG-ina uuesti salvestatud. Miks on see plekiline?",
+    "fields": [],
+    "open": true,
+    "hint": "Kadudeta või kadudega?",
+    "solution": "JPEG pakib kadudega. Iga kord, kui pilti muudetakse ja uuesti salvestatakse, visatakse jälle osa infot ära ja vead kuhjuvad."
+   }
+  ]
+ }
+]

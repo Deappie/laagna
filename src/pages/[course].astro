@@ -12,6 +12,12 @@ export function getStaticPaths() {
 const { course } = Astro.props as { course: Course };
 const base = import.meta.env.BASE_URL;
 const posts = getPostsForCourse(course.id);
+// Only this week's lesson is open: the newest post dated no later than this Sunday (weeks run Monday to Sunday).
+// The script below redoes this with the viewer's date, so the right post opens even when the site was built earlier.
+const now = new Date();
+const sunday = new Date(now.getTime() + (7 - (now.getDay() || 7)) * 86400000).toISOString().slice(0, 10);
+const found = posts.findIndex((p) => p.date.toISOString().slice(0, 10) <= sunday);
+const current = found === -1 ? posts.length - 1 : found;
 ---
 
 <Base title={course.title} linksHref={course.links.length ? '#lingid' : undefined}>
@@ -32,9 +38,22 @@ const posts = getPostsForCourse(course.id);
   )}
 
   <div class="posts">
-    {posts.length ? posts.map((p) => <Post post={p} />) : <p class="muted">{t.noPosts}</p>}
+    {posts.length ? posts.map((p, i) => <Post post={p} open={i === current} />) : <p class="muted">{t.noPosts}</p>}
   </div>
 </Base>
+
+<script>
+  const d = new Date();
+  d.setDate(d.getDate() + 7 - (d.getDay() || 7)); // this week's Sunday
+  const sunday = [d.getFullYear(), d.getMonth() + 1, d.getDate()].map((n) => String(n).padStart(2, '0')).join('-');
+  const posts = [...document.querySelectorAll<HTMLElement>('.post[data-date]')];
+  const found = posts.findIndex((p) => (p.dataset.date ?? '') <= sunday);
+  const current = found === -1 ? posts.length - 1 : found;
+  posts.forEach((p, i) => {
+    const details = p.querySelector('details');
+    if (details) details.open = i === current;
+  });
+</script>
 
 <style>
   .back { display: inline-block; font-size: 0.9rem; margin-bottom: 14px; text-decoration: none; }
