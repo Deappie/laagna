@@ -313,7 +313,7 @@ protsessor = [
         [c('4x'), c('STORE x'), 'kirjutab A väärtuse pessa x'],
         [c('5_'), c('OUT'), 'paneb A väärtuse väljundisse (ekraanile)'],
         [c('6x'), c('JUMP x'), 'järgmine käsk tuleb pesast x'],
-        [c('7x'), c('JZ x'), 'kui A on 0, järgmine käsk tuleb pesast x. Muidu lähe edasi'],
+        [c('7x'), c('JZ x'), 'kui A on 0, järgmine käsk tuleb pesast x. Muidu mine edasi'],
     ], [WIDTH * 0.12, WIDTH * 0.2, WIDTH * 0.68]),
     Spacer(1, 6),
     p('Vaata koodi veergu. Iga käsk on üks bait, kaks 16-süsteemi numbrit. <b>Esimene number ütleb, mida teha, '
@@ -372,7 +372,7 @@ protsessor = [
     p('Takt ja gigahertsid', h2),
     p('Iga tsükli sammu juhib <b>kell</b>: elektriline signaal, mis lööb ühtlases tempos nagu metronoom. Iga löök '
       'on üks <b>takt</b>. Mängus näed taktiloendurit. Kui vajutad „Käivita“, teeb mänguprotsessor umbes kolm takti '
-      'sekundis, et jõuaksid silmaga järgi.'),
+      'sekundis, et jõuaksid silmaga järge pidada.'),
     p('Nüüd tead lõpuks, mida tähendas PCPartPickeris number 4,5 GHz. Giga on miljard, herts on kord sekundis. '
       '4,5 GHz protsessoril lööb kell <b>4,5 miljardit</b> korda sekundis. Mängu 6. ülesanne võttis 70 takti. Sinu '
       'silme all kulus selleks umbes 20 sekundit, päris protsessoril kuluks 16 nanosekundit.'),
@@ -820,7 +820,7 @@ V V V V V M M M V V        10 pikslit = 10 baiti
     p('Seda viisi nimetatakse <b>RLE</b>-ks (ingl <i>run-length encoding</i>). Eesti keeles võiks öelda „järjendite '
       'pakkimine“, kus järjend on rida ühesuguseid asju.'),
     p('Lahtipakkimine on sama lihtne: kirjuta iga paari järgi pikslid uuesti välja. ' + c('2M 3V') + ' tähendab kaks '
-      'musta ja kolm valget, ehk ' + c('MMVVV') + '. Tulemus on täpselt sama, mis enne pakkimist, midagi ei kadunud. See '
+      'musta ja kolm valget ehk ' + c('MMVVV') + '. Tulemus on täpselt sama, mis enne pakkimist, midagi ei kadunud. See '
       'on <b>kadudeta</b> pakkimine.'),
     proovi('1', 'Paki rida ' + c('MMMMVVVVVV') + '. Mitu baiti see võtab? Paki lahti ' + c('2V 3M 1V') + '. Harjuta '
                 'Pakkimislabori vahelehel <b>RLE</b>, seal kontrollib arvuti vastuse kohe ära.'),
@@ -860,7 +860,7 @@ kokku                                      30 märki
 '''),
     p('Pane tähele, et sõnastik tuleb ka kaasa pakkida, muidu ei saa keegi teksti lahti pakkida. Seepärast võitsime siin '
       'ainult 3 märki. Pikas tekstis, kus sama sõna on sada korda, on võit palju suurem. Mõtle laulule, kus refrään '
-      'kordub: piisab, kui refräänist on üks koopia ja mujale kirjutad „nüüd tuleb refrään“.'),
+      'kordub: piisab, kui refräänist on üks koopia ja mujale kirjutad „Nüüd tuleb refrään“.'),
     p('Sarnast ideed kasutavad levinud kadudeta vormingud gzip ja ZIP. Natuke kavalamalt küll: eraldi sõnastiku asemel '
       'võib seal olla kirjas „mine 16 märki tagasi ja kopeeri sealt 4 märki“. Idee on sama: ära kirjuta kaks korda seda, '
       'mis on juba olemas. Programmis või tekstis ei tohi ükski täht kaotsi minna, seega sobib siia just kadudeta '
@@ -882,13 +882,13 @@ kokku                                      30 märki
     p('Foto on keerulisem. Fotol võib olla palju väikeseid värvierinevusi, mistõttu lihtne RLE ei pruugi hästi töötada. '
       'JPEG lähenebki teisest otsast: kas inimesel on vaja iga väikest erinevust?'),
     p('Kujuta ette, et kirjeldad telefonis sõbrale pilti taevast. Sa ei hakka ütlema iga ruudu täpset värvi, vaid '
-      'ütled: „see nurk on helesinine“. Sõber saab enam-vähem sama pildi. JPEG jagab pildi väikesteks ruutudeks '
+      'ütled: „See nurk on helesinine.“ Sõber saab enam-vähem sama pildi. JPEG jagab pildi väikesteks ruutudeks '
       '(8 × 8 pikslit) ja lihtsustab igaühes väikeseid erinevusi.'),
     figure(jpeg_block_drawing(), 'Lihtsustatud näide väikeste heleduseerinevuste eemaldamisest; see ei näita JPEG-i '
                                  'täpset tööalgoritmi.'),
     p('See on <b>kadudega</b> pakkimine. Infot läheb päriselt kaotsi ja seda ei saa kuidagi tagasi. Salvestamisel saad '
       'valida kvaliteedi: kõrgem kvaliteet tähendab vähem ära visatud infot ja tavaliselt suuremat faili.'),
-    p('Siit tuleb ka see, miks tekst JPEG-is võib halvasti välja näha. Teravate mustade tähtede ümber võib tekkida '
+    p('See selgitab ka, miks tekst JPEG-is võib halvasti välja näha. Teravate mustade tähtede ümber võib tekkida '
       'plekiline aura. Seepärast on ekraanipildi jaoks PNG sageli parem.'),
     p('JPEG-pildi kvaliteet võib halveneda, kui pilti muudetakse ja seejärel uuesti JPEG-vormingus salvestatakse. Faili '
       'muutmata kopeerimine või saatmine selle kvaliteeti ei vähenda. Vaata seda vahelehel <b>JPEG-labor</b> nupuga '
@@ -897,7 +897,7 @@ kokku                                      30 märki
     p('Mida millal kasutada?', h2),
     table(['Asi', 'Vali', 'Miks'], [
         ['foto', 'JPEG', 'Väikesed kaod ei paista tavaliselt välja.'],
-        ['ekraanipilt, logo, joonis', 'PNG', 'Palju ühesugust värvi pikslit, teravad servad ei tohi plekiliseks minna.'],
+        ['ekraanipilt, logo, joonis', 'PNG', 'Palju ühesugust värvi piksleid, teravad servad ei tohi plekiliseks minna.'],
         ['tekst, kood, programmid', 'ZIP, gzip', 'Ükski märk ei tohi kaduda.'],
         ['muusika', 'MP3, AAC', 'Kadudega: väike kadu jääb tavaliselt kõrvale märkamatuks.'],
         ['juba pakitud fail', 'ära paki', 'Sellest ei tule tavaliselt palju kasu.'],
@@ -908,10 +908,10 @@ kokku                                      30 märki
         '<b>RLE käsitsi.</b> Ava Pakkimislaboris vaheleht RLE ja tee ülesanded läbi. Täida töölehe 1. ja 2. osa.',
         '<b>Päris gzip.</b> Vahelehel gzip-labor on kolm nuppu: korduv tekst, tavaline tekst ja juhuslikud märgid. '
         'Vajuta kõiki, kirjuta tulemused töölehe 3. ossa ja kleebi kasti ka oma tekst.',
-        '<b>Päris JPEG.</b> Vahelehel JPEG-labor vali foto moodi pilt, seejärel logo moodi pilt ja liiguta kvaliteeti. '
+        '<b>Päris JPEG.</b> Vahelehel JPEG-labor vali foto moodi pilt, seejärel logo moodi pilt ja liiguta kvaliteediliugurit. '
         'Kirjuta suurused töölehe 4. ossa. Soovi korral proovi oma pildiga, see ei lahku su arvutist.',
-        '<b>Selgita.</b> Täida töölehe viimane osa, tee kodus lõpuni, mis jäi pooleli, ja saada tööleht ära. Ülesanne 5c '
-        'on lisaülesanne.',
+        '<b>Selgita.</b> Täida töölehe viimane osa ja saada tööleht tunni lõpus ära. Kodutööd sel korral ei ole, '
+        'valmistu kontrolltööks. Ülesanne 5c on lisaülesanne.',
     ]),
 
     CondPageBreak(230),
@@ -937,14 +937,14 @@ kokku                                      30 märki
 ]
 
 kodutoo_pakkimine = [
-    p('Tunni- ja kodutöö: pakkimine', title),
+    p('Tunnitöö: pakkimine', title),
     subtitle('9. tund', 'tööleht'),
     row([p('Nimi', label_b), Field('nimi', 220), '', p('Kuupäev', label_b), Field('kuupaev', 110), ''],
         [51, 220, 18, 51, 110, WIDTH + 12 - 450], PALE),
     Spacer(1, 8),
     p('Täida lahtrid otse kursuse veebilehel: ava fail nupuga „Vaata“, kirjuta vastused ja vajuta „Laadi täidetud PDF '
-      'alla“. Tee tunnis nii palju, kui jõuad, ja lõpeta ülejäänud ülesanded kodus. Saada täidetud fail aadressile '
-      '<b>mtsopo@taltech.ee</b> hiljemalt 16.11 kell 23.59. Abiks on konspekt ja veebilehe Pakkimislabor.', intro),
+      'alla“. Saada täidetud fail tunni lõpus aadressile <b>mtsopo@taltech.ee</b>. Kodutööd sel korral ei ole: kodus '
+      'valmistu kontrolltööks. Abiks on konspekt ja veebilehe Pakkimislabor.', intro),
 
     p('1. RLE käsitsi', h2),
     p('V on valge, M on must. Pakkimata võtab iga piksel 1 baidi. Pakituna võtab iga paar 2 baiti: korduste arv on üks '
@@ -999,7 +999,7 @@ kodutoo_pakkimine += [
 
     CondPageBreak(230),
     p('4. JPEG-labor', h2),
-    p('Vahelehel JPEG-labor vali pilt, liiguta kvaliteet õigele kohale ja kirjuta faili suurus kilobaitides. PNG suurus '
+    p('Vahelehel JPEG-labor vali pilt, liiguta kvaliteediliugur õigesse asendisse ja kirjuta faili suurus kilobaitides. PNG suurus '
       'on seal kohe näha. 90, 50 ja 10 on liuguri seadistused, mitte protsendid algse pildi kvaliteedist.'),
     row([p('<b>Pilt</b>', label), p('<b>PNG</b>', label), p('<b>JPEG 90</b>', label), p('<b>JPEG 50</b>', label),
          p('<b>JPEG 10</b>', label)], [100, 80, 80, 80, 80]),
@@ -1129,7 +1129,7 @@ BUILDS = {
     'pildid-heli-konspekt': ('Pildid ja heli arvudena', pildid),
     'kodutoo-pildid': ('Kodutöö: pildid ja heli', kodutoo_pildid),
     'pakkimine-konspekt': ('Pakkimine', pakkimine),
-    'kodutoo-pakkimine': ('Tunni- ja kodutöö: pakkimine', kodutoo_pakkimine),
+    'kodutoo-pakkimine': ('Tunnitöö: pakkimine', kodutoo_pakkimine),
     'internet-konspekt': ('Kuidas internet töötab', internet),
 }
 

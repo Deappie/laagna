@@ -141,7 +141,7 @@ konspekt = [
     p(c('npm') + ' on programm, mis toob pakette internetist. Pärast seda käsku on kaustas kaks uut asja:'),
     *bullets(
         c('node_modules') + ' on kaust, kus on Express ja kõik, mida Express ise vajab. Seal on palju kaustu. '
-        'Ära ehmu ja ära sinna midagi muuda;',
+        'Ära ehmu ja ära seal midagi muuda;',
         c('package.json') + '-isse tekib rida ' + c('"express"') + '. See on nimekiri: „sellel projektil on vaja '
         'Expressi“.'),
     p('Tänu sellele nimekirjale ei pea ' + c('node_modules') + '-it kellelegi saatma. Kes projekti saab, kirjutab '

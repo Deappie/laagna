@@ -213,7 +213,7 @@ posts:
   - title: "9. tund: pakkimise töötuba"
     course: 10it
     date: 2026-11-10
-    text: "Eelmisel korral nägime, et 12-megapikslise pildi pakkimata andmed võtaksid 36 MB, aga pakitud fotofail võib olla näiteks 3 MB. Täna teed pakkimist ise: kõigepealt käsitsi ridade kaupa, siis päris gzip-i ja JPEG-iga. Mõõdad, milliste andmete maht pakkimisel väheneb ja milliste oma mitte ning miks pilt korduval muutmisel ja salvestamisel koledamaks läheb.\nTunni- ja kodutöö: ava PDF nupuga „Vaata“, täida lahtrid otse veebis, tee kodus lõpuni, mis tunnis pooleli jäi, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee hiljemalt 16.11 kell 23.59.\nJärgmisel korral, 17.11, on kontrolltöö 2 tundide 5–9 kohta. Proovitöö ja kordamine on postituses „10. tund: kontrolltöö 2“."
+    text: "Eelmisel korral nägime, et 12-megapikslise pildi pakkimata andmed võtaksid 36 MB, aga pakitud fotofail võib olla näiteks 3 MB. Täna teed pakkimist ise: kõigepealt käsitsi ridade kaupa, siis päris gzip-i ja JPEG-iga. Mõõdad, milliste andmete maht pakkimisel väheneb ja milliste oma mitte ning miks pilt korduval muutmisel ja salvestamisel koledamaks läheb.\nTunnitöö: ava PDF nupuga „Vaata“, täida lahtrid otse veebis, vajuta „Laadi täidetud PDF alla“ ja saada fail tunni lõpus aadressile mtsopo@taltech.ee. Kodutööd sel korral ei ole, kodus valmistu kontrolltööks.\nJärgmisel korral, 17.11., on kontrolltöö 2 tundide 5–9 kohta. Proovitöö ja kordamine on postituses „10. tund: kontrolltöö 2“."
     items:
       - type: pdf
         file: "pakkimine-konspekt.pdf"
@@ -222,12 +222,12 @@ posts:
         game: compress
       - type: pdf
         file: "kodutoo-pakkimine.pdf"
-        label: "Tunni- ja kodutöö: pakkimine (täida veebis ja saada: mtsopo@taltech.ee)"
+        label: "Tunnitöö: pakkimine (täida veebis ja saada: mtsopo@taltech.ee)"
 
   - title: "10. tund: kontrolltöö 2"
     course: 10it
     date: 2026-11-17
-    text: "17.11 on kontrolltöö 2. See hõlmab 5.–9. tundi: arvuti osad ja mälu, loogikaväravad ja liitmine, mänguprotsessor, pildid ja heli ning pakkimine. Töö kestab 45 minutit, kokku on 35 punkti ja kalkulaatorit kasutada ei saa. Mänguprotsessori käsutabel on töölehel olemas.\nKõik vajalik on ühes PDF-is: proovitöö, mis on täpselt nagu päris töö (ainult arvud ja sõnad on teised), selle lahendused koos iga teema lühikese kordamisega ja kõigi viie tunni konspektid. Esimesel lehel on kirjas, kuidas valmistuda. Kui proovitöö on tehtud, harjuta allpool samade ülesannetega teiste arvudega."
+    text: "17.11. on kontrolltöö 2. See hõlmab 5.–9. tundi: arvuti osad ja mälu, loogikaväravad ja liitmine, mänguprotsessor, pildid ja heli ning pakkimine. Töö kestab 45 minutit, kokku on 35 punkti ja kalkulaatorit kasutada ei saa. Mänguprotsessori käsutabel on töölehel olemas.\nKõik vajalik on ühes PDF-is: proovitöö, mis on täpselt nagu päris töö (ainult arvud ja sõnad on teised), selle lahendused koos iga teema lühikese kordamisega ja kõigi viie tunni konspektid. Esimesel lehel on kirjas, kuidas valmistuda. Kui proovitöö on tehtud, harjuta allpool samade ülesannetega teiste arvudega."
     items:
       - type: pdf
         file: "kordamine-kt2.pdf"
@@ -492,7 +492,7 @@ posts:
   - title: "9. tund: arvustuste lisamine ja kustutamine"
     course: 11it
     date: 2026-11-10
-    text: "Praegu oskab meie server arvustusi ainult välja anda. Täna õpetame ta neid ka vastu võtma ja kustutama, nii et lisatud arvustus jääb alles ka pärast lehe värskendamist. Õpid meetodeid GET, POST ja DELETE ning staatusekoode. Päringulabor on serveri simulatsioon, kus saad päringuid proovida ilma midagi paigaldamata.\nSöökla projekt peab kaasas olema. Kui seda pole või see ei tööta, laadi alla algfailid.\nKodutöö: midagi paigaldada pole vaja, piisab brauserist. Ava kodutöö PDF nupuga „Vaata“, täida lahtrid, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile mtsopo@taltech.ee hiljemalt 16.11 kell 23.59.\nJärgmisel korral, 17.11, on praktiline kontrolltöö. Proovitöö ja algfailid on postituses „10. tund: kontrolltöö“."
+    text: "Praegu oskab meie server arvustusi ainult välja anda. Täna õpetame ta neid ka vastu võtma ja kustutama, nii et lisatud arvustus jääb alles ka pärast lehe värskendamist. Õpid meetodeid GET, POST ja DELETE ning staatusekoode. Päringulabor on serveri simulatsioon, kus saad päringuid proovida ilma midagi paigaldamata.\nSöökla projekt peab kaasas olema. Kui seda pole või see ei tööta, laadi alla algfailid.\nKodutööd sel korral ei ole: kodus valmistu kontrolltööks.\nJärgmisel korral, 17.11., on praktiline kontrolltöö. Proovitöö ja algfailid on postituses „10. tund: kontrolltöö“."
     items:
       - type: pdf
         file: "lisamine-kustutamine-konspekt.pdf"
@@ -505,14 +505,11 @@ posts:
         label: "Algfailid: söökla projekt pärast 8. tundi"
       - type: game
         game: api
-      - type: pdf
-        file: "kodutoo-lisamine.pdf"
-        label: "Kodutöö: lisamine ja kustutamine (täida veebis ja saada: mtsopo@taltech.ee)"
 
   - title: "10. tund: kontrolltöö"
     course: 11it
     date: 2026-11-17
-    text: "17.11 on esimene kontrolltöö, kokku 20 punkti. Esimesed umbes 20 minutit on teooria paberil (10 p): meetodid, staatusekoodid, koodi lugemine ja üks viga. Ülejäänud aja töötad arvutis (10 p): saad algfailid, kus uus osa on juba olemas, ja kirjutad kuus puuduvat kohta (TODO). Iga TODO kohta on eeskuju arvustuste koodis, mille tegime 7.–9. tunnis. Praktikaosas on lubatud konspektid, tunnijuhendid ja MDN, tehisintellekti tööriistu kasutada ei tohi.\nKõik vajalik on ühes PDF-is: proovitöö, mis on täpselt nagu kontrolltöö (ainult teema ja sõnad on teised), vastused ja lahendus koos selgitustega ning 7.–9. tunni konspektid. Esimesel lehel on kirjas, kuidas valmistuda. Proovitöö TODO-de jaoks laadi alla proovitöö algfailid.\nTule 17.11 tundi arvutiga, kus söökla projekt käivitub (Node.js ja npm töötavad). Kontrolltöö algfailid saad tunnis."
+    text: "17.11. on esimene kontrolltöö, kokku 20 punkti. Esimesed umbes 20 minutit on teooria paberil (10 p): meetodid, staatusekoodid, koodi lugemine ja üks viga. Ülejäänud aja töötad arvutis (10 p): saad algfailid, kus uus osa on juba olemas, ja kirjutad kuus puuduvat kohta (TODO). Iga TODO kohta on eeskuju arvustuste koodis, mille tegime 7.–9. tunnis. Praktikaosas on lubatud konspektid, tunnijuhendid ja MDN, tehisintellekti tööriistu kasutada ei tohi.\nKõik vajalik on ühes PDF-is: proovitöö, mis on täpselt nagu kontrolltöö (ainult teema ja sõnad on teised), vastused ja lahendus koos selgitustega ning 7.–9. tunni konspektid. Esimesel lehel on kirjas, kuidas valmistuda. Proovitöö TODO-de jaoks laadi alla proovitöö algfailid.\nTule 17.11. tundi arvutiga, kus söökla projekt käivitub (Node.js ja npm töötavad). Kontrolltöö algfailid saad tunnis."
     items:
       - type: pdf
         file: "kordamine-kontrolltoo-11it.pdf"

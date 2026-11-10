@@ -910,14 +910,14 @@ konspekt_9 = [
     p('Praegu saab meie rakendus andmeid ainult lugeda. Pärast lehe värskendamist kaovad brauseris lisatud arvustused. '
       'Serverist saadud algsed arvustused jäävad alles. Miks? Sest uus arvustus jõudis ainult sinu brauseri mällu ja '
       'server ei kuulnud sellest midagi.'),
-    p('Täna paneme lehe serverile rääkima: „võta see arvustus vastu“ ja „kustuta see ära“.'),
+    p('Täna paneme lehe serverile ütlema: „võta see arvustus vastu“ ja „kustuta see ära“.'),
 
     p('Kes on kes', h2),
     table(['Restoranis', 'Veebis', 'Mis see on'], [
         ['Sina laua taga', '<b>klient</b>', 'Programm, mis saadab päringuid: brauser ja Reacti leht.'],
         ['Tellimus', '<b>päring</b>', 'Mida klient serverilt tahab.'],
         ['Köök', '<b>server</b>', 'Programm, mis ootab päringuid ja vastab. Meil Express.'],
-        ['See, mis lauale tuuakse', '<b>vastus</b>', 'Mille server tagasi saadab.'],
+        ['See, mis lauale tuuakse', '<b>vastus</b>', 'See, mille server tagasi saadab.'],
     ], [WIDTH * 0.32, WIDTH * 0.14, WIDTH * 0.54]),
     Spacer(1, 6),
     p('Meil töötab korraga kaks programmi, kumbki oma terminalis. <b>Vite</b> (' + c('npm run dev') + ', tavaliselt port '
@@ -1028,8 +1028,8 @@ const { toit, hinne, kommentaar } = req.body;
                 'juhtub massiiviga?'),
 
     p('Kliendi pool: fetch koos meetodiga', h2),
-    p('Seni kirjutasime ' + c("fetch('/api/arvustused')") + ' ja see tegi ' + c('GET') + '-päringu. Teistel meetoditel '
-      'on vaja teist argumenti: objekt, kus on päringu seaded.'),
+    p('Seni kirjutasime ' + c("fetch('/api/arvustused')") + ' ja see tegi ' + c('GET') + '-päringu. Teiste meetodite puhul '
+      'on vaja teist argumenti: objekti, kus on päringu seaded.'),
     code("""
 const vastus = await fetch('/api/arvustused', {
   method: 'POST',
@@ -1065,7 +1065,7 @@ setArvustused((praegused) => [andmed, ...praegused]);
     code("""
 const vastus = await fetch(`/api/arvustused/${id}`, { method: 'DELETE' });
 """),
-    p('Langetusrõhumärgid ehk tagurpidi ülakomad ' + c('`') + ' teevad <b>malliteksti</b>: ' + c('${id}') + ' asemele '
+    p('Tagurpidi ülakomad ' + c('`') + ' teevad <b>malliteksti</b>: ' + c('${id}') + ' asemele '
       'pannakse muutuja väärtus.'),
 
     p('Kuidas nupp saab kustutada?', h2),
@@ -1215,7 +1215,7 @@ await vastus.json();
     code(LISA_9.strip('\n')),
     explain([
         ['async function lisa(e: ...) {', 'Nüüd on see async, sest kasutame sees await-i.'],
-        ['e.preventDefault();', 'Muidu teeks brauser vormi saatmisel lehele värskenduse.'],
+        ['e.preventDefault();', 'Muidu värskendaks brauser vormi saatmisel lehte.'],
         ["setViga('');", 'Kustutab eelmise veateate.'],
         ['try {', 'Kui server ei vasta üldse, hüppab programm catch-i.'],
         ["await fetch('/api/arvustused', {", 'Teine argument on objekt päringu seadetega.'],
@@ -1231,7 +1231,7 @@ await vastus.json();
     ]),
     Spacer(1, 6),
     p('<b>Mis sinu arvates juhtub</b>, kui lisad arvustuse ja vajutad siis ' + c('F5') + '? Proovi.'),
-    see('arvustus ilmub nimekirja ja pärast ' + c('F5') + '-e <b>on see ikka alles!</b> Vajuta nüüd „Lisa“ tühja vormiga: '
+    see('arvustus ilmub nimekirja ja pärast ' + c('F5') + ' vajutamist <b>on see ikka alles!</b> Vajuta nüüd „Lisa“ tühja vormiga: '
         'lehel on teade „Täida kõik lahtrid, hinne on 1 kuni 5.“ See teade tuli serverist. <b>Miks</b> on hea, et kontroll '
         'on serveris?'),
     stuck('kui lehel on „Serveriga ei saanud ühendust“, kontrolli, kas server töötab ja kas fetch-i aadress on õige.'),
@@ -1264,7 +1264,7 @@ await vastus.json();
       + c('kustuta') + ' on puudu. Lisa ' + c('App.tsx') + '-i funktsiooni ' + c('lisa') + ' järele:'),
     code(KUSTUTA_9.strip('\n')),
     explain([
-        ['fetch(`/api/arvustused/${id}`,', 'Langetusrõhumärgid ehk tagurpidi ülakomad: ${id} asemele tuleb number.'],
+        ['fetch(`/api/arvustused/${id}`,', 'Tagurpidi ülakomad: ${id} asemele tuleb number.'],
         ["{ method: 'DELETE' }", 'Keha pole vaja, kõik on aadressis.'],
         ['setArvustused((praegused) =>\n  praegused.filter(...));', 'Eemaldab ka lehelt, nii et ei pea kõike uuesti '
          'küsima.'],
@@ -1293,7 +1293,7 @@ git commit -m "Arvustuste lisamine ja kustutamine"
       + '. Kui Git küsib nime ja e-posti, täida need käskudega ' + c('git config --global user.name "Sinu Nimi"') + ' ja '
       + c('git config --global user.email "sinu@naide.ee"') + '.'),
 
-    p('Kogu fail', h2),
+    p('Täielikud failid', h2),
     p('Kui midagi ei tööta, võrdle oma faile nendega.'),
     *code_file(SERVER_9, 'server/index.js'),
     *code_file(APP_9, 'src/App.tsx'),
@@ -1330,7 +1330,7 @@ kodutoo_9 = [
     Spacer(1, 8),
     p('Midagi paigaldama ei pea, piisab brauserist. Abiks on konspekt ja veebilehe Päringulabor. Ava see fail kursuse '
       'lehel nupuga „Vaata“, täida lahtrid, vajuta „Laadi täidetud PDF alla“ ja saada fail aadressile '
-      '<b>mtsopo@taltech.ee</b> hiljemalt 16.11 kell 23.59.', intro),
+      '<b>mtsopo@taltech.ee</b> hiljemalt 16.11. kell 23.59.', intro),
 
     p('1. Mis meetod?', h2),
 ]

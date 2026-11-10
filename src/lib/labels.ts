@@ -267,7 +267,7 @@ export const t = {
     again2: 'Proovi uuesti',
     correct: 'Õige!',
     wrongPack: (run: string) =>
-      `Alusta vasakult: esimesed ${run.slice(0, -1)} ruutu on tähega ${run.slice(-1)}, nii et vastus algab ${run}. Jätka samamoodi järgmiste ruutudega.`,
+      `Alusta vasakult: esimesed ${run.slice(0, -1)} ruutu on tähega ${run.slice(-1)}, nii et vastuse alguses on ${run}. Jätka samamoodi järgmiste ruutudega.`,
     wrongUnpack: (run: string) =>
       `Alusta esimesest paarist: ${run} tähendab, et ${run.slice(-1)} tuleb ${run.slice(0, -1)} korda: ${run.slice(-1).repeat(Number(run.slice(0, -1)))}. Jätka järgmise paariga.`,
     rleResult: (right: string, before: number, after: number) =>
@@ -280,7 +280,7 @@ export const t = {
       }`,
     rleFinal: (score: number, n: number) => `Said esimesel katsel õigesti ${score}/${n}.`,
     zipIntro:
-      'Selles laboris pakib brauser teksti gzip-vormingus. ZIP on teine levinud pakkimisvorming. Tekst ei lähe kuhugi, kõik toimub sinu arvutis. Ennusta enne igat nuppu, milline tekst väheneb protsentides kõige rohkem, ja kontrolli. Kleebi kasti ka oma tekst.',
+      'Selles laboris pakib brauser teksti gzip-vormingus. ZIP on teine levinud pakkimisvorming. Tekst ei lähe kuhugi, kõik toimub sinu arvutis. Ennusta enne iga nupu vajutamist, milline tekst väheneb protsentides kõige rohkem, ja kontrolli. Kleebi kasti ka oma tekst.',
     presets: { repeat: 'Korduv tekst', normal: 'Tavaline tekst', random: 'Juhuslikud märgid' },
     zipText: 'Pakitav tekst',
     zipPlaceholder: 'Kirjuta või kleebi siia tekst…',
@@ -293,14 +293,14 @@ export const t = {
     zipGrew: 'Andmemaht ei vähenenud. Pakitud andmetele lisandub vormingu lisainfo, seetõttu võib väga lühike tekst pakkimisel hoopis suureneda.',
     repeatLine: 'Hip-hip-hurraa! ',
     normalText:
-      'Kui kool sai arvutiklassi uued arvutid, jagas õpetaja õpilased kahekaupa. Igal paaril oli oma ülesanne: üks kirjutas lühikese programmi, teine kontrollis, kas see töötab. Alguses läks paljudel midagi valesti, sest üks puuduv sulg võib terve programmi seisma panna. Tunni lõpuks oskas enamik vea ise üles leida. Kodus proovis Mari sama ülesannet oma sülearvutis ja avastas, et fail, mille ta sõbrale saatis, võttis üllatavalt vähe ruumi. Järgmisel päeval küsis ta õpetajalt, kuidas see võimalik on. Õpetaja naeratas ja ütles, et tekstis kordub rohkem, kui esmapilgul paistab: sidesõnad, sõnalõpud ja tähepaarid. Just neid kordusi pakkija otsibki.',
+      'Kui kool sai arvutiklassi uued arvutid, jagas õpetaja õpilased paaridesse. Igal paaril oli oma ülesanne: üks kirjutas lühikese programmi, teine kontrollis, kas see töötab. Alguses läks paljudel midagi valesti, sest üks puuduv sulg võib terve programmi seisma panna. Tunni lõpuks oskas enamik vea ise üles leida. Kodus proovis Mari sama ülesannet oma sülearvutis ja avastas, et fail, mille ta sõbrale saatis, võttis üllatavalt vähe ruumi. Järgmisel päeval küsis ta õpetajalt, kuidas see võimalik on. Õpetaja naeratas ja ütles, et tekstis kordub rohkem, kui esmapilgul paistab: sidesõnad, sõnalõpud ja tähepaarid. Just neid kordusi pakkija otsibki.',
     notes: {
       repeat: 'Sama rida kordub kuuskümmend korda. Pakkija hoiab alles ühe koopia ja viited sellele. Teine pakkimine enam ei aita, sest lihtsalt ärakasutatavaid kordusi on vähe alles.',
       normal: 'Tavalises tekstis on kordusi vähem: mõned sõnad, lõpud ja tähepaarid. Andmemaht väheneb, aga palju vähem kui korduva teksti puhul.',
-      random: 'Korduvaid tükke siin pole. Väike võit tuleb ainult sellest, et märke on 62 tükki, aga bait mahutaks 256. Võrdle sama pikka tavalist teksti.',
+      random: 'Korduvaid tükke siin pole. Väike võit tuleb ainult sellest, et märke on 62 tükki, aga bait mahutaks 256. Võrdle tulemust sama pika tavalise teksti tulemusega.',
     },
     jpegIntro:
-      'Siin pakib brauser pilti päriselt ja näitab failide suurust. Vali pilt ja liiguta kvaliteeti. Oma pilt ei lahku sinu arvutist.',
+      'Siin pakib brauser pilti päriselt ja näitab failide suurust. Vali pilt ja liiguta kvaliteediliugurit. Oma pilt ei lahku sinu arvutist.',
     pics: { photo: 'Foto moodi', logo: 'Logo moodi', own: 'Minu pilt' },
     quality: 'JPEG-i kvaliteet',
     saves: 'Salvestatud',
@@ -337,7 +337,7 @@ export const t = {
       'Meetod GET, aadress /api/arvustused.',
       'Meetod POST, sama aadress. Näidiskeha on kastis olemas.',
       'Muuda kehas hinne 9-ks. Oodatud staatus on 400.',
-      'Kustuta kehast "toit" koos väärtuse ja komaga, pane hinne 1 kuni 5 peale. Oodatud staatus on 400.',
+      'Kustuta kehast "toit" koos väärtuse ja komaga, määra hindeks täisarv vahemikus 1–5. Oodatud staatus on 400.',
       'Meetod DELETE, aadressi lõppu käib number: /api/arvustused/2.',
       'Vali number, mida serveri mälus pole. Oodatud staatus on 404.',
       'Selle koha peale pole serveril marsruuti. Oodatud staatus on 404.',

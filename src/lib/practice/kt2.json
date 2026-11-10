@@ -123,7 +123,7 @@
       "answer": "1000"
      }
     ],
-    "hint": "AND vajab mõlemat, OR ühest piisab, XOR tahab erinevaid. NAND ja NOR on AND ja OR vastupidi.",
+    "hint": "AND vajab mõlemat sisendit, OR-i puhul piisab ühest, XOR tahab erinevaid. NAND ja NOR on AND ja OR vastupidi.",
     "solution": "AND: 0001 · OR: 0111 · XOR: 0110 · NOR: 1000"
    },
    {
@@ -320,7 +320,7 @@
     "solution": "500 × 400 × 3 = 600 000 baiti = 0,6 MB."
    },
    {
-    "text": "Mitu baiti võtab 1 sekundit pakkimata CD-heli monos?",
+    "text": "Mitu baiti võtab üks sekund pakkimata CD-heli monos?",
     "fields": [
      {
       "label": "Baite",
