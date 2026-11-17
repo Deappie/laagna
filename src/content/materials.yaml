@@ -509,7 +509,7 @@ posts:
   - title: "10. tund: kontrolltöö"
     course: 11it
     date: 2026-11-17
-    text: "17.11. on esimene kontrolltöö, kokku 20 punkti. Esimesed umbes 20 minutit on teooria paberil (10 p): meetodid, staatusekoodid, koodi lugemine ja üks viga. Ülejäänud aja töötad arvutis (10 p): saad algfailid, kus uus osa on juba olemas, ja kirjutad kuus puuduvat kohta (TODO). Iga TODO kohta on eeskuju arvustuste koodis, mille tegime 7.–9. tunnis. Praktikaosas on lubatud konspektid, tunnijuhendid ja MDN, tehisintellekti tööriistu kasutada ei tohi.\nKõik vajalik on ühes PDF-is: proovitöö, mis on täpselt nagu kontrolltöö (ainult teema ja sõnad on teised), vastused ja lahendus koos selgitustega ning 7.–9. tunni konspektid. Esimesel lehel on kirjas, kuidas valmistuda. Proovitöö TODO-de jaoks laadi alla proovitöö algfailid.\nTule 17.11. tundi arvutiga, kus söökla projekt käivitub (Node.js ja npm töötavad). Kontrolltöö algfailid saad tunnis."
+    text: "17.11. on esimene kontrolltöö, kokku 20 punkti. Esimesed umbes 20 minutit on teooria paberil (10 p): meetodid, staatusekoodid, koodi lugemine ja üks viga. Ülejäänud aja töötad arvutis (10 p): saad algfailid, kus uus osa on juba olemas, ja kirjutad kuus puuduvat kohta (TODO). Iga TODO kohta on eeskuju arvustuste koodis, mille tegime 7.–9. tunnis. Praktikaosas on lubatud konspektid, tunnijuhendid ja MDN, tehisintellekti tööriistu kasutada ei tohi.\nKõik vajalik on ühes PDF-is: proovitöö, mis on täpselt nagu kontrolltöö (ainult teema ja sõnad on teised), vastused ja lahendus koos selgitustega ning 7.–9. tunni konspektid. Esimesel lehel on kirjas, kuidas valmistuda. Proovitöö TODO-de jaoks laadi alla proovitöö algfailid.\nTule 17.11. tundi arvutiga, kus söökla projekt käivitub (Node.js ja npm töötavad). Kontrolltöö algfailid leiad allpool, need on töö praktikaosa jaoks."
     items:
       - type: pdf
         file: "kordamine-kontrolltoo-11it.pdf"
@@ -517,3 +517,6 @@ posts:
       - type: file
         file: "proovitoo-algfailid.zip"
         label: "Proovitöö algfailid: söökla projekt koos kuue TODO-ga"
+      - type: file
+        file: "kontrolltoo-algfailid.zip"
+        label: "Kontrolltöö algfailid: praktikaosa (toidusoovid, kuus TODO-d)"
