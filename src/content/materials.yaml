@@ -525,3 +525,15 @@ posts:
       - type: file
         file: "kontrolltoo-algfailid.zip"
         label: "Kontrolltöö algfailid: praktikaosa (toidusoovid, kuus TODO-d)"
+
+  - title: "11. tund: andmebaasid"
+    course: 11it
+    date: 2026-11-24
+    text: "Lisa söökla lehel arvustus, taaskäivita server ja arvustus on kadunud. Täna vaatame, kuidas päris rakendused andmeid hoiavad: andmebaasid, tabelid ja võtmed ning keel SQL, mille nelja põhikäsku saab võrrelda meetoditega GET, POST, PUT ja DELETE. Pärast teooriat jaguneme 4–5 meeskonda. Iga meeskond valib ühe populaarse andmebaasi (MySQL, PostgreSQL, MariaDB, SQLite, MongoDB, Cassandra või Redis), uurib seda ja teeb kuni viieminutilise esitluse.\nRühmatöö: andmebaaside nimekiri, reeglid ja küsimused, millele esitlus vastab, on rühmatöö lehel. Saatke esitlus enne esitluste algust aadressile mtsopo@taltech.ee, kirjutage kirja andmebaasi nimi ja kõigi meeskonnaliikmete nimed.\nKodutööd sel korral ei ole. Järgmisel korral saab söökla server päris andmebaasi."
+    items:
+      - type: pdf
+        file: "andmebaasid-konspekt.pdf"
+        label: "Konspekt: andmebaasid"
+      - type: pdf
+        file: "tunnitoo-andmebaasid.pdf"
+        label: "Rühmatöö: andmebaasid (nimekiri, reeglid ja küsimused; esitlus saata: mtsopo@taltech.ee)"
