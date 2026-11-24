@@ -1,7 +1,9 @@
 # Builds the 10IT PDFs for lessons 7-11 in public/files/:
 #   protsessor-konspekt.pdf, kodutoo-protsessor.pdf (fillable),
 #   pildid-heli-konspekt.pdf, kodutoo-pildid.pdf (fillable),
-#   pakkimine-konspekt.pdf, kodutoo-pakkimine.pdf (fillable) and internet-konspekt.pdf.
+#   pakkimine-konspekt.pdf, kodutoo-pakkimine.pdf (fillable), internet-konspekt.pdf (old draft of both internet
+#   lessons, to be reworked as part 2) and for lesson 11 internet-1-konspekt.pdf and tunnitoo-internet.pdf
+#   (presentation task).
 # Needs ReportLab (pip install reportlab) and the macOS system fonts Arial and Menlo.
 # Run from the project root: python scripts/tund_10it.py
 # To build only some of them: python scripts/tund_10it.py pildid-heli-konspekt kodutoo-pildid
@@ -143,7 +145,7 @@ def network_drawing():
         text(d, x + w / 2, y + h / 2 - 3, label_text, 8.5, NAVY, 'Sans-Bold')
 
     box(5, 60, 70, 32, 'Sinu arvuti')
-    box(105, 60, 60, 32, 'Kodu ruuter')
+    box(105, 60, 60, 32, 'Koduruuter')
     routers = [(200, 95), (260, 40), (300, 100), (360, 55)]
     for x, y in routers:
         d.add(Circle(x, y, 13, fillColor=white, strokeColor=BLUE, strokeWidth=1.2))
@@ -157,6 +159,66 @@ def network_drawing():
     for x, y, n in [(176, 84, '1'), (232, 74, '2'), (330, 75, '3')]:
         d.add(Rect(x - 7, y - 6, 14, 12, rx=2, fillColor=YELLOW, strokeColor=NAVY, strokeWidth=0.6))
         text(d, x, y - 3, n, 7, NAVY, 'Sans-Bold')
+    return d
+
+
+def home_network_drawing():
+    d = Drawing(WIDTH, 132)
+
+    def box(x, y, w, h, name, small='', fill=PALE):
+        d.add(Rect(x, y, w, h, rx=6, fillColor=fill, strokeColor=BLUE, strokeWidth=1.2))
+        text(d, x + w / 2, y + h - 13, name, 8.5, NAVY, 'Sans-Bold')
+        if small:
+            text(d, x + w / 2, y + 6, small, 7, MUTED, 'Mono')
+
+    for i, (name, ip) in enumerate([('Telefon', '192.168.1.11'), ('Sülearvuti', '192.168.1.12'),
+                                    ('Teler', '192.168.1.13')]):
+        y = 92 - i * 40
+        box(5, y, 88, 30, name, ip, white)
+        d.add(Line(93, y + 15, 150, 72, strokeColor=MUTED, strokeWidth=1))
+    box(150, 54, 92, 36, 'Koduruuter', '192.168.1.1')
+    text(d, 196, 40, 'väljapoole: 90.190.12.34', 7, MUTED, 'Mono')
+    arrow(d, 244, 72, 278, 72)
+    box(280, 54, 90, 36, 'Teenusepakkuja', 'Telia, Elisa…')
+    arrow(d, 372, 72, 398, 72)
+    d.add(Circle(432, 72, 30, fillColor=PALE, strokeColor=BLUE, strokeWidth=1.2))
+    text(d, 432, 69, 'Internet', 8.5, NAVY, 'Sans-Bold')
+    text(d, 60, 4, 'kohtvõrk ehk koduvõrk', 7.5, BLUE)
+    return d
+
+
+def ip_bytes_drawing():
+    d = Drawing(WIDTH, 74)
+    values = [193, 40, 250, 10]
+    w, gap = 100, 16
+    x0 = (WIDTH - 4 * w - 3 * gap) / 2
+    for i, v in enumerate(values):
+        x = x0 + i * (w + gap)
+        d.add(Rect(x, 36, w, 30, rx=5, fillColor=PALE, strokeColor=BLUE, strokeWidth=1.1))
+        text(d, x + w / 2, 45, str(v), 14, NAVY, 'Sans-Bold')
+        text(d, x + w / 2, 18, f'{v:08b}', 11, BLUE, 'Mono')
+        text(d, x + w / 2, 4, f'{i + 1}. bait', 7.5, MUTED)
+        if i < 3:
+            text(d, x + w + gap / 2, 43, '.', 16, NAVY, 'Sans-Bold')
+    return d
+
+
+def packet_drawing():
+    d = Drawing(WIDTH, 82)
+    cells = [('Saatja', '192.168.1.11'), ('Saaja', '142.250.74.46'), ('Nr', '7 / 2000')]
+    x, widths = 6, [96, 96, 62]
+    text(d, x + sum(widths) / 2, 70, 'PÄIS', 8.5, BLUE, 'Sans-Bold')
+    for (name, val), w in zip(cells, widths):
+        d.add(Rect(x, 22, w, 40, fillColor=PALE, strokeColor=BLUE, strokeWidth=1.1))
+        text(d, x + 6, 48, name, 7.5, MUTED, anchor='start')
+        text(d, x + w / 2, 30, val, 8.5, NAVY, 'Mono')
+        x += w
+    w = WIDTH - x - 6
+    text(d, x + w / 2, 70, 'SISU', 8.5, BLUE, 'Sans-Bold')
+    d.add(Rect(x, 22, w, 40, fillColor=white, strokeColor=BLUE, strokeWidth=1.1))
+    text(d, x + w / 2, 44, 'üks tükk failist', 8.5, NAVY)
+    text(d, x + w / 2, 30, 'umbes 1500 baiti', 7.5, MUTED)
+    text(d, WIDTH / 2, 6, 'Pildi saatmiseks tehakse tuhandeid selliseid pakette.', 7.5, MUTED)
     return d
 
 
@@ -1122,6 +1184,306 @@ internet = [
     ], [WIDTH * 0.22, WIDTH * 0.78]),
 ]
 
+# ---------------------------------------------------------------- 11. tund: internet, 1. osa
+
+internet1 = [
+    p('Kuidas internet töötab', title),
+    subtitle('11. tund', 'konspekt, 1. osa'),
+
+    intro_box('See on internetiteema esimene osa. Konspekt selgitab kõik algusest peale, nii et saad seda lugeda ka '
+              'tunnist puududes. Lahenda „Proovi ise“ kastid, vastused on lõpus. Teises osas, järgmisel korral, vaatame, '
+              'kuidas arvuti leiab nime youtube.com järgi õige aadressi ja mida tähendab lukk aadressiribal.<br/><br/>'
+              '<b>Pärast seda tundi oskad:</b><br/>'
+              '• selgitada, mis on võrk, ruuter ja internet;<br/>'
+              '• lugeda IPv4-aadressi ja kirjutada selle baidid kahendsüsteemis;<br/>'
+              '• arvutada, mitu paketti fail vajab ja kui kaua allalaadimine kestab;<br/>'
+              '• selgitada, miks ping ei saa olla väiksem, kui valguse kiirus lubab.'),
+
+    p('Kust see video tuleb?', h2),
+    p('Klõpsad YouTube’is videol ja sekundi pärast see mängib. Video ei olnud sinu telefonis. See asus serveris, mille '
+      'asukohta sa ei tea, võib-olla teises riigis. Selle sekundi jooksul jõudis sinu soov sinna ja video hakkas tagasi '
+      'tulema. Teel läbis see kümmekond seadet ja võib-olla ka merepõhjas lebava kaabli.'),
+    p('Internetti kutsutakse tihti pilveks, nagu oleks see miski õhus. Minu meelest see sõna eksitab. Internet on väga '
+      'maine asi: kaablid maa all ja merepõhjas, raadiolained ning kapitäied seadmeid, mis neid omavahel ühendavad. '
+      'Täna võtame selle masinavärgi lahti.'),
+
+    p('Võrk algab kahest arvutist', h2),
+    p('Ühenda kaks arvutit juhtmega ja sul ongi <b>võrk</b>. Võrk on lihtsalt seadmed, mis saavad üksteisele andmeid '
+      'saata.'),
+    p('Sinu kodus on väike võrk. Telefon, sülearvuti ja teler on WiFi või juhtme kaudu ühendatud koduse '
+      '<b>ruuteriga</b>. Ruuter on see vilkuvate tuledega karbike, mis seisab tavaliselt kuskil esikus. Tema töö on saata '
+      'andmed õiges suunas edasi. Kui telefon tahab sülearvutiga rääkida, jääb kõik kodu sisse. Kui telefon tahab '
+      'YouTube’i, saadab ruuter soovi välja <b>internetiteenuse pakkujale</b>, näiteks Teliale või Elisale.'),
+    figure(home_network_drawing(), 'Koduvõrk. Kõik kodu seadmed räägivad ruuteriga, ruuter räägib ülejäänud maailmaga.'),
+
+    p('Internet on võrkude võrk', h2),
+    p('Kooli võrk on suurem kui koduvõrk ja internetiteenuse pakkuja oma veel palju suurem. Kui kõik need võrgud omavahel '
+      'ühendada, saad <b>interneti</b>. Seda ütleb ka sõna ise: <i>inter</i> tähendab „vahel“, internet on võrkude vaheline võrk.'),
+    p('Internet ei kuulu ühelegi firmale ega riigile. Võrke on kümneid tuhandeid ja nad on kokku leppinud, et edastavad '
+      'üksteise andmeid. Ühendused nende vahel on päris juhtmed. Eestist Soome viib mitu sidekaablit mööda Soome lahe '
+      'põhja. Ookeanide põhjas on kaableid nii palju, et nende kaart näeb välja nagu ämblikuvõrk. Link kaardile on '
+      'kursuse lehel.'),
+
+    p('IP-aadress: igal seadmel oma number', h2),
+    p('Kiri jõuab kohale, sest ümbrikul on aadress. Internetis on samamoodi: igal seadmel on <b>IP-aadress</b>. IP tuleb '
+      'sõnadest <i>Internet Protocol</i>, interneti kokkulepe. Levinum kuju, IPv4, näeb välja nii:'),
+    code('193.40.250.10'),
+    p('Neli arvu, punktidega eraldatud, igaüks 0 kuni 255. Kas see vahemik tuleb kuskilt tuttav ette? Just nii palju '
+      'mahub ühte baiti. IPv4-aadress on neli baiti ehk 32 bitti. Arvuti jaoks ongi see lihtsalt 32 nulli ja ühte järjest.'),
+    figure(ip_bytes_drawing(), 'Sama aadress kahel kujul. Inimene loeb ülemist rida, arvuti hoiab alumist.'),
+    p('Arvude kahendsüsteemi teisendamist harjutasime esimeses tunnis. Lahuta arvust järjest 128, 64, 32, 16, 8, 4, 2 ja 1, kui '
+      'saad, ja kirjuta iga kord 1, muidu 0. Aadressis kirjutatakse iga bait alati kaheksa numbriga, vajaduse korral '
+      'algusnullidega: 40 on ' + c('00101000') + ', mitte ' + c('101000') + '.'),
+    proovi('1', 'Kirjuta kahendsüsteemis aadressi ' + c('192.168.1.10') + ' kõik neli baiti.'),
+    p('Mitu erinevat aadressi 32 bitiga saab? Iga lisabitt kahekordistab võimalusi, seega 2³² ehk umbes 4,3 miljardit. '
+      '1980. aastatel tundus see lõputu hulk. Täna elab Maal üle 8 miljardi inimese ja nutiseadmeid on veel rohkem, nii et '
+      'aadressid said otsa. Seepärast on kasutusel ka uuem <b>IPv6</b>, kus aadressis on 128 bitti. Selle kirjutame '
+      '16-süsteemis, sest kahendsüsteemis oleks see 128 märki pikk:'),
+    code('2001:0db8:85a3:0000:0000:8a2e:0370:7334'),
+    p('IPv6-aadresse jätkuks igale liivaterale Maal ja ikka jääks üle.'),
+
+    p('Miks on sinu ja pinginaabri aadressid nii sarnased?', h2),
+    p('Kui vaatad koolis oma arvuti aadressi, algab see suure tõenäosusega ' + c('10.') + ' või ' + c('192.168.')
+      + '-ga. Pinginaabril samamoodi ja sinu kodus ka. Kas siis kõigil on sama aadress?'),
+    p('Mõtle kortermajale. Korter number 12 on olemas peaaegu igas majas ja see pole probleem, sest postiljon vaatab '
+      'kõigepealt tänavat ja maja numbrit. Võrgus on samamoodi. Aadressid, mis algavad ' + c('10.') + ' või '
+      + c('192.168.') + '-ga, on <b>kohtvõrgu aadressid</b>. Kolmas selline vahemik on ' + c('172.16.–172.31.') + ', mida kohtab harvem. Need kehtivad ainult „maja sees“, kodus või koolis. '
+      'Ülejäänud maailm näeb ainult ruuteri avalikku aadressi. Ruuter peab meeles, kes majast midagi tellis, ja annab '
+      'vastuse õigesse korterisse. Ruuteri enda aadressi kodu- või koolivõrgus nimetatakse <b>vaikelüüsiks</b>: sinna '
+      'saadab arvuti kõik andmed, mis on mõeldud välismaailmale.'),
+    proovi('2', 'Sinu telefoni aadress kodus on ' + c('192.168.1.23') + '. Sõbra telefonil on tema kodus täpselt sama '
+                'aadress. Kas see on probleem? Miks?'),
+
+    p('Paketid: raamat postkaartidel', h2),
+    p('Kujuta ette, et pead saatma sõbrale terve raamatu, aga postkontor võtab vastu ainult postkaarte. Mis teed? '
+      'Kirjutad raamatu postkaartidele. Igale kaardile lähevad saaja aadress, sinu aadress ja kaardi järjekorranumber. '
+      'Kaardid võivad minna eri teid ja jõuda kohale suvalises järjekorras, aga sõber paneb need numbrite järgi kokku. '
+      'Kui kaart number 37 puudub, palub ta lihtsalt selle uuesti saata.'),
+    p('Internet töötab sarnaselt. Iga fail, pilt, sõnum ja video tükeldatakse <b>pakettideks</b>. Paketi algusesse '
+      'kirjutatakse <b>päis</b>, kus on saatja ja saaja IP-aadress. Tavalises koduvõrgus on terve pakett koos päisega '
+      'kuni umbes 1500 baiti, nii et andmeid mahub sinna natuke vähem. <b>Meie arvutustes lihtsustame</b> ja loeme, et '
+      'ühes paketis on 1500 baiti andmeid.'),
+    p('Järjekorranumber ja uuesti saatmine ei tule IP-st endast. Kui fail peab kohale jõudma täpselt, nagu veebileht või '
+      'pilt, kasutatakse lisaks kokkulepet nimega <b>TCP</b>. TCP nummerdab paketid, paneb need saaja juures õigesse '
+      'järjekorda ja palub kadunud paketid uuesti saata. Postkaartide lugu ongi lihtsustatud pilt sellest. Videokõnes '
+      'tehakse teisiti: hilinenud paketti pole mõtet oodata, see jäetakse lihtsalt vahele.'),
+    figure(packet_drawing(), 'Lihtsustatud pakett. Päis on nagu ümbrik, sisu on üks tükk failist. Järjekorranumbri '
+                             'lisab TCP.'),
+    p('Mitu paketti läheb vaja ühe 3 MB foto saatmiseks?'),
+    code('''
+1. samm: megabaidid baitideks    3 MB = 3 000 000 baiti
+2. samm: jaga paketi suurusega   3 000 000 : 1500 = 2000 paketti
+'''),
+    p('Kaks tuhat postkaarti ühe pildi jaoks. Ja kõik see juhtub vähem kui sekundiga.'),
+    p('Miks mitte saata kogu faili korraga? Esiteks võtaks üks suur fail kogu tee enda alla, nagu rekka kitsal teel, ja '
+      'teised peaksid ootama. Väikesed paketid saavad liikuda vaheldumisi, nii et sinu video ja pinginaabri sõnum mahuvad '
+      'samasse kaablisse. Teiseks: kui midagi teel kaduma läheb, tuleb uuesti saata ainult üks väike pakett, mitte terve '
+      'fail.'),
+    proovi('3', 'Mitu paketti on vaja 6 MB laulu saatmiseks? Teine küsimus: saaja sai paketid 1, 2, 4 ja 5, aga kokku '
+                'pidi neid olema viis. Mida ta nüüd teeb?'),
+
+    p('Ruuter teab ainult järgmist sammu', h2),
+    p('Teel serverini läbib pakett mitu ruuterit. Kuidas iga ruuter teab, kuhu paketti saata? Huvitav on see, et tavaliselt ei '
+      'tea ükski neist kogu teed.'),
+    p('Mõtle tee küsimisele võõras linnas. Küsid möödujalt, kuidas jõuda raudteejaama. Ta ei joonista sulle kogu '
+      'marsruuti, vaid ütleb: „Mine selle tänava lõpuni ja küsi seal uuesti.“ Ruuter teeb sama. Ta vaatab paketi päisest '
+      'saaja aadressi, otsib oma tabelist, milline naaber on sinnapoole kõige lähemal, ja annab paketi talle. Järgmine '
+      'ruuter teeb sama otsuse uuesti.'),
+    figure(network_drawing(), 'Teel serverini läbib pakett mitu ruuterit (R). Paketid 1, 2 ja 3 võivad minna eri teid, '
+                              'server paneb need numbrite järgi kokku.'),
+    p('Sellest tuleb interneti suur tugevus. Kui mõni kaabel katki läheb ja mõni teine tee on olemas, leiavad ruuterid '
+      'selle tavaliselt mõne hetkega ja saadavad paketid sealt. Kui teist teed pole, jääb ühendus katki. Internet '
+      'ehitatigi nii, et ühe ühenduse kadumine ei paneks seisma kogu võrku.'),
+    proovi('4', 'Miks on hea, et ükski ruuter ei pea teadma kogu teed? Mõtle, mis juhtuks, kui iga uus server tuleks '
+                'lisada iga ruuteri kaardile.'),
+
+    p('Kiirus: miks 100 megabitti pole 100 megabaiti', h2),
+    p('Internetipakkuja reklaamib „100 Mbit/s“. Laadid alla mängu ja allalaadija näitab 12 MB/s. Kas sind petetakse?'),
+    p('Ei peteta. Pakkuja loeb <b>bitte</b> sekundis, allalaadija <b>baite</b> sekundis. Väike b on bitt, suur B on bait '
+      'ja bait on 8 bitti. Seepärast tuleb jagada kaheksaga:'),
+    code('100 Mbit/s : 8 = 12,5 MB/s'),
+    p('Kui kaua kestab siis 1 GB mängu allalaadimine? 1 GB on 1000 MB.'),
+    code('''
+1. samm: kiirus baitides   100 Mbit/s : 8 = 12,5 MB/s
+2. samm: aeg               1000 MB : 12,5 MB/s = 80 sekundit
+'''),
+    p('Päriselt läheb natuke kauem, sest iga pakett kannab ka päist ja sama ühendust kasutavad teisedki pereliikmed. '
+      'Suurusjärk on aga õige.'),
+    proovi('5', 'Kui kaua kestab 3 GB mängu allalaadimine kiirusel 50 Mbit/s? Anna vastus sekundites ja minutites.'),
+
+    p('Viivitus: valgus on liiga aeglane', h2),
+    p('Mängurid räägivad pingist. Pingiks ehk <b>viivituseks</b> nimetatakse aega, mis kulub paketil serverisse '
+      'jõudmiseks ja vastusel tagasitulekuks. Seda mõõdetakse millisekundites (ms). Üks millisekund on tuhandik sekundit.'),
+    p('Esimene mõte oleks, et kiirem internet annab ka väiksema pingi. Päris nii see ei ole. Mõtle maanteele: kiirus '
+      'megabittides on maantee laius. Mida laiem tee, seda rohkem autosid korraga läbi mahub. Viivitus on aga tee pikkus '
+      'ja laiemaks ehitamine ei too Tartut Tallinnale lähemale. Laiem tee aitab ainult siis, kui seal oli ummik: kui keegi '
+      'pereliikmetest laadib samal ajal suurt faili alla, võib kiirem ühendus pingi väiksemaks teha. Teekonna pikkust '
+      'see ei muuda.'),
+    p('Andmed liiguvad klaaskiudkaablis valgusena, umbes 200 000 km sekundis. See teeb 200 km millisekundis. Tallinnast New '
+      'Yorki on kaablit mööda umbes 7000 km:'),
+    code('''
+ühte suunda     7000 km : 200 km/ms = 35 ms
+edasi-tagasi    35 ms × 2 = 70 ms
+'''),
+    p('Kui kaablit on 7000 km, ei saa ping olla alla 70 ms, maksa pakkujale palju tahes. Valgust kaablis kiiremaks ei '
+      'tee. '
+      'Seepärast on suurtel mängudel serverid igas maailmajaos eraldi.'),
+    p('Suured firmad teevad veel kavalama triki. Nad hoiavad oma lehtedest ja videotest koopiaid paljudes riikides, ka '
+      'Euroopas. Sellist süsteemi nimetatakse <b>sisuedastusvõrguks</b> (ingl <i>content delivery network</i>, CDN). Kui '
+      'vaatad Ameerika youtuberi videot, tuleb see tõenäoliselt serverist, mis on Eestile palju lähemal kui Ameerika.'),
+    p('Edaspidi tähendab „väikseim võimalik ping“ meie ülesannetes seda: kaabel läheb otse ja valgus liigub selles '
+      '200 km millisekundis. Päris kaablid lähevad ringiga, nii et päriselt on ping alati suurem.'),
+    proovi('6', 'Kyoto ülikool Jaapanis on Tallinnast linnulennult umbes 7800 km kaugusel. Mis on väikseim võimalik ping '
+                'edasi-tagasi? Keegi mõõtis Tallinnast Kyoto ülikooli lehele pingiks 8 ms. Mis on selle kõige tõenäolisem seletus?'),
+    proovi('7', 'Linnulennult on Tallinnast Austraalia pealinna Canberrasse umbes 15 200 km. Mis oleks ping edasi-tagasi, '
+                'kui kaabel läheks otse? Päriselt mõõdetakse umbes 300 ms. Miks rohkem?'),
+
+    CondPageBreak(200),
+    p('Mida tunnis teeme', h2),
+    *numbered([
+        '<b>Teooria.</b> Alustame sellest, mis on selles konspektis: võrk, IP-aadressid, paketid, ruuterid, kiirus ja '
+        'viivitus.',
+        '<b>Meeskonnad.</b> Jaguneme 4–5 meeskonda ja iga meeskond saab ühe teema. Teemad ja reeglid on kirjas '
+        'rühmatöö lehel.',
+        '<b>Esitluse tegemine.</b> Teete kuni 6 slaidi ja valmistate ette ühe näite: arvutuse või joonise, mille klassi '
+        'ees läbi teete. Saatke esitlus enne esitluste algust aadressile <b>mtsopo@taltech.ee</b>.',
+        '<b>Esitlused.</b> Iga meeskond esitab kuni 5 minutit ja küsib lõpus klassilt ühe küsimuse.',
+    ]),
+
+    p('Järgmisel korral', h2),
+    p('Üks küsimus jäi täna vastamata. Sina kirjutad aadressiribale youtube.com, aga ruuterid tunnevad ainult numbreid. '
+      'Kust arvuti teab, milline IP-aadress on youtube.com-i taga? Sellest, lukust aadressiribal ja sellest, mis täpselt '
+      'juhtub, kui vajutad Enterit, räägime järgmises tunnis.'),
+
+    CondPageBreak(400),
+    p('Sõnastik', h2),
+    table(['Sõna', 'Tähendus'], [
+        ['<b>võrk</b>', 'seadmed, mis saavad üksteisele andmeid saata'],
+        ['<b>internet</b>', 'võrkude võrk, mis katab kogu maailma'],
+        ['<b>ruuter</b>', 'seade, mis saadab pakette õiges suunas edasi'],
+        ['<b>internetiteenuse pakkuja</b>', 'firma, mis ühendab sinu kodu või kooli internetiga, näiteks Telia või Elisa'],
+        ['<b>IP-aadress</b>', 'seadme number võrgus. IPv4-aadress on 4 baiti, näiteks 193.40.250.10'],
+        ['<b>IPv6</b>', 'uuem 128-bitine aadress, kirjutatakse 16-süsteemis'],
+        ['<b>kohtvõrgu aadress</b>', 'aadress, mis kehtib ainult kodus või koolis, algab näiteks 10. või 192.168.'],
+        ['<b>vaikelüüs</b>', 'ruuteri aadress, kuhu arvuti saadab kõik välismaailmale mõeldud andmed'],
+        ['<b>pakett</b>', 'väike andmetükk koos päisega, kokku kuni umbes 1500 baiti'],
+        ['<b>päis</b>', 'paketi algus: saatja ja saaja aadress. TCP lisab järjekorranumbri'],
+        ['<b>TCP</b>', 'kokkulepe, mis nummerdab paketid ja laseb kadunud paketid uuesti saata'],
+        ['<b>Mbit/s ja MB/s</b>', 'megabitti sekundis ja megabaiti sekundis. 8 Mbit/s = 1 MB/s'],
+        ['<b>viivitus, ping</b>', 'aeg, mis kulub paketil kohale ja vastusel tagasi, millisekundites'],
+        ['<b>sisuedastusvõrk (CDN)</b>', 'serverid paljudes riikides, mis hoiavad sama lehe või video koopiaid'],
+    ], [WIDTH * 0.3, WIDTH * 0.7]),
+
+    CondPageBreak(230),
+    p('„Proovi ise“ vastused', h2),
+    *numbered([
+        '192 = ' + c('11000000') + ', 168 = ' + c('10101000') + ', 1 = ' + c('00000001') + ', 10 = ' + c('00001010')
+        + '. Kontrolli: 168 = 128 + 32 + 8.',
+        'Ei ole probleem. ' + c('192.168.') + ' on kohtvõrgu aadress ja kehtib ainult kodu sees. Väljaspool näeb maailm '
+        'ainult kummagi kodu ruuteri avalikku aadressi ja need on tavaliselt erinevad.',
+        '6 MB = 6 000 000 baiti. 6 000 000 : 1500 = 4000 paketti. Puudu on pakett 3, nii et saaja palub saatjal selle '
+        'uuesti saata.',
+        'Internet on tohutu ja muutub kogu aeg. Kui iga ruuter peaks teadma kogu teed, tuleks iga muudatuse järel '
+        'uuendada miljoneid kaarte. Nii piisab, kui ruuter teab oma naabreid, ja katkise kaabli korral muudavad oma '
+        'otsust ainult lähedal olevad ruuterid.',
+        '50 Mbit/s : 8 = 6,25 MB/s. 3 GB = 3000 MB. 3000 : 6,25 = 480 sekundit ehk 8 minutit.',
+        '7800 : 200 = 39 ms ühte suunda, edasi-tagasi 78 ms. 8 ms on sellest palju vähem, seega ei saanud vastus tulla '
+        'Jaapanist. Kõige tõenäolisem seletus on lehe koopia Euroopas (sisuedastusvõrk), aga vastata võis ka mõni muu '
+        'lähedal olev server.',
+        '15 200 : 200 = 76 ms ühte suunda, edasi-tagasi 152 ms. Päriselt on rohkem, sest kaabel ei lähe sirgelt ja iga '
+        'ruuter teel võtab ka natuke aega.',
+    ]),
+]
+
+def teema(n, name, items, example):
+    return KeepTogether([
+        p(f'Teema {n}. {name}', ParagraphStyle('teema', parent=h2, fontSize=12, leading=15, spaceBefore=8)),
+        *bullets(*items),
+        p('<b>Näide:</b> ' + example),
+        Spacer(1, 4),
+    ])
+
+
+tunnitoo_internet = [
+    p('Rühmatöö: esitlus', title),
+    subtitle('11. tund', 'rühmatöö'),
+    p('Pärast teooriaosa jagunete 4–5 meeskonda. Iga meeskond saab ühe teema, teeb selle kohta lühikese esitluse ja '
+      'esitab selle klassile. Teie esitlusest peab klass päriselt midagi juurde õppima. Mõelge siis, kuidas te seda '
+      'kaaslasele selgitaksite, mitte ainult sellele, mida slaidile kirjutada.', intro),
+
+    p('Reeglid', h2),
+    *bullets(
+        'Meeskonnas on 4–5 inimest. Esitluses räägib igaüks vähemalt korra.',
+        'Esitlus kestab <b>kõige rohkem 5 minutit</b>. Õpetaja hoiab aega ja viie minuti pärast esitlus lõpeb, ükskõik '
+        'kus te parasjagu olete. Proovige korra läbi.',
+        'Slaide on kuni 6. Slaidil on vähe teksti: pilt, joonis või paar märksõna. Selgitus tuleb teie suust.',
+        'Igas esitluses on <b>üks näide</b>: arvutus, mille te klassi ees samm-sammult läbi teete, või joonis, mille '
+        'abil oma teemat selgitate. Mida teie teemas näidata, on allpool kirjas. Arvutis käske käivitada ei ole vaja.',
+        'Lõpus esitate klassile <b>ühe küsimuse</b>, millele saab teie esitluse põhjal vastata.',
+        'Kasutage konspekti. Internetist võite otsida pilte ja lisainfot, aga iga slaid peab olema teile endale arusaadav.',
+        'Esitluse võite teha PowerPointis, Google Slidesis või Canvas.',
+    ),
+
+    p('Saatmine', h2),
+    p('Saatke esitlus <b>enne esitluste algust</b> aadressile <b>mtsopo@taltech.ee</b>. Esitlusi näitame õpetaja '
+      'arvutist, nii et ilma saatmata pole midagi näidata. Kirja pange:'),
+    *bullets(
+        'teema number ja kõigi meeskonnaliikmete nimed;',
+        'fail (.pptx või .pdf) või Google Slidesi või Canva link, mille saab lingiga avada;',
+        'faili nimi kujul ' + c('tund11-teema3-Mari-Jaan-Kati.pptx') + '.',
+    ),
+
+    p('Tunni ajakava', h2),
+    table(['Aeg', 'Mis toimub'], [
+        ['0–15 min', 'Teooria: võrk, IP-aadressid, paketid, ruuterid, kiirus ja viivitus. Kõik on ka konspektis.'],
+        ['15–20 min', 'Meeskonnad ja teemad.'],
+        ['20–60 min', 'Esitluse tegemine. Jagage töö kohe ära: üks teeb slaidid, teised valmistavad ette näite ja selle, '
+         'mida räägite. Viimase viie minutiga proovige aeg läbi ja saatke fail ära.'],
+        ['60–90 min', 'Esitlused, igaüks kuni 5 minutit, ja iga esitluse lõpus üks küsimus klassile.'],
+    ], [WIDTH * 0.18, WIDTH * 0.82]),
+
+    p('Teemad', h2),
+    note('Kui meeskondi on neli, ühendage teemad 3 ja 4 üheks: „Paketid ja ruuterid“. Näiteks võtke siis ühest '
+         'teemast arvutus ja teisest joonis.'),
+    teema(1, 'Võrk, ruuter ja internet', [
+        'Mis on võrk? Joonistage oma koduvõrk: millised seadmed, ruuter, teenusepakkuja.',
+        'Mida ruuter teeb?',
+        'Miks öeldakse, et internet on võrkude võrk ja et keegi ei oma seda?',
+        'Mis on pilv päriselt: kaablid maa all ja merepõhjas.',
+    ], 'avage merekaablite kaart (link on kursuse lehel) ja näidake, millised kaablid jõuavad Eestisse. Leidke kaardilt '
+       'üks väga pikk kaabel ja öelge, kust kuhu see läheb.'),
+    teema(2, 'IP-aadress', [
+        'Mis on IP-aadress ja milleks seda vaja on?',
+        'IPv4-aadress on 4 baiti ehk 32 bitti. Mitu aadressi see annab ja miks need otsa said? Mis on IPv6?',
+        'Miks algavad teie ja pinginaabri aadressid samamoodi? Kohtvõrgu aadressid ja kortermaja võrdlus.',
+        'Mis on vaikelüüs?',
+    ], 'valige üks kohtvõrgu aadress, näiteks ' + c('192.168.1.25') + ', kirjutage selle kõik neli baiti '
+       'kahendsüsteemis ja tehke üks bait klassi ees samm-sammult läbi.'),
+    teema(3, 'Paketid', [
+        'Miks faili ei saadeta tervikuna, vaid tükeldatakse pakettideks?',
+        'Mis on paketi päises ja milleks iga osa vaja on? Mida teeb TCP?',
+        'Mis juhtub, kui paketid jõuavad kohale vales järjekorras või üks kaob?',
+    ], 'arvutage, mitu paketti läheb vaja ühe teie valitud faili saatmiseks (näiteks foto, laul või mäng). '
+       'Lihtsustame ja loeme, et ühes paketis on 1500 baiti andmeid. Lisaks võite klassiga läbi mängida väikese pakimängu: üks lause neljal paberil, '
+       'mis saadetakse käest kätte. Õpetajal on selleks kaardid.'),
+    teema(4, 'Ruuterid ja tee serverini', [
+        'Mida ruuter paketiga teeb, kui see tema juurde jõuab?',
+        'Miks ükski ruuter ei tea kogu teed? Kasutage tee küsimise võrdlust.',
+        'Mis juhtub, kui mõni kaabel katki läheb?',
+    ], 'joonistage väike võrk viie-kuue ruuteriga, ühes servas sinu arvuti ja teises server. Näidake, kuidas pakett '
+       'samm-sammult liigub ja mida iga ruuter otsustab. Siis „lõigake“ üks kaabel läbi ja näidake, millist teed '
+       'pakett nüüd läheb.'),
+    teema(5, 'Kiirus ja viivitus', [
+        'Miks 100 Mbit/s ei ole 100 MB/s? Arvutage ühe mängu allalaadimise aeg.',
+        'Mis on viivitus ehk ping ja miks valguse kiirus seab sellele piiri?',
+        'Mida kiirem internetiühendus pingiga teeb ja mida mitte? Kasutage maantee võrdlust.',
+        'Mis on koopiad ehk sisuedastusvõrk (CDN)?',
+    ], 'arvutage, kui kaua kestab 2 GB mängu allalaadimine kiirusel 100 Mbit/s. Siis arvutage väikseim võimalik ping '
+       'Kyotosse (7800 km) ja Canberrasse (15 200 km), kui kaabel läheks otse: kaugus : 200 × 2. Kyoto ülikooli leht '
+       'vastab Tallinnast tegelikult umbes 8 ms-ga, Canberra oma umbes 300 ms-ga. Kuidas saab Kyoto vastata kiiremini, '
+       'kui otse kulgev kaabel lubaks, ja mis on selle kõige tõenäolisem seletus?'),
+]
+
 
 BUILDS = {
     'protsessor-konspekt': ('Kuidas protsessor programmi täidab', protsessor),
@@ -1131,6 +1493,8 @@ BUILDS = {
     'pakkimine-konspekt': ('Pakkimine', pakkimine),
     'kodutoo-pakkimine': ('Tunnitöö: pakkimine', kodutoo_pakkimine),
     'internet-konspekt': ('Kuidas internet töötab', internet),
+    'internet-1-konspekt': ('Kuidas internet töötab, 1. osa', internet1),
+    'tunnitoo-internet': ('Rühmatöö: esitlus', tunnitoo_internet),
 }
 
 if __name__ == '__main__':

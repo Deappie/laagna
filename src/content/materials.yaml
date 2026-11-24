@@ -239,12 +239,17 @@ posts:
   - title: "11. tund: kuidas internet töötab"
     course: 10it
     date: 2026-11-24
-    draft: true
-    text: "Klõpsad videol ja sekundi pärast see mängib. Kust see tuli? Täna ja järgmisel korral vaatame, kuidas internet päriselt töötab: IP-aadressid, paketid, ruuterid ja DNS. Terminali käskudega jälgime, kuidas meie paketid maailmas ringi käivad."
+    text: "Klõpsad videol ja sekundi pärast see mängib. Kust see tuli? Täna vaatame, kuidas internet päriselt töötab: võrgud ja ruuterid, IPv4-aadressid (mis on lihtsalt neli baiti), paketid ning see, miks 100 megabitti ei ole 100 megabaiti. Pärast teooriat jaguneme 4–5 meeskonda. Iga meeskond teeb ühe teema kohta kuni viieminutilise esitluse ja esitab selle klassile.\nRühmatöö: teemad ja reeglid on rühmatöö lehel. Saatke esitlus enne esitluste algust aadressile mtsopo@taltech.ee, kirja pange teema number ja kõigi meeskonnaliikmete nimed."
     items:
       - type: pdf
-        file: "internet-konspekt.pdf"
-        label: "Konspekt: kuidas internet töötab"
+        file: "internet-1-konspekt.pdf"
+        label: "Konspekt: kuidas internet töötab, 1. osa"
+      - type: pdf
+        file: "tunnitoo-internet.pdf"
+        label: "Rühmatöö: esitlus (teemad ja reeglid; esitlus saata: mtsopo@taltech.ee)"
+      - type: link
+        url: "https://www.submarinecablemap.com/"
+        label: "Merealuste internetikaablite kaart (teema 1, inglise keeles)"
 
   - title: "1. tund: HTML-i alused"
     course: 11it
